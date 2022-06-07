@@ -1,9 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword } from 'firebase/auth';
 import { Link, useNavigate } from 'react-router-dom';
-import tw from "tailwind-styled-components"
-import { useDispatch } from 'react-redux';
-import { setUserInfo } from '../features/userSlice';
 import { CustomInput, RoundButton  } from './Register';
 import {FaGooglePlus} from 'react-icons/fa'
 
@@ -15,7 +12,6 @@ const LoginPage: React.FunctionComponent<ILoginPageProps> = (props) => {
     const [authing, setAuthing] = useState(false);
     const emailRef = useRef<HTMLInputElement>()
     const passwordRef = useRef<HTMLInputElement>()
-    // const dispatch = useDispatch()
 
     const signIn = async () => {
       setAuthing(true)
@@ -24,7 +20,6 @@ const LoginPage: React.FunctionComponent<ILoginPageProps> = (props) => {
         const password = passwordRef.current.value
         try {
           await signInWithEmailAndPassword(auth,email,password)
-          // dispatch(setUserInfo({email:email}))
           setAuthing(false)
           navigate('/')
         } catch(error) {

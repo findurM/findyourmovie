@@ -29,14 +29,14 @@ const HomePage: React.FunctionComponent<IHomePageProps> = (props) => {
         title={MainMovieImage?.original_title}
         text={MainMovieImage?.overview}
       />
-      <section>
-        <div className="w-4/5 my-4 mx-auto">
-          <h2 className="text-2xl font-bold">최신 인기 영화</h2>
+      <section className="max-w-7xl mx-auto">
+        <div className="mt-[3.75rem] mb-[1.875rem]">
+          <h2 className="text-5xl font-bold">TOP 250</h2>
           <hr/>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 justify-items-center gap-3 w-5/6 m-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 justify-items-center gap-5 m-auto">
           {Movies && Movies.map((movie,index) => (
-            <Link to={`/movies/${movie.id}`} key={index}>
+            <Link to={`/movies/${movie.id}`} key={index} className="w-full h-full">
               <GridCards 
                 image={movie.poster_path ? `${IMAGE_URL}w500${movie.poster_path}`: null}
                 movieName={movie.original_title}
