@@ -3,7 +3,8 @@ import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import tw from "tailwind-styled-components"
 import {useForm,SubmitHandler } from 'react-hook-form';
-
+import { db } from '../Application';
+import {collection, addDoc} from 'firebase/firestore'
 
 export const CustomInput = tw.input`
 appearance-none
@@ -63,7 +64,9 @@ interface IFormInputs {
 
 const LoginPage: React.FunctionComponent<ILoginPageProps> = (props) => {
 
+
   const { register, formState: { errors }, handleSubmit, watch } = useForm<IFormInputs>()
+  const userCollectionRef = collection(db,"users")
 
     watch("password")
     const auth = getAuth()
@@ -71,10 +74,10 @@ const LoginPage: React.FunctionComponent<ILoginPageProps> = (props) => {
     const [authing, setAuthing] = useState(false);
 
     const onSubmit: SubmitHandler<IFormInputs> = async(data) => {
-      console.log(data)
       await createUserWithEmailAndPassword(auth,data.email,data.password)
+      await addDoc(userCollectionRef, {id: auth.currentUser?.uid , email:data.email, nickname: data.nickname})
       navigate('/')
-    };
+    }
 
     return (
     <div>

@@ -4,7 +4,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { CustomInput, RoundButton  } from './Register';
 import {FaGooglePlus} from 'react-icons/fa'
 import { toast } from 'react-toastify';
-import { useForm } from 'react-hook-form';
 
 export interface ILoginPageProps {}
 
@@ -25,7 +24,7 @@ const LoginPage: React.FunctionComponent<ILoginPageProps> = (props) => {
           setAuthing(false)
           navigate('/')
         } catch(error) {
-          toast.error('가입된 사용자가 아닙니다!')
+          toast.error('이메일 혹은 비밀번호를 잘못 입력하셨습니다!')
           emailRef.current.value = ''
           passwordRef.current.value = ''
           setAuthing(false)

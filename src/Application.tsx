@@ -15,8 +15,10 @@ import MyReviews from './pages/MyReviews';
 import MyInfo from './pages/MyInfo';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import {getFirestore} from '@firebase/firestore'
 
 initializeApp(config.firebaseConfig);
+export const db = getFirestore()
 
 export interface IApplicationProps {}
 
