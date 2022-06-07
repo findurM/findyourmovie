@@ -23,7 +23,8 @@ pt-[3.75rem]
 const SideMenuBox = tw.div`
 flex
 flex-col
-divide-y
+divide-y-[3px]
+divide-current
 max-w-[305px]
 w-full
 `
