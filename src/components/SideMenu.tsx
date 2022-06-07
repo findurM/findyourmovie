@@ -41,11 +41,11 @@ const SideMenu = () => {
       <SideMenuBox>
         <h2 className="text-[2rem] mb-5">마이 페이지</h2>
         <div className="pt-[1.875rem]">
-          <ul className="flex flex-col gap-[1.875rem] text-2xl">
+          <ul className="menu bg-base-100 w-56 p-2">
             {Object.entries(categoryList).map((category) => (
               <li>
                 <Link to={category[0]} key={category[0]} 
-                  className={categoryInfo.category === category[0] ? "font-bold" : ""}
+                  className={(categoryInfo.category === category[0] ? "active font-bold " : "") + "text-2xl py-3.5"}
                   onClick={() => {
                     localStorage.setItem('mypageCategory', category[0]);
                     dispatch(setCategory(category[0]));
