@@ -49,8 +49,8 @@ const LoginPage: React.FunctionComponent<ILoginPageProps> = (props) => {
     };
 
     return (
-    <div className='bg-base-300 min-h-screen flex justify-around pt-20'>
-      <div className=" h-5/6 w-5/12 flex items-center justify-center py-5 px-4 sm:px-3 lg:px-5 bg-base-100 rounded-lg">
+    <div className='bg-base-300 min-h-screen flex flex-col sm:flex-row sm:justify-around pt-20'>
+      <div className=" h-5/6 sm:w-5/12 flex items-center mx-auto w-full justify-center py-5 px-4 sm:px-3 lg:px-5 bg-base-100 rounded-lg">
         <div className="max-w-md w-2/3 space-y-8">
           <div>
             <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">로그인</h2>
@@ -119,12 +119,12 @@ const LoginPage: React.FunctionComponent<ILoginPageProps> = (props) => {
           </form>
         </div>
       </div>
-      <div className='flex-col w-4/12 pt-24 mr-5'>
+      <div className='flex-col w-4/12 pt-24 mx-auto'>
         <div>
         <p className='text-5xl font-bold'>Hello, <br/> Welcome Friend!</p>
         <p className='mt-10 text-lg'>회원가입하고 많은 혜택을 누려보세요!</p>
         </div>
-       <RoundButton className="abosolute left-20 top-10" >
+       <RoundButton className="mx-auto my-10" >
         <Link to='/register'>
                 회원가입
           </Link>
