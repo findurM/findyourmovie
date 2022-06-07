@@ -6,6 +6,8 @@ import { useDispatch } from 'react-redux';
 import { setUserInfo } from '../features/userSlice';
 import { CustomInput, RoundButton  } from './Register';
 import {FaGooglePlus} from 'react-icons/fa'
+import { toast } from 'react-toastify';
+import { useForm } from 'react-hook-form';
 
 export interface ILoginPageProps {}
 
@@ -28,9 +30,10 @@ const LoginPage: React.FunctionComponent<ILoginPageProps> = (props) => {
           setAuthing(false)
           navigate('/')
         } catch(error) {
-          alert('가입된 사용자가 아닙니다')
+          toast.error('가입된 사용자가 아닙니다!')
           emailRef.current.value = ''
           passwordRef.current.value = ''
+          setAuthing(false)
         }
       }
     }
@@ -39,8 +42,10 @@ const LoginPage: React.FunctionComponent<ILoginPageProps> = (props) => {
 
         signInWithPopup(auth, new GoogleAuthProvider())
             .then((response) => {
-                console.log(response.user.uid);
+                const email = response.user.email
+                dispatch(setUserInfo({email:email}))
                 navigate('/');
+                setAuthing(false);
             })
             .catch((error) => {
                 console.log(error);
@@ -94,7 +99,7 @@ const LoginPage: React.FunctionComponent<ILoginPageProps> = (props) => {
                   id="remember-me"
                   name="remember-me"
                   type="checkbox"
-                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                  className="h-4 w-4 text-indigo-600 focus:ring-primary-500 border-gray-300 rounded"
                 />
                 <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
                   이메일 기억하기
@@ -102,7 +107,7 @@ const LoginPage: React.FunctionComponent<ILoginPageProps> = (props) => {
               </div>
 
               <div className="text-sm">
-                <a className="font-medium text-indigo-600 hover:text-indigo-500">
+                <a className="font-medium text-accent hover:text-indigo-500">
                   비밀번호 찾기
                 </a>
               </div>
