@@ -4,6 +4,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { CustomInput, RoundButton  } from './Register';
 import {FaGooglePlus} from 'react-icons/fa'
 import { toast } from 'react-toastify';
+import { doc, setDoc } from 'firebase/firestore';
+import { db } from '../Application';
 
 export interface ILoginPageProps {}
 
@@ -36,6 +38,7 @@ const LoginPage: React.FunctionComponent<ILoginPageProps> = (props) => {
 
         signInWithPopup(auth, new GoogleAuthProvider())
             .then((response) => {
+                setDoc(doc(db,"users", response.user?.uid), {id: response.user?.uid , email:response.user?.email, nickname: response.user?.displayName})
                 navigate('/');
                 setAuthing(false);
             })
@@ -120,7 +123,7 @@ const LoginPage: React.FunctionComponent<ILoginPageProps> = (props) => {
         <p className='text-5xl font-bold'>Hello, <br/> Welcome Friend!</p>
         <p className='mt-10 text-lg'>회원가입하고 많은 혜택을 누려보세요!</p>
         </div>
-       <RoundButton className="mx-auto my-10" >
+        <RoundButton className="mx-auto my-10" >
         <Link to='/register'>
                 회원가입
           </Link>
