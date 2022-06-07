@@ -1,4 +1,7 @@
 import { getAuth } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { useEffect, useState } from "react";
+import { db, UserInfo } from "../Application";
 import ReviewCards from "../components/ReviewCards";
 import { IMAGE_URL } from "../config/config";
 
@@ -407,12 +410,22 @@ const MyReviews = () => {
   ];
 
   const auth = getAuth();
+  const [userInfo, setUserInfo] = useState({email: "", id: "", nickname: ""});
+
+  const getUserInfo = async () => {
+    const userRef = doc(db, "users", auth.currentUser.uid);
+    const userSnap = await getDoc(userRef);
+    setUserInfo((userSnap.data() as UserInfo));
+  }
+  useEffect(() => {
+    getUserInfo();
+  }, []);
 
   return (
     <>
       <section className="w-full mx-auto">
         <div className="mb-[3.75rem]">
-          <h2 className="text-5xl font-bold">{auth.currentUser.displayName} 님의 감상평</h2>
+          <h2 className="text-5xl font-bold">{userInfo.nickname} 님의 감상평</h2>
           <hr/>
         </div>
 

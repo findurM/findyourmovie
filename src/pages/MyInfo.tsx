@@ -1,12 +1,24 @@
 import { EmailAuthProvider, getAuth, reauthenticateWithCredential } from "firebase/auth";
-import { useRef, useState } from "react";
+import { doc, getDoc } from "firebase/firestore";
+import { useEffect, useRef, useState } from "react";
+import { db, UserInfo } from "../Application";
 import { CustomInput, RoundButton } from "./Register";
 
 const MyInfo = () => {
   const auth = getAuth();
   const [authing, setAuthing] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
+  const [userInfo, setUserInfo] = useState({email: "", id: "", nickname: ""});
   const passwordRef = useRef<HTMLInputElement>()
+
+  const getUserInfo = async () => {
+    const userRef = doc(db, "users", auth.currentUser.uid);
+    const userSnap = await getDoc(userRef);
+    setUserInfo((userSnap.data() as UserInfo));
+  }
+  useEffect(() => {
+    getUserInfo();
+  }, []);
 
   const signIn = async () => {
     setAuthing(true)
@@ -29,7 +41,7 @@ const MyInfo = () => {
     <>
       <section className="w-full mx-auto">
         <div className="mb-[7.75rem]">
-          <h2 className="text-5xl font-bold">{auth.currentUser.displayName} 님의 회원정보수정</h2>
+          <h2 className="text-5xl font-bold">{userInfo.nickname} 님의 회원정보수정</h2>
           <hr/>
         </div>
         {auth.currentUser.providerData[0].providerId === "password" && !isConfirmed ?

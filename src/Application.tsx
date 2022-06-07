@@ -22,6 +22,12 @@ export const db = getFirestore()
 
 export interface IApplicationProps {}
 
+export interface UserInfo {
+  email: string,
+  id: string,
+  nickname: string
+}
+
 const App = tw.div`
 min-h-screen
 `
