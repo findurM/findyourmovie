@@ -1,13 +1,18 @@
 import React from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { initializeApp } from 'firebase/app';
+import { config } from './config/config';
+import tw from "tailwind-styled-components"
+import Header from './components/Header';
+import AuthRoute from './components/AuthRoute';
 import HomePage from './pages/Home';
 import LoginPage from './pages/Login';
 import RegisterPage from './pages/Register';
-import { initializeApp } from 'firebase/app';
-import { config } from './config/config';
-import AuthRoute from './components/AuthRoute';
-import Header from './components/Header';
-import tw from "tailwind-styled-components"
+import SideMenu from './components/SideMenu';
+import RecentRecords from './pages/RecentRecords';
+import MyLikes from './pages/MyLikes';
+import MyReviews from './pages/MyReviews';
+import MyInfo from './pages/MyInfo';
 
 initializeApp(config.firebaseConfig);
 
@@ -18,24 +23,31 @@ min-h-screen
 `
 
 const Application: React.FunctionComponent<IApplicationProps> = (props) => {
-    return (
-        <App>
-            <BrowserRouter>
-                <Header/>
-                <Routes>
-                    <Route path="/"
-                    element={
-                        <AuthRoute>
-                            <HomePage />
-                        </AuthRoute>
-                        }
-                    />
-                    <Route path="/login" element={<LoginPage />} />
-                    <Route path="/register" element={<RegisterPage />} />
-                </Routes>
-            </BrowserRouter>
-        </App>
-    );
+  return (
+    <App>
+      <BrowserRouter>
+        <Header/>
+        <Routes>
+          <Route path="/"
+            element={
+              <AuthRoute>
+                <HomePage />
+              </AuthRoute>
+            }
+          />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+
+          <Route path="/mypage" element={<SideMenu/>}>
+            <Route path="recent-records" element={<RecentRecords/>}/>
+            <Route path="my-likes" element={<MyLikes/>}/>
+            <Route path="my-reviews" element={<MyReviews/>}/>
+            <Route path="my-info" element={<MyInfo/>}/>
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </App>
+  );
 };
 
 export default Application;
