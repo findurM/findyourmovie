@@ -20,7 +20,6 @@ export interface IApplicationProps {}
 
 const App = tw.div`
 min-h-screen
-px-5
 `
 
 const Application: React.FunctionComponent<IApplicationProps> = (props) => {

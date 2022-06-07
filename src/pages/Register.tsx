@@ -6,9 +6,9 @@ import tw from "tailwind-styled-components"
 
 export interface ILoginPageProps {}
 
-const CustomInput = tw.input`
+export const CustomInput = tw.input`
 appearance-none
-rounded-none 
+rounded-md
 relative
 block
 w-full
@@ -23,7 +23,36 @@ focus:outline-none
 focus:ring-indigo-500 
 focus:border-indigo-500 
 focus:z-10 sm:text-sm
+bg-base-300
+mt-2
 `
+export const InputBox = tw.div`
+py-2
+`
+
+export const RoundButton = tw.button`
+group 
+relative 
+w-4/12
+flex 
+rounded-full
+justify-center 
+py-3
+px-4 
+mt-2
+border 
+border-transparent 
+text-sm font-medium 
+text-white 
+bg-indigo-600 
+hover:bg-indigo-700 
+focus:outline-none 
+focus:ring-2 
+focus:ring-offset-2 
+focus:ring-indigo-500
+min-w-max
+`
+
 
 
 const LoginPage: React.FunctionComponent<ILoginPageProps> = (props) => {
@@ -57,21 +86,16 @@ const LoginPage: React.FunctionComponent<ILoginPageProps> = (props) => {
     return (
     <div>
       <div className="min-h-full flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full space-y-8">
+        <div className="max-w-md w-1/3 space-y-8">
           <div>
-            <img
-              className="mx-auto h-12 w-auto"
-              src="https://tailwindui.com/img/logos/workflow-mark-indigo-600.svg"
-              alt="Workflow"
-            />
-            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">회원가입</h2>
+            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">FindurM</h2>
           </div>
           <form className="mt-8 space-y-6">
             <input type="hidden" name="remember" defaultValue="true" />
             <div className="rounded-md shadow-sm -space-y-px">
-              <div>
-                <label htmlFor="email-address" className="sr-only">
-                  Email address
+              <InputBox>
+                <label htmlFor="email-address">
+                  이메일
                 </label>
                 <CustomInput
                   id="email-address"
@@ -82,10 +106,10 @@ const LoginPage: React.FunctionComponent<ILoginPageProps> = (props) => {
                   placeholder="이메일을 입력하세요"
                   ref={emailRef}
                 />
-              </div>
-              <div>
-                <label htmlFor="password" className="sr-only">
-                  Password
+              </InputBox>
+              <InputBox>
+                <label htmlFor="password">
+                  비밀번호
                 </label>
                 <CustomInput
                   id="password"
@@ -96,10 +120,10 @@ const LoginPage: React.FunctionComponent<ILoginPageProps> = (props) => {
                   placeholder="비밀번호를 입력하세요"
                   ref={passwordRef}
                 />
-              </div>
-              <div>
-                <label htmlFor="password" className="sr-only">
-                  Password
+              </InputBox>
+              <InputBox>
+                <label htmlFor="password">
+                  비밀번호 확인
                 </label>
                 <CustomInput
                   id="password"
@@ -110,39 +134,32 @@ const LoginPage: React.FunctionComponent<ILoginPageProps> = (props) => {
                   placeholder="비밀번호를 다시 한 번 입력하세요"
                   ref={passwordConfirmRef}
                 />
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
-                  Remember me
+              </InputBox>
+              <InputBox>
+                <label htmlFor="password" >
+                  닉네임
                 </label>
-              </div>
-
-              <div className="text-sm">
-                <a href="#" className="font-medium text-indigo-600 hover:text-indigo-500">
-                  Forgot your password?
-                </a>
-              </div>
+                <CustomInput
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete="current-password"
+                  required
+                  placeholder="사용하실 닉네임을 입력하세요"
+                  ref={passwordConfirmRef}
+                />
+              </InputBox>
             </div>
 
-            <div>
-              <button onClick={signup} disabled={authing}
+            <div className='flex justify-center'>
+              <RoundButton onClick={signup} disabled={authing}
                 type="submit"
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               >
                 <span className="absolute left-0 inset-y-0 flex items-center pl-3">
                   <LockClosedIcon className="h-5 w-5 text-indigo-500 group-hover:text-indigo-400" aria-hidden="true" />
                 </span>
-                  회원 가입하기
-              </button>
+                  회원가입
+              </RoundButton>
             </div>
           </form>
         </div>
