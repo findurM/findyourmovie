@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Link, useNavigate } from 'react-router-dom'
 import { getAuth, signOut } from 'firebase/auth';
@@ -17,6 +17,16 @@ const Header = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
 
+  useEffect(() => {
+
+  }, [userInfo]);
+
+  const profileClick = () => {
+    navigate("/mypage/recent-records");
+    localStorage.setItem('mypageCategory', "recent-records");
+    dispatch(setCategory("recent-records"));
+  }
+
   return (
     <div className="navbar bg-base-100 h-20 sticky top-0 z-[1000]">
       <div className="flex-1">
@@ -27,12 +37,11 @@ const Header = () => {
           {userInfo.email !='' ? 
           (
             <>
-              <CgProfile size={36} className="mr-2.5 cursor-pointer" 
-                onClick={() => {
-                  navigate("/mypage/recent-records");
-                  localStorage.setItem('mypageCategory', "recent-records");
-                  dispatch(setCategory("recent-records"));
-                }}/>
+              {auth.currentUser.photoURL ?
+              <img src={auth.currentUser.photoURL} className="w-9 h-9 mr-2.5 cursor-pointer rounded-full" 
+                onClick={profileClick}/>
+              : <CgProfile size={36} className="mr-2.5 cursor-pointer" 
+                onClick={profileClick}/>}
               <button className='btn rounded-pill text-xl' onClick={() => {
                 localStorage.removeItem('user')
                 console.log(userInfo)
