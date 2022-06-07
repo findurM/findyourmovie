@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import tw from "tailwind-styled-components"
-import {useForm } from 'react-hook-form';
+import {useForm,SubmitHandler } from 'react-hook-form';
 
 
 export const CustomInput = tw.input`
@@ -28,6 +28,9 @@ mt-2
 export const InputBox = tw.div`
 py-2
 `
+const Warning = tw.p`
+text-rose-600
+`
 
 export const RoundButton = tw.button`
 group 
@@ -51,41 +54,27 @@ min-w-max
 `
 export interface ILoginPageProps {}
 
-
+interface IFormInputs {
+  email: string
+  password: string
+  nickname: string
+  passwordConfirm: string
+}
 
 const LoginPage: React.FunctionComponent<ILoginPageProps> = (props) => {
 
-    const navigate = useNavigate();
+  const { register, formState: { errors }, handleSubmit, watch } = useForm<IFormInputs>()
+
+    watch("password")
     const auth = getAuth()
+    const navigate = useNavigate()
     const [authing, setAuthing] = useState(false);
-    const emailRef = useRef<HTMLInputElement>()
-    const passwordRef = useRef<HTMLInputElement>()
-    const passwordConfirmRef = useRef<HTMLInputElement>()
-    const nicknameRef = useRef<HTMLInputElement>()
-    
-    const signup = async () => {
-      setAuthing(true)
-      if(emailRef.current && passwordRef.current && passwordConfirmRef.current && nicknameRef.current) {
-        const email = emailRef.current.value
-        const password = passwordRef.current.value
-        const passwordConfirm = passwordConfirmRef.current.value
-        const nickname = nicknameRef.current.value
 
-        if(password != passwordConfirm) {
-          alert('비밀번호를 다르게 입력하셨습니다')
-          emailRef.current.value=''
-          passwordRef.current.value=''
-          passwordConfirmRef.current.value=''
-          nicknameRef.current.value=''
-          setAuthing(false)
-          return 
-        }
-        await createUserWithEmailAndPassword(auth,email,password)
-      }
-      setAuthing(false)
+    const onSubmit: SubmitHandler<IFormInputs> = async(data) => {
+      console.log(data)
+      await createUserWithEmailAndPassword(auth,data.email,data.password)
       navigate('/')
-    }
-
+    };
 
     return (
     <div>
@@ -94,7 +83,7 @@ const LoginPage: React.FunctionComponent<ILoginPageProps> = (props) => {
           <div>
             <img src="/assets/Findurm_regular_logo.png" alt="FindurM Logo"/>
           </div>
-          <form className="mt-8 space-y-6">
+          <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
             <input type="hidden" name="remember" defaultValue="true" />
             <div className="rounded-md shadow-sm -space-y-px">
               <InputBox>
@@ -106,10 +95,10 @@ const LoginPage: React.FunctionComponent<ILoginPageProps> = (props) => {
                   name="email"
                   type="email"
                   autoComplete="email"
-                  required
                   placeholder="이메일을 입력하세요"
-                  ref={emailRef}
+                  {...register("email",{required: true})}
                 />
+                <Warning>{errors.email && "이메일을 입력해 주십시오"}</Warning>
               </InputBox>
               <InputBox>
                 <label htmlFor="password">
@@ -120,10 +109,17 @@ const LoginPage: React.FunctionComponent<ILoginPageProps> = (props) => {
                   name="password"
                   type="password"
                   autoComplete="current-password"
-                  required
                   placeholder="비밀번호를 입력하세요"
-                  ref={passwordRef}
+                  {...register("password",{required: true, minLength: 6})}
                 />
+                <Warning> 
+                  {errors.password && errors.password.type === "required" && (
+                    "필수 입력 사항입니다"
+                  )}
+                  {errors.password && errors.password.type === "minLength" && (
+                   "최소 6자리 이상이어야 합니다"
+                  )}
+                </Warning>
               </InputBox>
               <InputBox>
                 <label htmlFor="passwordConfirm">
@@ -134,10 +130,14 @@ const LoginPage: React.FunctionComponent<ILoginPageProps> = (props) => {
                   name="passwordConfirm"
                   type="password"
                   autoComplete="current-password"
-                  required
                   placeholder="비밀번호를 다시 한 번 입력하세요"
-                  ref={passwordConfirmRef}
+                  {...register("passwordConfirm",{required: true,
+                    validate: (val: string) => {
+                      if (watch('password') != val) {
+                        return "비밀번호가 일치하지 않습니다!";
+                      }}})}
                 />
+                <Warning>{errors.passwordConfirm?.message}</Warning>
               </InputBox>
               <InputBox>
                 <label htmlFor="nickname" >
@@ -148,15 +148,15 @@ const LoginPage: React.FunctionComponent<ILoginPageProps> = (props) => {
                   name="nickname"
                   type="text"
                   autoComplete="nickname"
-                  required
                   placeholder="사용하실 닉네임을 입력하세요"
-                  ref={nicknameRef}
+                  {...register("nickname",{required: true})}
                 />
+                <Warning>{errors.nickname && '닉네임을 입력해 주십시오'}</Warning>
               </InputBox>
             </div>
 
             <div className='flex justify-center'>
-              <RoundButton onClick={signup} disabled={authing}
+              <RoundButton  disabled={authing}
                 type="submit"
               >
                   회원가입
