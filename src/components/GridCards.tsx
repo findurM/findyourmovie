@@ -7,12 +7,9 @@ interface Props {
 
 const GridCards = ({image, movieName}:Props) => {
   return(
-        <div className="card card-compact bg-base-100 shadow-xl flex justify-center align-middle w-full">
-            <figure><img src={image} alt={movieName} /></figure>
-            <div className="card-body">
-                <h2 className="card-title">{movieName}</h2>
-            </div>
-        </div>
+    <div className="card card-compact bg-base-100 shadow-xl w-full max-w-[305px]">
+      <figure className='w-full h-full'><img src={image} alt={movieName} className="w-full h-full object-cover hover:scale-125 duration-100" /></figure>
+    </div>
   )
 }
 

@@ -37,7 +37,7 @@ const Header = () => {
           {userInfo.email !='' ? 
           (
             <>
-              {auth.currentUser.photoURL ?
+              {auth.currentUser && auth.currentUser.photoURL ?
               <img src={auth.currentUser.photoURL} className="w-9 h-9 mr-2.5 cursor-pointer rounded-full" 
                 onClick={profileClick}/>
               : <CgProfile size={36} className="mr-2.5 cursor-pointer" 
