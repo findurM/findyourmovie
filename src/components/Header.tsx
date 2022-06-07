@@ -20,7 +20,7 @@ const Header = () => {
   return (
     <div className="navbar bg-base-100 h-20 sticky top-0 z-[1000]">
       <div className="flex-1">
-        <Link to='/' className="btn btn-ghost normal-case text-xl">FindUrM</Link>
+        <Link to='/' className="btn btn-ghost normal-case text-xl"><img src="/assets/Findurm_regular_logo.png" alt="FindurM Logo"/></Link>
       </div>
       <div className="flex-none">
         <ul className="menu menu-horizontal p-0 items-center">
