@@ -17,7 +17,7 @@ const LoginPage: React.FunctionComponent<ILoginPageProps> = (props) => {
     const [authing, setAuthing] = useState(false);
     const emailRef = useRef<HTMLInputElement>()
     const passwordRef = useRef<HTMLInputElement>()
-    const dispatch = useDispatch()
+    // const dispatch = useDispatch()
 
     const signIn = async () => {
       setAuthing(true)
@@ -26,7 +26,7 @@ const LoginPage: React.FunctionComponent<ILoginPageProps> = (props) => {
         const password = passwordRef.current.value
         try {
           await signInWithEmailAndPassword(auth,email,password)
-          dispatch(setUserInfo({email:email}))
+          // dispatch(setUserInfo({email:email}))
           setAuthing(false)
           navigate('/')
         } catch(error) {

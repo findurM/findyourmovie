@@ -17,7 +17,6 @@ const HomePage: React.FunctionComponent<IHomePageProps> = (props) => {
     fetch(endpoint)
     .then(response => response.json())
     .then(response => {
-      console.log(response.results);
       setMovies([...response.results])
       setMainMovieImage(response.results[0])
     })

@@ -41,10 +41,10 @@ const SideMenu = () => {
     <MypageContainer>
       <SideMenuBox>
         <h2 className="text-[2rem] mb-5">마이 페이지</h2>
-        <div className="pt-[1.875rem]">
-          <ul className="menu bg-base-100 w-56 p-2">
+        <div className="pt-4">
+          <ul className="menu bg-base-100 w-full p-2">
             {Object.entries(categoryList).map((category) => (
-              <li>
+              <li key={category[0]}>
                 <Link to={category[0]} key={category[0]} 
                   className={(categoryInfo.category === category[0] ? "active font-bold " : "") + "text-2xl py-3.5"}
                   onClick={() => {
