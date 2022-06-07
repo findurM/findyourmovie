@@ -11,7 +11,6 @@ export interface ILoginPageProps {}
 const LoginPage: React.FunctionComponent<ILoginPageProps> = (props) => {
     const auth = getAuth();
     const navigate = useNavigate();
-    const dispatch = useDispatch()
     const [authing, setAuthing] = useState(false);
     const emailRef = useRef<HTMLInputElement>()
     const passwordRef = useRef<HTMLInputElement>()
@@ -38,8 +37,6 @@ const LoginPage: React.FunctionComponent<ILoginPageProps> = (props) => {
 
         signInWithPopup(auth, new GoogleAuthProvider())
             .then((response) => {
-                const email = response.user.email
-                dispatch(setUserInfo({email:email}))
                 navigate('/');
                 setAuthing(false);
             })
