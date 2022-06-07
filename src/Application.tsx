@@ -13,6 +13,8 @@ import RecentRecords from './pages/RecentRecords';
 import MyLikes from './pages/MyLikes';
 import MyReviews from './pages/MyReviews';
 import MyInfo from './pages/MyInfo';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 initializeApp(config.firebaseConfig);
 
@@ -46,6 +48,7 @@ const Application: React.FunctionComponent<IApplicationProps> = (props) => {
           </Route>
         </Routes>
       </BrowserRouter>
+      <ToastContainer/>
     </App>
   );
 };

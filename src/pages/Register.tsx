@@ -1,10 +1,9 @@
 import React, { useRef, useState } from 'react';
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
-import { LockClosedIcon } from '@heroicons/react/solid'
 import tw from "tailwind-styled-components"
+import {useForm } from 'react-hook-form';
 
-export interface ILoginPageProps {}
 
 export const CustomInput = tw.input`
 appearance-none
@@ -43,37 +42,42 @@ mt-2
 border 
 border-transparent 
 text-sm font-medium 
-text-white 
-bg-indigo-600 
-hover:bg-indigo-700 
 focus:outline-none 
 focus:ring-2 
 focus:ring-offset-2 
-focus:ring-indigo-500
+btn
+btn-secondary 
 min-w-max
 `
+export interface ILoginPageProps {}
 
 
 
 const LoginPage: React.FunctionComponent<ILoginPageProps> = (props) => {
+
     const navigate = useNavigate();
     const auth = getAuth()
     const [authing, setAuthing] = useState(false);
     const emailRef = useRef<HTMLInputElement>()
     const passwordRef = useRef<HTMLInputElement>()
     const passwordConfirmRef = useRef<HTMLInputElement>()
+    const nicknameRef = useRef<HTMLInputElement>()
     
     const signup = async () => {
       setAuthing(true)
-      if(emailRef.current && passwordRef.current && passwordConfirmRef.current) {
+      if(emailRef.current && passwordRef.current && passwordConfirmRef.current && nicknameRef.current) {
         const email = emailRef.current.value
         const password = passwordRef.current.value
         const passwordConfirm = passwordConfirmRef.current.value
+        const nickname = nicknameRef.current.value
+
         if(password != passwordConfirm) {
           alert('비밀번호를 다르게 입력하셨습니다')
           emailRef.current.value=''
           passwordRef.current.value=''
           passwordConfirmRef.current.value=''
+          nicknameRef.current.value=''
+          setAuthing(false)
           return 
         }
         await createUserWithEmailAndPassword(auth,email,password)
@@ -88,7 +92,7 @@ const LoginPage: React.FunctionComponent<ILoginPageProps> = (props) => {
       <div className="min-h-full flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-1/3 space-y-8">
           <div>
-            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">FindurM</h2>
+            <img src="/assets/Findurm_regular_logo.png" alt="FindurM Logo"/>
           </div>
           <form className="mt-8 space-y-6">
             <input type="hidden" name="remember" defaultValue="true" />
@@ -122,12 +126,12 @@ const LoginPage: React.FunctionComponent<ILoginPageProps> = (props) => {
                 />
               </InputBox>
               <InputBox>
-                <label htmlFor="password">
+                <label htmlFor="passwordConfirm">
                   비밀번호 확인
                 </label>
                 <CustomInput
-                  id="password"
-                  name="password"
+                  id="passwordConfirm"
+                  name="passwordConfirm"
                   type="password"
                   autoComplete="current-password"
                   required
@@ -136,17 +140,17 @@ const LoginPage: React.FunctionComponent<ILoginPageProps> = (props) => {
                 />
               </InputBox>
               <InputBox>
-                <label htmlFor="password" >
+                <label htmlFor="nickname" >
                   닉네임
                 </label>
                 <CustomInput
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="current-password"
+                  id="nickname"
+                  name="nickname"
+                  type="text"
+                  autoComplete="nickname"
                   required
                   placeholder="사용하실 닉네임을 입력하세요"
-                  ref={passwordConfirmRef}
+                  ref={nicknameRef}
                 />
               </InputBox>
             </div>
@@ -155,9 +159,6 @@ const LoginPage: React.FunctionComponent<ILoginPageProps> = (props) => {
               <RoundButton onClick={signup} disabled={authing}
                 type="submit"
               >
-                <span className="absolute left-0 inset-y-0 flex items-center pl-3">
-                  <LockClosedIcon className="h-5 w-5 text-indigo-500 group-hover:text-indigo-400" aria-hidden="true" />
-                </span>
                   회원가입
               </RoundButton>
             </div>
