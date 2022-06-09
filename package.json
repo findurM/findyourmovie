@@ -53,6 +53,7 @@
         ]
     },
     "devDependencies": {
+        "@types/react-infinite-scroll-component": "^5.0.0",
         "@types/uuid": "^8.3.4",
         "autoprefixer": "^10.4.7",
         "install": "^0.13.0",
