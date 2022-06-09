@@ -13,6 +13,7 @@ import RecentRecords from './pages/RecentRecords';
 import MyLikes from './pages/MyLikes';
 import MyReviews from './pages/MyReviews';
 import MyInfo from './pages/MyInfo';
+import DetailedPages from './pages/DetailedPages';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import {getFirestore} from '@firebase/firestore'
@@ -45,6 +46,7 @@ const Application: React.FunctionComponent<IApplicationProps> = (props) => {
               </AuthRoute>
             }
           />
+          <Route path="/movies/:id" element={<DetailedPages/>}/>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
 
