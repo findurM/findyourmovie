@@ -22,10 +22,11 @@ export const db = getFirestore()
 
 export interface IApplicationProps {}
 
-export interface UserInfo {
+export interface CurrentUserInfo {
   email: string,
   id: string,
-  nickname: string
+  nickname: string,
+  profileImg: string
 }
 
 const App = tw.div`

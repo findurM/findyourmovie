@@ -1,24 +1,34 @@
 import { EmailAuthProvider, getAuth, reauthenticateWithCredential } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
 import { useEffect, useRef, useState } from "react";
-import { db, UserInfo } from "../Application";
+import { db, CurrentUserInfo } from "../Application";
 import { CustomInput, RoundButton } from "./Register";
 
 const MyInfo = () => {
   const auth = getAuth();
   const [authing, setAuthing] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
-  const [userInfo, setUserInfo] = useState({email: "", id: "", nickname: ""});
+  const [file, setFile] = useState<File>();
+  const [currentUserInfo, setCurrentUserInfo] = useState<CurrentUserInfo>();
+  const [url, setUrl] = useState<string>();
   const passwordRef = useRef<HTMLInputElement>()
-
+  
+  const userRef = doc(db, "users", auth.currentUser?.uid);
   const getUserInfo = async () => {
-    const userRef = doc(db, "users", auth.currentUser.uid);
     const userSnap = await getDoc(userRef);
-    setUserInfo((userSnap.data() as UserInfo));
+    setCurrentUserInfo((userSnap.data() as CurrentUserInfo));
   }
   useEffect(() => {
     getUserInfo();
   }, []);
+  useEffect(() => {
+    if(currentUserInfo && currentUserInfo?.profileImg !== "") {
+      imageDownload(currentUserInfo?.profileImg);
+    } else if(auth.currentUser?.photoURL) {
+      setUrl(auth.currentUser.photoURL);
+    }
+  }, [currentUserInfo, auth.currentUser])
 
   const signIn = async () => {
     setAuthing(true)
@@ -36,12 +46,50 @@ const MyInfo = () => {
       }
     }
   }
+
+  const imagePreview = () => {
+    const preview = new FileReader();
+    preview.onload = (e) => {
+      (document.getElementById("previewImg") as HTMLImageElement).src = String(e.target.result);
+    }
+    setFile((document.getElementById("selectImg") as HTMLInputElement).files[0]);
+    preview.readAsDataURL((document.getElementById("selectImg") as HTMLInputElement).files[0]);
+  }
+
+  const imageUpload = (file: File) => {
+    const storage = getStorage();
+    const storageRef = ref(storage, 'images/' + file.name);
+    updateDoc(userRef, {profileImg: file.name});
+    uploadBytes(storageRef, file)
+    .then(() => {
+      alert("성공적으로 storage에 올라갔습니다!")
+    });
+  }
+
+  const imageDownload = (fileName: string) => {
+    const storage = getStorage();
+    getDownloadURL(ref(storage, 'images/' + fileName))
+    .then((url) => {
+      setUrl(url);
+    })
+    .catch((error) => {
+      console.log(error);
+    })
+  }
+
+  const confirmClick = () => {
+    if(file !== undefined) {
+      imageUpload(file)
+    } else {
+      alert("파일이 선택되지 않았습니다.")
+    }
+  }
   
   return (
     <>
       <section className="w-full mx-auto">
         <div className="mb-[7.75rem]">
-          <h2 className="text-5xl font-bold">{userInfo.nickname} 님의 회원정보수정</h2>
+          <h2 className="text-5xl font-bold">{currentUserInfo?.nickname} 님의 회원정보수정</h2>
           <hr/>
         </div>
         {auth.currentUser.providerData[0].providerId === "password" && !isConfirmed ?
@@ -63,7 +111,13 @@ const MyInfo = () => {
             </RoundButton>
           </div>
         </>)
-        : (<div>회원 정보</div>)
+        : (<>
+          <div>회원 정보</div>
+          <img id="previewImg" src={url} alt="" className="w-60 h-60 object-contain"/>
+          <label htmlFor="selectImg" className="btn btn-secondary min-h-fit h-8">사진 선택</label>
+          <input type="file" id="selectImg" accept="image/*" style={{display: "none"}} onChange={imagePreview}/>
+          <button className="btn min-h-fit h-8" onClick={confirmClick}>확인</button>
+        </>)
         }
       </section>
     </>
