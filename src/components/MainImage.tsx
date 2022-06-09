@@ -3,25 +3,25 @@ import {BiSearch} from 'react-icons/bi'
 
 interface Props {
     image:string
-    text: string
-    title: string
 }
 
-const MainImage = ({image, text, title}:Props) => {
+const MainImage = ({image}:Props) => {
   return (
       <>
-        <section className="hero h-3/5 bg-base-200">
-            <div className="hero-content flex-col lg:flex-row-reverse">
-                <img src={image} className="rounded-lg shadow-2xl" />
-                <div className="mr-3">
-                    <h1 className="text-5xl font-bold">{title}</h1>
-                    <p className="py-6 ">{text}</p>
-                    <button className="btn btn-primary text-xl">
-                        <BiSearch size={24}/>
-                        자세히 보기
-                    </button>
-                </div>
-            </div>
+        <section className='h-1/2' >
+        <div className="hero h-full" style={{backgroundImage: `url(${image})`}}>
+  <div className="hero-overlay bg-opacity-60"></div>
+  <div className="hero-content text-center text-white w-full">
+    <div className="w-full">
+      <h1 className="mb-5 text-5xl font-bold">What is your Movie?</h1>
+      <h1 className="mb-5 text-5xl font-bold pb-16">Let's find your Movie!</h1>
+      <form className='relative w-3/5 mx-auto'>
+      <input type="search" placeholder="Search.." className="input input-bordered input-primary w-full pl-10 text-black" />
+      <button type='submit' className='absolute top-3 left-2 text-black'><BiSearch size={24}/></button>
+      </form>
+    </div>
+  </div>
+</div>
         </section>
       </>
   )

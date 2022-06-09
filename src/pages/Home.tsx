@@ -3,14 +3,18 @@ import { API_URL,API_KEY,IMAGE_URL } from "../config/config"
 import MainImage from "../components/MainImage"
 import GridCards from "../components/GridCards";
 import { Link } from "react-router-dom";
+import InfiniteScroll from 'react-infinite-scroll-component'
 
 
 export interface IHomePageProps {}
 
+
 const HomePage: React.FunctionComponent<IHomePageProps> = (props) => {
 
   const [Movies, setMovies] = useState([])
-  const [MainMovieImage, setMainMovieImage] = useState(null)
+  const [hasMore, setHasMore] = useState(true)
+  const [page, setPage] = useState(2)
+  // const [bestMovies, setBestMovies] = useState([])
 
   useEffect(() => {
     const endpoint = `${API_URL}movie/popular?api_key=${API_KEY}&language=en-US&page=1`
@@ -18,23 +22,47 @@ const HomePage: React.FunctionComponent<IHomePageProps> = (props) => {
     .then(response => response.json())
     .then(response => {
       setMovies([...response.results])
-      setMainMovieImage(response.results[0])
+      // let bestIds = [response.results.slice(0,8)].map((movie) => movie.id)
+      // setBestMovies(bestIds)
     })
   },[])
 
+ const fetchMovies = async () => {
+   const res = await fetch(`${API_URL}movie/popular?api_key=${API_KEY}&language=en-US&page=${page}`)
+   const data = await res.json()
+   return data.results
+ }
+
+  const fetchData = async () => {
+    const newMovies = await fetchMovies()
+    console.log(newMovies)
+    setMovies([...Movies, ...newMovies])
+    setPage(page+1)
+    if(page >= 12) {
+      setHasMore(false)
+    }
+  }
+
   return (
     <>
-      <MainImage 
-        image={`${IMAGE_URL}w780${MainMovieImage?.backdrop_path}`}
-        title={MainMovieImage?.original_title}
-        text={MainMovieImage?.overview}
+    <MainImage 
+        image={`/assets/FindurM_main_hero.jpg`}
       />
-      <section className="max-w-7xl mx-auto">
+     <section className="max-w-7xl mx-auto">
         <div className="mt-[3.75rem] mb-[1.875rem]">
-          <h2 className="text-5xl font-bold">TOP 250</h2>
+          <h2 className="text-5xl font-bold pb-5">TOP 250</h2>
           <hr/>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 justify-items-center gap-5 m-auto">
+          <InfiniteScroll className="w-full h-full"
+          dataLength={Movies.length}
+          next={fetchData}
+          hasMore={hasMore}
+          loader={<h4 className="text-center">로딩중...</h4>}
+          endMessage={
+            <p className="text-center py-10">
+              <b className="text-2xl">모든 영화를 가져왔습니다!</b>
+            </p>
+          }>
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 justify-items-center gap-5 m-auto">
           {Movies && Movies.map((movie,index) => (
             <Link to={`/movies/${movie.id}`} key={index} className="w-full h-full">
               <GridCards 
@@ -42,10 +70,9 @@ const HomePage: React.FunctionComponent<IHomePageProps> = (props) => {
                 movieName={movie.original_title}
               />
             </Link>
-          ))}
-        </div>
-        <div className="flex justify-center">
-          <button className="btn btn-secondary text-xl">더 가져오기!</button>
+                  ))}
+          </div>
+        </InfiniteScroll>
         </div>
       </section>
     </>
