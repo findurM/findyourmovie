@@ -45,10 +45,25 @@ const HomePage: React.FunctionComponent<IHomePageProps> = (props) => {
 
   return (
     <>
-    <MainImage 
-        image={`/assets/FindurM_main_hero.jpg`}
-      />
-     <section className="max-w-7xl mx-auto">
+      <MainImage image={`/assets/FindurM_main_hero.jpg`}/>
+      <section>
+        <div className="relative w-2/3 h-60 bg-black mx-auto mt-16">
+          <p className="absolute text-4xl text-primary top-16 left-12 text-center">영화 <br/>인기작</p>
+            <svg className="w-full h-full absolute top-0 left-0">
+                <line x1="0" y1="100%" x2="100%" y2="0" className="stroke-gray-400 stroke-2" />
+                <line x1="0" y1="0" x2="100%" y2="100%" className="stroke-gray-400 stroke-2"/>
+            </svg>
+        </div>
+        <div className="relative w-2/3 h-60 bg-black mx-auto mt-10">
+          <p className="absolute text-4xl text-primary top-16 left-12 text-center">드라마 <br/>인기작</p>
+            <svg className="w-full h-full absolute top-0 left-0">
+                <line x1="0" y1="100%" x2="100%" y2="0" className="stroke-gray-400 stroke-2" />
+                <line x1="0" y1="0" x2="100%" y2="100%" className="stroke-gray-400 stroke-2"/>
+            </svg>
+        </div>
+      </section>
+
+      <section className="max-w-7xl mx-auto">
         <div className="mt-[3.75rem] mb-[1.875rem]">
           <h2 className="text-5xl font-bold pb-5">TOP 250</h2>
           <hr/>
