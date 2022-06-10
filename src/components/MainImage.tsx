@@ -1,6 +1,9 @@
 import React, { useRef, useState } from 'react'
 import {BiSearch} from 'react-icons/bi'
+import { useDispatch } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 import { API_URL,API_KEY } from "../config/config"
+import { setSearchResult } from '../features/searchResultSlice'
 
 interface Props {
     image:string
@@ -9,14 +12,17 @@ interface Props {
 const MainImage = ({image}:Props) => {
 
   const inputRef = useRef<HTMLInputElement>()
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const query = inputRef.current.value
-    const endpoint = `${API_URL}/search/movie?${API_KEY}&language=ko-KR&page=1&query=${query}`
+    const endpoint = `${API_URL}search/movie?api_key=${API_KEY}&language=ko-KR&page=1&query=${query}`
     fetch(endpoint)
     .then(response => response.json())
-    .then(response => console.log(response))
+    .then(response => dispatch(setSearchResult(response.results)))
+    navigate('/search')
   }
   
   return (
