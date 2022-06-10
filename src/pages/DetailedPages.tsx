@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { db, UserInfo } from "../Application";
+import { db, CurrentUserInfo } from "../Application";
 import { API_URL,API_KEY,IMAGE_URL } from "../config/config"
 
 export interface DetailedPages {}

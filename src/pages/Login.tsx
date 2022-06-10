@@ -47,7 +47,11 @@ const LoginPage: React.FunctionComponent<ILoginPageProps> = (props) => {
         getUserInfo(response.user?.uid)
           .then((isMember)  => {
             if (isMember) {
-              setDoc(doc(db,"users", response.user?.uid), {id: response.user?.uid , email:response.user?.email, nickname: response.user?.displayName});
+              setDoc(doc(db,"users", response.user?.uid), 
+                        {id: response.user?.uid , 
+                        email:response.user?.email, 
+                        nickname: response.user?.displayName, 
+                        profileImg: ""});
             }
           })
         navigate('/');
