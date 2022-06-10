@@ -72,7 +72,11 @@ const LoginPage: React.FunctionComponent<ILoginPageProps> = (props) => {
 
     const onSubmit: SubmitHandler<IFormInputs> = async(data) => {
       await createUserWithEmailAndPassword(auth,data.email,data.password)
-      await setDoc(doc(db,"users", auth.currentUser?.uid), {id: auth.currentUser?.uid , email:data.email, nickname: data.nickname})
+      await setDoc(doc(db,"users", auth.currentUser?.uid), 
+                        {id: auth.currentUser?.uid , 
+                        email:data.email, 
+                        nickname: data.nickname,
+                        profileImg: ""})
       navigate('/')
     }
 
