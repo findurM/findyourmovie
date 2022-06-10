@@ -410,12 +410,12 @@ const MyReviews = () => {
   ];
 
   const auth = getAuth();
-  const [userInfo, setUserInfo] = useState<CurrentUserInfo>();
+  const [currentUserInfo, setCurrentUserInfo] = useState<CurrentUserInfo>();
 
   const getUserInfo = async () => {
     const userRef = doc(db, "users", auth.currentUser.uid);
     const userSnap = await getDoc(userRef);
-    setUserInfo((userSnap.data() as CurrentUserInfo));
+    setCurrentUserInfo((userSnap.data() as CurrentUserInfo));
   }
   useEffect(() => {
     getUserInfo();
@@ -425,8 +425,7 @@ const MyReviews = () => {
     <>
       <section className="w-full mx-auto">
         <div className="mb-[3.75rem]">
-          <h2 className="text-5xl font-bold">{userInfo?.nickname} 님의 감상평</h2>
-          <hr/>
+          <h2 className="text-5xl font-bold">{currentUserInfo?.nickname} 님의 감상평</h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 justify-items-center gap-5 m-auto">

@@ -71,7 +71,7 @@ const TvshowListPage = () => {
                 <Link to={`/movies/${movie.id}`} key={index} className="w-full h-full">
                 <GridCards 
                     image={movie.poster_path ? `${IMAGE_URL}w500${movie.poster_path}`: null}
-                    movieName={movie.original_title}
+                    alt={movie.original_title}
                 />
                 </Link>
                     ))}

@@ -90,7 +90,6 @@ const MyInfo = () => {
       <section className="w-full mx-auto">
         <div className="mb-[7.75rem]">
           <h2 className="text-5xl font-bold">{currentUserInfo?.nickname} 님의 회원정보수정</h2>
-          <hr/>
         </div>
         {auth.currentUser.providerData[0].providerId === "password" && !isConfirmed ?
         (<>
