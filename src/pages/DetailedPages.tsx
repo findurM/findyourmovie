@@ -18,6 +18,9 @@ const DetailedPages: React.FC<DetailedPages> = () => {
     const result = recordSnap.data();
     if(result === undefined) {
       return false;
+    } else if((result.movieArray as Number[]).includes(Number(movieId))) {
+      updateDoc(recordRef, {movieArray: arrayRemove(Number(movieId))});
+      updateDoc(recordRef, {movieArray: arrayUnion(Number(movieId))});
     } else if((result.movieArray as Number[]).length >= 20) {
       const oldestRecord = result.movieArray[0];
       updateDoc(recordRef, {movieArray: arrayRemove(oldestRecord)});

@@ -39,7 +39,7 @@ const RecentRecords = () => {
 
   useEffect(() => {
     if(recentRecords !== null && recentRecords !== undefined) {
-      recentRecords.forEach((movieId: Number) => {
+      recentRecords.reverse().forEach((movieId: Number) => {
         getMovieImages(movieId);
       })
     }
