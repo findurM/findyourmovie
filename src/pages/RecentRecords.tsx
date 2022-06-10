@@ -6,15 +6,11 @@ import { CurrentUserInfo, db } from "../Application";
 import GridCards from "../components/GridCards";
 import { API_KEY, API_URL, IMAGE_URL } from "../config/config";
 
-interface MovieIds {
-  [index: number]: number
-}
-
 const RecentRecords = () => {
 
   const auth = getAuth();
   const [currentUserInfo, setCurrentUserInfo] = useState<CurrentUserInfo>();
-  const [recentRecords, setRecentRecords] = useState<MovieIds>();
+  const [recentRecords, setRecentRecords] = useState<Number[]>();
   const [movieImages, setMovieImages] = useState([]);
 
   const getUserInfo = async () => {
@@ -24,12 +20,12 @@ const RecentRecords = () => {
   }
 
   const getRecentRecords = async () => {
-    const recordRef = doc(db, "users", auth.currentUser?.uid, "recentRecords", "movieIds");
+    const recordRef = doc(db, "users", auth.currentUser?.uid, "recentRecords", "movies");
     const recordSnap = await getDoc(recordRef);
-    setRecentRecords((recordSnap.data() as MovieIds));
+    setRecentRecords((recordSnap.data().movieArray as Number[]));
   }
 
-  const getMovieImages = async (movieId: number) => {
+  const getMovieImages = async (movieId: Number) => {
     const res = await fetch(`${API_URL}/movie/${movieId}/images?api_key=${API_KEY}`);
     const data = await res.json();
     const newImage = [{movieId: movieId, poster: data.posters[0]}];
@@ -43,7 +39,7 @@ const RecentRecords = () => {
 
   useEffect(() => {
     if(recentRecords !== null && recentRecords !== undefined) {
-      Object.values(recentRecords).forEach((movieId: number) => {
+      recentRecords.forEach((movieId: Number) => {
         getMovieImages(movieId);
       })
     }
