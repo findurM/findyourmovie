@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { db, CurrentUserInfo } from "../Application";
 import { API_URL,API_KEY,IMAGE_URL } from "../config/config"
-import tw from "tailwind-styled-components"
+
 
 export interface DetailedPages {}
 
@@ -14,7 +14,7 @@ const DetailedPages: React.FC<DetailedPages> = () => {
   const [movieFullDetails, setMovieFullDetails] = useState([])
   const [actors, setActors] = useState([])
   const [director, setDirector] = useState([])
-  const movieId = useParams().idc
+  const movieId = useParams().id
 
   interface Genre {
     id: number, 
@@ -37,6 +37,15 @@ const DetailedPages: React.FC<DetailedPages> = () => {
   }
 
 useEffect(() => {
+  getRecentRecords()
+  .then((isExist)  => {
+    if (!isExist) {
+      setDoc(recordRef, {movieArray: [Number(movieId)]});
+    } else {
+      updateDoc(recordRef, {movieArray: arrayUnion(Number(movieId))});
+    }
+  })
+
   async function fullDetails(){
     const movieDetailApi = `${API_URL}/movie/${movieId}?api_key=${API_KEY}`
     const res = await fetch(movieDetailApi)
@@ -75,26 +84,6 @@ useEffect(() => {
     }
     return true;
   }
-  
-  useEffect(() => {
-    getRecentRecords()
-      .then((isExist)  => {
-        if (!isExist) {
-          setDoc(recordRef, {movieArray: [Number(movieId)]});
-        } else {
-          updateDoc(recordRef, {movieArray: arrayUnion(Number(movieId))});
-        }
-      })
-    async function fetchData(){
-      const movieDetailApi = `${API_URL}/movie/${movieId}?api_key=${API_KEY}`
-      const res = await fetch(movieDetailApi)
-      const results = await res.json()
-      setMovieFullDetails(results)
-      return results
-    }
-    fetchData()
-  },[])
-
 
 
 function maxTenActors(actors: any[]): Array<ActorInfo> {
@@ -109,7 +98,7 @@ function maxTenActors(actors: any[]): Array<ActorInfo> {
   return result
 }
 
-function maxFiveActors(actors: any[]): Array<ActorInfo> {
+function maxFiveActors(actors: Array<ActorInfo>): Array<ActorInfo> {
   const result: Array<ActorInfo> = []
   if(actors.length > 5){
     for(let i = 0; i < 5; i++){
@@ -162,7 +151,7 @@ const tenMovieActors: JSX.Element[] = maxTenActors(actors).map((actor) => <li ke
       </ul>
       <ul className='flex flex-row'>
         출연진
-        {fiveMovieActors || tenMovieActors}
+        {fiveMovieActors}
         <li><button>더보기</button></li>
       </ul>
       
