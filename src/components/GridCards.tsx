@@ -2,14 +2,14 @@ import React from 'react'
 
 interface Props {
     image: string,
-    movieName: string
+    alt: string
 }
 
-const GridCards = ({image, movieName}:Props) => {
+const GridCards = ({image, alt}:Props) => {
   return(
     <div className="card card-compact bg-base-100 shadow-xl w-full max-w-[305px]">
       <figure className='w-full h-full'>
-        <img src={image} alt={movieName} style={{aspectRatio: "1 / 1.5"}} className="w-full h-full object-cover hover:scale-125 duration-100" />
+        <img src={image} alt={alt} style={{aspectRatio: "1 / 1.5"}} className="w-full h-full object-cover hover:scale-125 duration-100" />
       </figure>
     </div>
   )

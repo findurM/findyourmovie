@@ -19,16 +19,21 @@ import {getFirestore} from '@firebase/firestore'
 import MovieListPage from './pages/MovieListPage'
 import TvshowListPage from './pages/TvshowListPage'
 import DetailedPages from './pages/DetailedPages'
+import SearchResultPage from './pages/SearchResultPage'
+import ErrorPage from './pages/ErrorPage'
+import Footer from './components/Footer'
+
 
 initializeApp(config.firebaseConfig);
 export const db = getFirestore()
 
 export interface IApplicationProps {}
 
-export interface UserInfo {
+export interface CurrentUserInfo {
   email: string,
   id: string,
-  nickname: string
+  nickname: string,
+  profileImg: string
 }
 
 const App = tw.div`
@@ -53,12 +58,14 @@ const Application: React.FunctionComponent<IApplicationProps> = (props) => {
           <Route path="/register" element={<RegisterPage />} />
           <Route path='/movielist' element={<MovieListPage/>}/>
           <Route path='/tvshowlist' element={<TvshowListPage/>}/>
+          <Route path='/search' element={<SearchResultPage/>}/>
           <Route path="/mypage" element={<SideMenu/>}>
             <Route path="recent-records" element={<RecentRecords/>}/>
             <Route path="my-likes" element={<MyLikes/>}/>
             <Route path="my-reviews" element={<MyReviews/>}/>
             <Route path="my-info" element={<MyInfo/>}/>
           </Route>
+          <Route path="*" element={<ErrorPage/>}/>
         </Routes>
       </BrowserRouter>
       <ToastContainer/>

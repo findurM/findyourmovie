@@ -1,11 +1,13 @@
 import { configureStore } from "@reduxjs/toolkit";
 import userSlice from '../features/userSlice'
 import mypageCategorySlice from "../features/mypageCategorySlice";
+import searchResultSlice from "../features/searchResultSlice";
 
 export const store = configureStore({
   reducer: {
     user: userSlice,
-    mypageCategory: mypageCategorySlice
+    mypageCategory: mypageCategorySlice,
+    searchResult: searchResultSlice
   }
 })
 
