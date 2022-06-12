@@ -35,6 +35,7 @@ const RecentRecords = () => {
   useEffect(() => {
     getUserInfo();
     getRecentRecords();
+    console.log(recentRecords,currentUserInfo)
   }, [auth.currentUser]);
 
   useEffect(() => {

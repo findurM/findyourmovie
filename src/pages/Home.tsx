@@ -4,9 +4,20 @@ import MainImage from "../components/MainImage"
 import GridCards from "../components/GridCards";
 import { Link } from "react-router-dom";
 import InfiniteScroll from 'react-infinite-scroll-component'
-import {BsFillArrowLeftCircleFill, BsFillArrowRightCircleFill} from 'react-icons/bs'
 import Carousel from "../components/Carousel";
+import tw from "tailwind-styled-components/dist/tailwind";
 
+const Ranking = tw.div`
+absolute
+top-3
+right-3
+text-2xl
+bg-primary
+z-10
+rounded-full
+p-2
+font-bold
+`
 
 export interface IHomePageProps {}
 
@@ -16,7 +27,7 @@ const HomePage: React.FunctionComponent<IHomePageProps> = (props) => {
   const [Movies, setMovies] = useState([])
   const [hasMore, setHasMore] = useState(true)
   const [page, setPage] = useState(2)
-  // const [bestMovies, setBestMovies] = useState([])
+  const [bestMovies, setBestMovies] = useState([])
 
   const movieCarouselRef = useRef<HTMLDivElement>()
   const dramaCarouselRef = useRef<HTMLDivElement>()
@@ -27,8 +38,8 @@ const HomePage: React.FunctionComponent<IHomePageProps> = (props) => {
     .then(response => response.json())
     .then(response => {
       setMovies([...response.results])
-      // let bestIds = [response.results.slice(0,8)].map((movie) => movie.id)
-      // setBestMovies(bestIds)
+      let bestIds = [...response.results.slice(0,8)].map((movie) => movie.id)
+      setBestMovies(bestIds)
     })
   },[])
 
@@ -54,12 +65,12 @@ const HomePage: React.FunctionComponent<IHomePageProps> = (props) => {
     <>
       <MainImage image={`/assets/FindurM_main_hero.jpg`}/>
       <section>
-          <Carousel category='영화'/>
-          <Carousel category='드라마'/>
+          <Carousel category='최신'/>
+          <Carousel category='개봉예정'/>
       </section>
 
-      <section className="max-w-7xl mx-auto mt-20">
-        <div className="mt-[3.75rem] mb-[1.875rem]">
+      <section className="mt-20">
+        <div className="w-3/4 mx-auto mt-[3.75rem] mb-[1.875rem]">
           <h2 className="text-5xl font-bold pb-10 mt-">영화평점 TOP 250</h2>
           <InfiniteScroll className="w-full h-full"
           dataLength={Movies.length}
@@ -73,11 +84,12 @@ const HomePage: React.FunctionComponent<IHomePageProps> = (props) => {
           }>
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 justify-items-center gap-5 m-auto">
           {Movies && Movies.map((movie,index) => (
-            <Link to={`/movies/${movie.id}`} key={index} className="w-full h-full">
+            <Link to={`/movies/${movie.id}`} key={index} className="w-full flex justify-center h-full relative">
               <GridCards 
                 image={movie.poster_path ? `${IMAGE_URL}w500${movie.poster_path}`: null}
                 alt={movie.original_title}
               />
+              {bestMovies.includes(movie.id) ? (<Ranking>{index+1}위</Ranking>): null}
             </Link>
                   ))}
           </div>
