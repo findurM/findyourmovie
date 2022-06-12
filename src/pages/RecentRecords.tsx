@@ -8,19 +8,20 @@ import { API_KEY, API_URL, IMAGE_URL } from "../config/config";
 
 const RecentRecords = () => {
 
-  const auth = getAuth();
+  const localStorageUserInfo = JSON.parse(localStorage.getItem('user'))
   const [currentUserInfo, setCurrentUserInfo] = useState<CurrentUserInfo>();
   const [recentRecords, setRecentRecords] = useState<Number[]>();
   const [movieImages, setMovieImages] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const getUserInfo = async () => {
-    const userRef = doc(db, "users", auth.currentUser?.uid);
+    const userRef = doc(db, "users", localStorageUserInfo.uid);
     const userSnap = await getDoc(userRef);
     setCurrentUserInfo((userSnap.data() as CurrentUserInfo));
   }
 
   const getRecentRecords = async () => {
-    const recordRef = doc(db, "users", auth.currentUser?.uid, "recentRecords", "movies");
+    const recordRef = doc(db, "users", localStorageUserInfo.uid, "recentRecords", "movies");
     const recordSnap = await getDoc(recordRef);
     setRecentRecords((recordSnap.data().movieArray as Number[]));
   }
@@ -34,9 +35,17 @@ const RecentRecords = () => {
 
   useEffect(() => {
     getUserInfo();
+<<<<<<< HEAD
     getRecentRecords();
     console.log(recentRecords,currentUserInfo)
   }, [auth.currentUser]);
+=======
+    getRecentRecords()
+    .then(() => {
+      setIsLoading(false);
+    });
+  }, []);
+>>>>>>> 6df31c9cc3fe5cd7cbcae4cd59002426f83f8e32
 
   useEffect(() => {
     if(recentRecords !== null && recentRecords !== undefined) {
@@ -45,6 +54,8 @@ const RecentRecords = () => {
       })
     }
   }, [recentRecords])
+
+  if(isLoading) return <div>Loading...</div>
 
   return (
     <>

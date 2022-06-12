@@ -15,6 +15,7 @@ interface Props {}
 
 const Header = () => {
   
+  const localStorageUserInfo = JSON.parse(localStorage.getItem('user'))
   const userInfo = useSelector<RootState, User>((state) => state.user)
   const auth = getAuth();
   const [currentUserInfo, setCurrentUserInfo] = useState<CurrentUserInfo>();
@@ -23,7 +24,7 @@ const Header = () => {
   const navigate = useNavigate()
   
   const getUserInfo = async () => {
-    const userRef = doc(db, "users", auth.currentUser?.uid);
+    const userRef = doc(db, "users", localStorageUserInfo.uid);
     const userSnap = await getDoc(userRef);
     setCurrentUserInfo(userSnap.data() as CurrentUserInfo);
   }
@@ -32,14 +33,16 @@ const Header = () => {
     .catch((error) => {
       console.log(error);
     })
-  }, [auth.currentUser]);
+  }, []);
   useEffect(() => {
-    if(currentUserInfo && currentUserInfo?.profileImg !== "") {
-      imageDownload(currentUserInfo?.profileImg);
-    } else if(auth.currentUser?.photoURL) {
-      setUrl(auth.currentUser.photoURL);
+    if(currentUserInfo && currentUserInfo.profileImg !== "" && !currentUserInfo.profileImg.includes("googleusercontent.com")) {
+      imageDownload(currentUserInfo.profileImg);
+    } else if(currentUserInfo?.profileImg.includes("googleusercontent.com")) {
+      setUrl(currentUserInfo?.profileImg);
+    } else {
+      setUrl('/assets/defaultImage.png');
     }
-  }, [currentUserInfo, auth.currentUser])
+  }, [currentUserInfo])
 
   const profileClick = () => {
     navigate("/mypage/recent-records");
@@ -68,7 +71,7 @@ const Header = () => {
           {userInfo.email !='' ? 
           (
             <>
-              {currentUserInfo?.profileImg !== "" || auth.currentUser?.photoURL
+              {currentUserInfo?.profileImg !== ""
               ? <img src={url} className="w-9 h-9 mr-2.5 object-cover cursor-pointer rounded-full" onClick={profileClick} />
               : <CgProfile size={36} className="mr-2.5 cursor-pointer" onClick={profileClick} />}
 
