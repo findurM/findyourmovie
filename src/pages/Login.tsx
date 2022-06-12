@@ -51,7 +51,7 @@ const LoginPage: React.FunctionComponent<ILoginPageProps> = (props) => {
                         {id: response.user?.uid , 
                         email:response.user?.email, 
                         nickname: response.user?.displayName, 
-                        profileImg: ""});
+                        profileImg: response.user?.photoURL});
             }
           })
         navigate('/');

@@ -7,28 +7,35 @@ import { CustomInput, RoundButton } from "./Register";
 
 const MyInfo = () => {
   const auth = getAuth();
+  const localStorageUserInfo = JSON.parse(localStorage.getItem('user'))
   const [authing, setAuthing] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [file, setFile] = useState<File>();
   const [currentUserInfo, setCurrentUserInfo] = useState<CurrentUserInfo>();
   const [url, setUrl] = useState<string>();
   const passwordRef = useRef<HTMLInputElement>()
+  const [isLoading, setIsLoading] = useState(true);
   
-  const userRef = doc(db, "users", auth.currentUser?.uid);
+  const userRef = doc(db, "users", localStorageUserInfo.uid);
   const getUserInfo = async () => {
     const userSnap = await getDoc(userRef);
     setCurrentUserInfo((userSnap.data() as CurrentUserInfo));
   }
   useEffect(() => {
-    getUserInfo();
+    getUserInfo()
+    .then(() => {
+      setIsLoading(false);
+    });
   }, []);
   useEffect(() => {
-    if(currentUserInfo && currentUserInfo?.profileImg !== "") {
-      imageDownload(currentUserInfo?.profileImg);
-    } else if(auth.currentUser?.photoURL) {
-      setUrl(auth.currentUser.photoURL);
+    if(currentUserInfo && currentUserInfo.profileImg !== "" && !currentUserInfo.profileImg.includes("googleusercontent.com")) {
+      imageDownload(currentUserInfo.profileImg);
+    } else if(currentUserInfo?.profileImg.includes("googleusercontent.com")) {
+      setUrl(currentUserInfo?.profileImg);
+    } else {
+      setUrl('/assets/defaultImage.png');
     }
-  }, [currentUserInfo, auth.currentUser])
+  }, [currentUserInfo])
 
   const signIn = async () => {
     setAuthing(true)
@@ -84,6 +91,8 @@ const MyInfo = () => {
       alert("파일이 선택되지 않았습니다.")
     }
   }
+
+  if(isLoading) return <div>Loading...</div>
   
   return (
     <>
@@ -91,7 +100,7 @@ const MyInfo = () => {
         <div className="mb-[7.75rem]">
           <h2 className="text-5xl font-bold">{currentUserInfo?.nickname} 님의 회원정보수정</h2>
         </div>
-        {auth.currentUser.providerData[0].providerId === "password" && !isConfirmed ?
+        {localStorageUserInfo.providerData[0].providerId === "password" && !isConfirmed ?
         (<>
           <p className="text-lg mb-[1.875rem]">회원정보 조회를 위해 비밀번호를 입력해주세요.</p>
           <div className="flex gap-5">
