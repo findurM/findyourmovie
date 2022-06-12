@@ -42,6 +42,8 @@ const HomePage: React.FunctionComponent<IHomePageProps> = (props) => {
     const newMovies = await fetchMovies()
     console.log(newMovies)
     setMovies([...Movies, ...newMovies])
+    console.log(Movies);
+    
     setPage(page+1)
     if(page >= 12) {
       setHasMore(false)
@@ -59,7 +61,6 @@ const HomePage: React.FunctionComponent<IHomePageProps> = (props) => {
       <section className="max-w-7xl mx-auto mt-20">
         <div className="mt-[3.75rem] mb-[1.875rem]">
           <h2 className="text-5xl font-bold pb-10 mt-">영화평점 TOP 250</h2>
-          <hr/>
           <InfiniteScroll className="w-full h-full"
           dataLength={Movies.length}
           next={fetchData}
@@ -75,7 +76,7 @@ const HomePage: React.FunctionComponent<IHomePageProps> = (props) => {
             <Link to={`/movies/${movie.id}`} key={index} className="w-full h-full">
               <GridCards 
                 image={movie.poster_path ? `${IMAGE_URL}w500${movie.poster_path}`: null}
-                movieName={movie.original_title}
+                alt={movie.original_title}
               />
             </Link>
                   ))}
