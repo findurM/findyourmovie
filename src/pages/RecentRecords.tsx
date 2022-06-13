@@ -35,17 +35,11 @@ const RecentRecords = () => {
 
   useEffect(() => {
     getUserInfo();
-<<<<<<< HEAD
-    getRecentRecords();
-    console.log(recentRecords,currentUserInfo)
-  }, [auth.currentUser]);
-=======
     getRecentRecords()
     .then(() => {
       setIsLoading(false);
     });
   }, []);
->>>>>>> 6df31c9cc3fe5cd7cbcae4cd59002426f83f8e32
 
   useEffect(() => {
     if(recentRecords !== null && recentRecords !== undefined) {

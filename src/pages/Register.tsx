@@ -69,6 +69,10 @@ const LoginPage: React.FunctionComponent<ILoginPageProps> = (props) => {
     const auth = getAuth()
     const navigate = useNavigate()
     const [authing, setAuthing] = useState(false);
+    const [age, setAge] = useState(20)
+    const [selectedRadio, setSelectedRadio] = useState('여')
+
+    const ageRef = useRef<HTMLInputElement>()
 
     const onSubmit: SubmitHandler<IFormInputs> = async(data) => {
       await createUserWithEmailAndPassword(auth,data.email,data.password)
@@ -76,8 +80,20 @@ const LoginPage: React.FunctionComponent<ILoginPageProps> = (props) => {
                         {id: auth.currentUser?.uid , 
                         email:data.email, 
                         nickname: data.nickname,
-                        profileImg: ""})
+                        profileImg: "",
+                        age: age,
+                        sex: selectedRadio})
       navigate('/')
+    }
+
+    const handleRange = () => {
+      setAge(Number(ageRef.current.value))
+    }
+
+    const isRadioSelected = (value:string) : boolean => selectedRadio === value
+
+    const handleRadio = (e: React.ChangeEvent<HTMLInputElement>): void => {
+      setSelectedRadio(e.currentTarget.value)
     }
 
     return (
@@ -156,6 +172,37 @@ const LoginPage: React.FunctionComponent<ILoginPageProps> = (props) => {
                   {...register("nickname",{required: true})}
                 />
                 <Warning>{errors.nickname && '닉네임을 입력해 주십시오'}</Warning>
+              </InputBox>
+              <InputBox>
+                <label htmlFor="sex">
+                  성별
+                </label>
+                <div className='mt-3 w-full flex'>
+                  <div className='mr-3 flex justify-between w-10'> 
+                    <span>남</span>
+                    <input type="radio" name="radio-3" value='남' className="radio radio-secondary" 
+                    checked={isRadioSelected('남')} 
+                    onChange={handleRadio} />
+                  </div>
+                  <div className='flex justify-between w-10'>
+                    <span>여</span>
+                    <input type="radio" name="radio-3" value='여' className="radio radio-secondary" 
+                     checked={isRadioSelected('여')} 
+                     onChange={handleRadio} />
+                  </div>
+                </div>
+              </InputBox>
+              <InputBox>
+                <label htmlFor="age">
+                  나이: {age}세
+                </label>
+                <input 
+                type="range" min="10" max="90" value={age} step="1" className="range range-secondary my-3"
+                id='age'
+                name='age'
+                onChange={handleRange}
+                ref={ageRef}
+               />
               </InputBox>
             </div>
 

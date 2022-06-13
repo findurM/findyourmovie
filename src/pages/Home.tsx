@@ -10,13 +10,15 @@ import tw from "tailwind-styled-components/dist/tailwind";
 const Ranking = tw.div`
 absolute
 top-3
-right-3
+right-36
 text-2xl
 bg-primary
 z-10
 rounded-full
 p-2
 font-bold
+md:top-3
+md:right-3
 `
 
 export interface IHomePageProps {}
