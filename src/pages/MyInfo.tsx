@@ -1,7 +1,7 @@
 import { EmailAuthProvider, getAuth, reauthenticateWithCredential } from "firebase/auth";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { db, CurrentUserInfo } from "../Application";
 import { CustomInput, RoundButton } from "./Register";
 
@@ -15,6 +15,7 @@ const MyInfo = () => {
   const [url, setUrl] = useState<string>();
   const passwordRef = useRef<HTMLInputElement>()
   const [isLoading, setIsLoading] = useState(true);
+  const [nicknameInputValue, setNicknameInputValue] = useState<string>();
   
   const userRef = doc(db, "users", localStorageUserInfo.uid);
   const getUserInfo = async () => {
@@ -29,6 +30,7 @@ const MyInfo = () => {
   }, []);
   useEffect(() => {
     if(currentUserInfo && currentUserInfo.profileImg !== "" && !currentUserInfo.profileImg.includes("googleusercontent.com")) {
+      setNicknameInputValue(currentUserInfo.nickname);
       imageDownload(currentUserInfo.profileImg);
     } else if(currentUserInfo?.profileImg.includes("googleusercontent.com")) {
       setUrl(currentUserInfo?.profileImg);
@@ -84,11 +86,16 @@ const MyInfo = () => {
     })
   }
 
-  const confirmClick = () => {
+  const inputChange = useCallback(e => {
+    setNicknameInputValue(e.target.value);
+  }, []);
+
+  const confirmClick = async() => {
     if(file !== undefined) {
-      imageUpload(file)
-    } else {
-      alert("파일이 선택되지 않았습니다.")
+      imageUpload(file);
+    }
+    if(currentUserInfo.nickname !== nicknameInputValue) {
+      updateDoc(userRef, {nickname: nicknameInputValue});
     }
   }
 
@@ -97,12 +104,12 @@ const MyInfo = () => {
   return (
     <>
       <section className="w-full mx-auto">
-        <div className="mb-[7.75rem]">
-          <h2 className="text-5xl font-bold">{currentUserInfo?.nickname} 님의 회원정보수정</h2>
+        <div className="mb-10">
+          <h2 className="text-5xl font-bold"><span id="nicknameTitle">{currentUserInfo?.nickname}</span> 님의 회원정보조회</h2>
         </div>
         {localStorageUserInfo.providerData[0].providerId === "password" && !isConfirmed ?
         (<>
-          <p className="text-lg mb-[1.875rem]">회원정보 조회를 위해 비밀번호를 입력해주세요.</p>
+          <p className="text-lg mt-[7.75rem] mb-[1.875rem]">회원정보 조회를 위해 비밀번호를 입력해주세요.</p>
           <div className="flex gap-5">
             <CustomInput
               id="password"
@@ -120,11 +127,25 @@ const MyInfo = () => {
           </div>
         </>)
         : (<>
-          <div>회원 정보</div>
+          <p>아이디</p>
+          <CustomInput type="text" value={currentUserInfo.email} readOnly={true} className="max-w-[25rem] text-gray-500"/>
+          <p className="mt-5">닉네임</p>
+          <CustomInput type="text" value={nicknameInputValue} id="nicknameInput" className="max-w-[25rem]"
+            onChange={inputChange}
+          />
+
           <img id="previewImg" src={url} alt="" className="w-60 h-60 object-contain"/>
           <label htmlFor="selectImg" className="btn btn-secondary min-h-fit h-8">사진 선택</label>
           <input type="file" id="selectImg" accept="image/*" style={{display: "none"}} onChange={imagePreview}/>
-          <button className="btn min-h-fit h-8" onClick={confirmClick}>확인</button>
+          <button className="btn min-h-fit h-8" 
+            onClick={() => {
+              confirmClick()
+              .then(() => {
+                alert("회원정보가 수정되었습니다.");
+                document.getElementById("nicknameTitle").textContent = nicknameInputValue;
+              })
+            }}
+          >수정</button>
         </>)
         }
       </section>
