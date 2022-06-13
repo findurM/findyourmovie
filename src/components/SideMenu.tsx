@@ -9,7 +9,7 @@ const categoryList = {
   "recent-records": "최근 기록",
   "my-likes": "좋아요",
   "my-reviews": "감상평",
-  "my-info": "회원정보수정"
+  "my-info": "회원정보조회"
 }
 
 const MypageContainer = tw.div`
