@@ -173,9 +173,9 @@ const MyInfo = () => {
             </RoundButton>
           </div>
         </>)
-        : (<form onSubmit={handleSubmit(onSubmit)}>
+        : (<form className="max-w-[25rem] pb-[1.875rem]" onSubmit={handleSubmit(onSubmit)}>
           <InfoTitle className="mt-0">아이디</InfoTitle>
-          <CustomInput type="text" value={currentUserInfo.email} className="max-w-[25rem] text-gray-500" disabled/>
+          <CustomInput type="text" value={currentUserInfo.email} className="text-gray-500" disabled/>
 
           {localStorageUserInfo.providerData[0].providerId === "password" &&
           (<>
@@ -186,7 +186,6 @@ const MyInfo = () => {
               type="password"
               autoComplete="current-password"
               placeholder="변경하고 싶은 비밀번호를 입력하세요"
-              className="max-w-[25rem]"
               {...register("password",{minLength: 6})}
             />
             <Warning>
@@ -204,7 +203,6 @@ const MyInfo = () => {
               type="password"
               autoComplete="current-password"
               placeholder="비밀번호를 다시 한 번 입력하세요"
-              className="max-w-[25rem]"
               {...register("passwordConfirm",
                 {required: (document.getElementById("password") as HTMLInputElement).value !== "",
                 validate: (val: string) => {
@@ -242,13 +240,15 @@ const MyInfo = () => {
             id="nickname"
             name="nickname"
             value={nicknameInputValue}
-            className="max-w-[25rem]"
             onChange={inputChange}/>
 
-          <img id="previewImg" src={url} alt="" className="w-60 h-60 object-contain"/>
-          <label htmlFor="selectImg" className="btn btn-secondary min-h-fit h-8">사진 선택</label>
-          <input type="file" id="selectImg" accept="image/*" style={{display: "none"}} onChange={imagePreview}/>
-          <button type="submit" className="btn min-h-fit h-8">수정</button>
+          <div className="flex gap-5 items-end my-5">
+            <img id="previewImg" src={url} alt="" className="w-60 h-60 object-contain border"/>
+            <label htmlFor="selectImg" className="btn btn-secondary min-h-fit h-8">사진 선택</label>
+            <input type="file" id="selectImg" accept="image/*" style={{display: "none"}} onChange={imagePreview}/>
+          </div>
+
+          <button type="submit" className="btn min-h-fit h-8 block mx-auto">수정</button>
         </form>)
         }
       </section>
