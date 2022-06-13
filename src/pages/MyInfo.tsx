@@ -4,6 +4,11 @@ import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { db, CurrentUserInfo } from "../Application";
 import { CustomInput, RoundButton } from "./Register";
+import tw from "tailwind-styled-components"
+
+const InfoTitle = tw.p`
+font-bold
+`
 
 const MyInfo = () => {
   const auth = getAuth();
@@ -127,12 +132,33 @@ const MyInfo = () => {
           </div>
         </>)
         : (<>
-          <p>아이디</p>
-          <CustomInput type="text" value={currentUserInfo.email} readOnly={true} className="max-w-[25rem] text-gray-500"/>
-          <p className="mt-5">닉네임</p>
+          <InfoTitle>아이디</InfoTitle>
+          <CustomInput type="text" value={currentUserInfo.email} className="max-w-[25rem] text-gray-500" disabled/>
+          
+          <div className="flex gap-5 mt-5 items-center">
+            <InfoTitle className="shrink-0">성별</InfoTitle>
+            <div className='w-full flex'>
+              <div className='mr-3 flex justify-between w-10'> 
+                <span>남</span>
+                <input type="radio" name="radio-3" value='남' className="radio radio-secondary" 
+                checked={currentUserInfo.sex === '남'} readOnly/>
+              </div>
+              <div className='flex justify-between w-10'>
+                <span>여</span>
+                <input type="radio" name="radio-3" value='여' className="radio radio-secondary" 
+                  checked={currentUserInfo.sex === '여'} readOnly/>
+              </div>
+            </div>
+          </div>
+            
+          <div className="flex gap-5 mt-5 items-center">
+            <InfoTitle>나이</InfoTitle>
+            <p>{currentUserInfo.age} 세</p>
+          </div>
+
+          <InfoTitle className="mt-5">닉네임</InfoTitle>
           <CustomInput type="text" value={nicknameInputValue} id="nicknameInput" className="max-w-[25rem]"
-            onChange={inputChange}
-          />
+            onChange={inputChange}/>
 
           <img id="previewImg" src={url} alt="" className="w-60 h-60 object-contain"/>
           <label htmlFor="selectImg" className="btn btn-secondary min-h-fit h-8">사진 선택</label>
