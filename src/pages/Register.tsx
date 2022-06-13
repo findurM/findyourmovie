@@ -29,7 +29,7 @@ mt-2
 export const InputBox = tw.div`
 py-2
 `
-const Warning = tw.p`
+export const Warning = tw.p`
 text-rose-600
 `
 
