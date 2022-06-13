@@ -53,9 +53,7 @@ const HomePage: React.FunctionComponent<IHomePageProps> = (props) => {
 
   const fetchData = async () => {
     const newMovies = await fetchMovies()
-    console.log(newMovies)
     setMovies([...Movies, ...newMovies])
-    console.log(Movies);
     
     setPage(page+1)
     if(page >= 12) {

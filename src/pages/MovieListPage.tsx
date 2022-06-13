@@ -15,6 +15,16 @@ const MovieListPage = () => {
 
     const selectRef = useRef<HTMLSelectElement>()
 
+    interface ICategory {
+      [key: string] : any
+    }
+
+    const categoryKR: ICategory = {
+      "popular" : "인기",
+      "top_rated" : "최고 평점",
+      "upcoming" : "개봉 예정"
+    }
+
     useEffect(() => {
       const endpoint = `${API_URL}movie/${category}?api_key=${API_KEY}&language=en-US&page=1`
       fetch(endpoint)
@@ -48,7 +58,7 @@ const MovieListPage = () => {
       <>
         <section className="w-2/3 mx-auto mt-12">
             <div className="flex justify-between">
-                <h1 className="text-4xl mb-10">인기 영화</h1>
+                <h1 className="text-4xl mb-10">{categoryKR[category]} 영화</h1>
                 <select className="select select-primary w-full max-w-xs" onChange={changeCategory} ref={selectRef}>
                     <option selected value='popular'>인기순으로 정렬</option>
                     <option value='top_rated'>평점순으로 정렬</option>
