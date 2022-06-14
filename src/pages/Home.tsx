@@ -31,9 +31,6 @@ const HomePage: React.FunctionComponent<IHomePageProps> = (props) => {
   const [page, setPage] = useState(2)
   const [bestMovies, setBestMovies] = useState([])
 
-  const movieCarouselRef = useRef<HTMLDivElement>()
-  const dramaCarouselRef = useRef<HTMLDivElement>()
-
   useEffect(() => {
     const endpoint = `${API_URL}movie/top_rated?api_key=${API_KEY}&language=en-US&page=1`
     fetch(endpoint)
