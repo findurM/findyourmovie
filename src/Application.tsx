@@ -22,6 +22,7 @@ import DetailedPages from './pages/DetailedPages'
 import SearchResultPage from './pages/SearchResultPage'
 import ErrorPage from './pages/ErrorPage'
 import Footer from './components/Footer'
+import ScrollToTop from './features/ScrollRestoration '
 
 
 initializeApp(config.firebaseConfig);
@@ -44,6 +45,7 @@ const Application: React.FunctionComponent<IApplicationProps> = (props) => {
   return (
     <App>
       <BrowserRouter>
+      <ScrollToTop/>
         <Header/>
         <Routes>
           <Route path="/"
