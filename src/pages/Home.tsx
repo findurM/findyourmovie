@@ -174,6 +174,7 @@ const HomePage: React.FunctionComponent<IHomePageProps> = (props) => {
               <GridCards 
                 image={movie.poster_path ? `${IMAGE_URL}w500${movie.poster_path}`: null}
                 alt={movie.original_title}
+                movie={movie}
               />
               {bestMovies.includes(movie.id) ? (<Ranking>{index+1}위</Ranking>): null}
             </Link>

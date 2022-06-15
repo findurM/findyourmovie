@@ -22,7 +22,7 @@ import DetailedPages from './pages/DetailedPages'
 import SearchResultPage from './pages/SearchResultPage'
 import ErrorPage from './pages/ErrorPage'
 import Footer from './components/Footer'
-import ScrollToTop from './features/ScrollRestoration'
+import ScrollToTop from './components/ScrollRestoration'
 
 
 initializeApp(config.firebaseConfig);

@@ -73,10 +73,11 @@ const Carousel = ({category}:Props) => {
                     <GridCards
                         image={movie.poster_path ? `${IMAGE_URL}w300${movie.poster_path}`: null}
                         alt={movie.original_title}
+                        movie={movie}
                     />
                     </Link>
                 </div> ))}
-                <Link to='/movielist'><button className="btn btn-lg bg-primary rounded-full text-white mt-14 ml-8">더 보기</button></Link>
+                <Link to='/movielist'><button className="btn p-5 btn-lg bg-primary rounded-full text-white mt-14 ml-8">더 보기</button></Link>
             </div>
         </div>
         <button className="absolute top-24 left-52 text-primary" onClick={leftShift}>
