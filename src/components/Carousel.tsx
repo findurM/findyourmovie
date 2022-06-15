@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 import {BsFillArrowLeftCircleFill, BsFillArrowRightCircleFill} from 'react-icons/bs'
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react"
+import { API_URL,API_KEY,IMAGE_URL } from "../config/config"
+import GridCards from '../components/GridCards'
 
 interface Props {
     category: string
@@ -9,11 +11,35 @@ interface Props {
 const Carousel = ({category}:Props) => {
 
     const [offset, setOffset] = useState(0)
+    const [movies, setMovies] = useState([])
 
     const movieCarouselRef = useRef<HTMLDivElement>()
 
+    interface ICategory {
+        "최신": string,
+        "개봉예정": string
+    }
+
+    const categoryKR:ICategory = {
+        "최신": 'popular',
+        "개봉예정": "upcoming"
+    }
+    const getMovies = (category: keyof ICategory) => {
+        const newCategory = categoryKR[category]
+        const endpoint = `${API_URL}movie/${newCategory}?api_key=${API_KEY}&language=en-US&page=1`
+        fetch(endpoint)
+        .then(response => response.json())
+        .then(response => {
+        setMovies([...response.results.slice(0,9)])
+            })
+        }
+
+    useEffect(() => {
+    getMovies(category as keyof ICategory)
+    },[])
+
     const rightShift = () => {
-      if(offset <= -90) return
+      if(offset <= -100) return
       if (movieCarouselRef.current) {
         movieCarouselRef.current.style.transform = `translate(${offset-10}rem)`
         setOffset(offset-10)
@@ -38,41 +64,19 @@ const Carousel = ({category}:Props) => {
             <Link to='/movielist'> {category} <br/>영화</Link>
         </p>
         <div className="overflow-hidden relative top-3 left-60 w-3/4">
-            <div className="carousel carousel-center p-4 bg-transparent rounded-box w-[130rem] h-full
+            <div className="carousel carousel-center p-4 bg-transparent rounded-box w-[100rem] md:w-[150rem] h-full
             transition duration-150 ease-out" ref={movieCarouselRef}>
-                <div className="carousel-item w-[13rem] ">
-                    <img src="https://api.lorem.space/image/furniture?w=180&h=180&hash=8B7BCDC2" className="rounded-box" />
-                </div> 
-                <div className="carousel-item w-[13rem] ">
-                    <img src="https://api.lorem.space/image/furniture?w=180&h=180&hash=8B7BCDC2" className="rounded-box" />
-                </div> 
-                <div className="carousel-item w-[13rem] ">
-                    <img src="https://api.lorem.space/image/furniture?w=180&h=180&hash=8B7BCDC2" className="rounded-box" />
-                </div> 
-                <div className="carousel-item w-[13rem] ">
-                    <img src="https://api.lorem.space/image/furniture?w=180&h=180&hash=8B7BCDC2" className="rounded-box" />
-                </div> 
-                <div className="carousel-item w-[13rem] ">
-                    <img src="https://api.lorem.space/image/furniture?w=180&h=180&hash=8B7BCDC2" className="rounded-box" />
-                </div> 
-                <div className="carousel-item w-[13rem] ">
-                    <img src="https://api.lorem.space/image/furniture?w=180&h=180&hash=8B7BCDC2" className="rounded-box" />
-                </div> 
-                <div className="carousel-item w-[13rem] ">
-                    <img src="https://api.lorem.space/image/furniture?w=180&h=180&hash=8B7BCDC2" className="rounded-box" />
-                </div> 
-                <div className="carousel-item w-[13rem] ">
-                    <img src="https://api.lorem.space/image/furniture?w=180&h=180&hash=8B7BCDC2" className="rounded-box" />
-                </div> 
-                <div className="carousel-item w-[13rem] ">
-                    <img src="https://api.lorem.space/image/furniture?w=180&h=180&hash=8B7BCDC2" className="rounded-box" />
-                </div> 
-                <div className="carousel-item w-[13rem] ">
-                    <img src="https://api.lorem.space/image/furniture?w=180&h=180&hash=8B7BCDC2" className="rounded-box" />
-                </div> 
-                <div className="carousel-item w-[13rem] ">
-                    <img src="https://api.lorem.space/image/furniture?w=180&h=180&hash=8B7BCDC2" className="rounded-box" />
-                </div> 
+                {movies && movies.map((movie,index) => (
+                <div className="carousel-item w-[10rem] md:w-[15rem] flex items-center md:items-start ">
+                    <Link to={`/movies/${movie.id}`} key={index} 
+                    className="w-5/6 flex justify-center h-3/5 relative hover:scale-125">
+                    <GridCards
+                        image={movie.poster_path ? `${IMAGE_URL}w300${movie.poster_path}`: null}
+                        alt={movie.original_title}
+                    />
+                    </Link>
+                </div> ))}
+                <Link to='/movielist'><button className="btn btn-lg bg-primary rounded-full text-white mt-14 ml-8">더 보기</button></Link>
             </div>
         </div>
         <button className="absolute top-24 left-52 text-primary" onClick={leftShift}>
