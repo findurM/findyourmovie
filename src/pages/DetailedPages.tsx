@@ -5,6 +5,8 @@ import { useParams } from "react-router-dom";
 import { db, CurrentUserInfo } from "../Application";
 import { API_URL,API_KEY,IMAGE_URL } from "../config/config"
 import {BsHeart,BsFillHeartFill} from 'react-icons/bs'
+import {BsStarFill,BsStarHalf} from 'react-icons/bs'
+import {BiStar} from 'react-icons/bi'
 
 
 export interface MovieDetailedPages {}
@@ -38,8 +40,24 @@ interface MovieFullDetails {
   vote_count?: number
 }
 
+interface ActorInfo {
+  adult: boolean
+  cast_id: number
+  character: string
+  credit_id: string
+  gender: number
+  id: number
+  known_for_department: string
+  name: string
+  order: number
+  original_name: string
+  popularity: number
+  profile_path: string
+}
+
 
 const DetailedPages: React.FC<MovieDetailedPages> = () => {
+  const [currentUserInfo, setCurrentUserInfo] = useState<CurrentUserInfo>();
   const [movieFullDetails, setMovieFullDetails] = useState<MovieFullDetails>()
   const [actors, setActors] = useState([])
   const [director, setDirector] = useState([])
@@ -48,20 +66,6 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
   const [moreCredits, setMoreCredits] = useState(false)
   const movieId = useParams().id
 
-  interface ActorInfo {
-    adult: boolean
-    cast_id: number
-    character: string
-    credit_id: string
-    gender: number
-    id: number
-    known_for_department: string
-    name: string
-    order: number
-    original_name: string
-    popularity: number
-    profile_path: string
-  }
 
 useEffect(() => {
   getRecentRecords()
@@ -70,6 +74,17 @@ useEffect(() => {
       setDoc(recordRef, {movieArray: [Number(movieId)]});
     } else {
       updateDoc(recordRef, {movieArray: arrayUnion(Number(movieId))});
+    }
+  })
+},[])
+
+useEffect(() => {
+  getLikeMovies()
+  .then((isExit) => {
+    if(!isExit) {
+      setDoc(likeRef, {moviesArray: [Number(movieId)]});
+    } else {
+      updateDoc(likeRef, {movieArray: arrayUnion(Number(movieId))});
     }
   })
 },[])
@@ -94,8 +109,6 @@ useEffect(() => {
     setDirector([results.crew[0]])
     return results
   }
-
-
   actorDetails()
 },[]) 
 
@@ -105,32 +118,48 @@ useEffect(() => {
     const res = await fetch(similarMoviesApi)
     const results = await res.json()
     setSimilarMovies(results.results)
-    
     return results
   }
-
-
   similarMovies()
 },[]) 
 
   const auth = getAuth();
 
-  const recordRef = doc(db, "users", auth.currentUser?.uid, "recentRecords", "movies");
-  const getRecentRecords = async () => {
-    const recordSnap = await getDoc(recordRef);
-    const result = recordSnap.data();
+const recordRef = doc(db, "users", auth.currentUser?.uid, "recentRecords", "movies");
+const getRecentRecords = async () => {
+  const recordSnap = await getDoc(recordRef);
+  const result = recordSnap.data();
+  
+  if(result === undefined) {
+    return false;
+  } else if((result.movieArray as Number[]).includes(Number(movieId))) {
+    updateDoc(recordRef, {movieArray: arrayRemove(Number(movieId))});
+    updateDoc(recordRef, {movieArray: arrayUnion(Number(movieId))});
+  } else if((result.movieArray as Number[]).length >= 20) {
+    const oldestRecord = result.movieArray[0];
+    updateDoc(recordRef, {movieArray: arrayRemove(oldestRecord)});
+  }
+  return true;
+}
+
+const likeRef = doc(db, "users", auth.currentUser?.uid, 'likeMovies','movies');
+const getLikeMovies =  async () => {
+  const likeSnap = await getDoc(likeRef);
+  const result = likeSnap.data();
+
+  if(like){
     if(result === undefined) {
       return false;
-    } else if((result.movieArray as Number[]).includes(Number(movieId))) {
-      updateDoc(recordRef, {movieArray: arrayRemove(Number(movieId))});
-      updateDoc(recordRef, {movieArray: arrayUnion(Number(movieId))});
-    } else if((result.movieArray as Number[]).length >= 20) {
-      const oldestRecord = result.movieArray[0];
-      updateDoc(recordRef, {movieArray: arrayRemove(oldestRecord)});
+    } else if((result.moviesArray as Number[]).includes(Number(movieId))) {
+      updateDoc(likeRef, {moviesArray: arrayRemove(Number(movieId))});
+      updateDoc(likeRef, {moviesArray: arrayUnion(Number(movieId))});
     }
-    return true;
-  }
-
+  } else if (like === false){
+      const unlikeMovie = result.moviesArray[result.moviesArray.indexOf(movieId)];
+      updateDoc(likeRef, {moviesArray: arrayRemove(unlikeMovie)})
+  }      
+  return true
+}
 
 function maxTenActors(actors: any[]): Array<ActorInfo> {
   const result: Array<ActorInfo> = []
@@ -168,6 +197,22 @@ function maxSevenMovies(movies: Array<MovieFullDetails>): Array<MovieFullDetails
   return result
 }
 
+function ratingStar(rate: number): JSX.Element[] {
+  let rating: number = rate / 2;
+  const result: JSX.Element[] = [];
+
+  for(let i = 0; i < 5; i++){
+    if(rating > 1){
+      result.push(<BsStarFill fill="yellow" size="1.5rem" key={i}></BsStarFill>)
+      rating -= 1;
+    } else if(rating >= 0.25) {
+      result.push(<BsStarHalf fill="yellow" size="1.5rem" key={i}></BsStarHalf>)
+      rating = 0
+    } else result.push(<BiStar fill="yellow"  size="1.5rem" key={i}></BiStar>)
+  }
+  return result
+}
+
 let movieTitle 
 let movieGenres 
 let moviePoster 
@@ -176,9 +221,10 @@ let movieRelease
 let movieLanguage 
 let movieRuntime
 let movieOverview 
+let movieRate
 
 if(movieFullDetails !== undefined){
-  const {original_title, genres, poster_path, backdrop_path, release_date, spoken_languages, runtime, overview} = movieFullDetails
+  const {original_title, genres, poster_path, backdrop_path, release_date, spoken_languages, runtime, overview, vote_average} = movieFullDetails
 
   movieTitle = original_title
   movieGenres = genres
@@ -188,16 +234,14 @@ if(movieFullDetails !== undefined){
   movieLanguage = spoken_languages[0].name
   movieRuntime = runtime
   movieOverview = overview
-
+  movieRate = vote_average
 }
 
 const movieDirector: string = director[0]?.name
-  
 const fiveMovieActors: JSX.Element[] = maxFiveActors(actors).map((actor) => <li key={actor.credit_id}><img className="w-20" src={`${IMAGE_URL}w300${actor.profile_path}`} alt='Actor Image'></img><p>{actor.character}역</p> <p>{actor.name}</p></li>)
 const tenMovieActors: JSX.Element[] = maxTenActors(actors).map((actor) => <li key={actor.credit_id}><img className="w-20" src={`${IMAGE_URL}w300${actor.profile_path}`} alt='Actor Image'></img><p>{actor.character}역</p> <p>{actor.name}</p></li>)
-
-const sevenSimilarMovies: JSX.Element[] = maxSevenMovies(similarMovies).map((movie)=> <li key={movie.id} className="mr-10"><img className="w-36" src={movie.poster_path ? `${IMAGE_URL}w300${movie.poster_path}`: null} alt='Similar Movie Image'/><p>{movie.title}</p></li>)
-
+const sevenSimilarMovies: JSX.Element[] = maxSevenMovies(similarMovies).map((movie)=> <li key={movie.id}><img  src={movie.poster_path ? `${IMAGE_URL}w300${movie.poster_path}`: null} alt='Similar Movie Image'/><p>{movie.title}</p></li>)
+const movieYear: string = movieRelease !== undefined ? movieRelease.substring(0,4) : ""
 
 let imgUrl = ""
 if(movieImage !== undefined) {
@@ -205,17 +249,28 @@ if(movieImage !== undefined) {
 }
 
 
+
+
+
   return (
     <>
-    <section>
-      <div className="opacity-50" style={{backgroundImage: `url(${imgUrl})`, backgroundRepeat: 'no-repeat', backgroundSize: 'cover', width: '100%', height: '40vw'}}> </div>
+    <section className="relative">
+      <div className="opacity-50" style={{backgroundImage: `url(${imgUrl})`, backgroundRepeat: 'no-repeat', backgroundSize: 'cover', width: '100%', height: '40vw'}}></div>
       
-    <h2>{movieTitle}</h2>
-    <button className="btn btn-accent btn-sm rounded-2xl w-28" onClick={()=> like ? setLike(false) : setLike(true)}>{like ? <BsFillHeartFill className="mr-3 text-red-600"></BsFillHeartFill> : <BsHeart className="mr-3"></BsHeart>}좋아요</button>
+      <div className="absolute w-3/4 left-[12.5%] bottom-10 flex flex-row justify-between">
+        <div className='flex flex-row '>
+          <h2 className="text-3xl font-bold">{movieTitle}({movieYear})</h2> 
+          <div className='flex flex-row items-end ml-4'>{ratingStar(movieRate)} 
+          <p className="text-lg font-bold ">({movieRate})</p>
+          </div>
+         
+          
+        </div>
+        <button className="btn btn-accent btn-sm rounded-2xl w-28 opacity-100" onClick={()=> like ? setLike(false) : setLike(true)}>{like ? <BsFillHeartFill className="mr-3 text-red-600"></BsFillHeartFill> : <BsHeart className="mr-3"></BsHeart>}좋아요</button>
+      </div>
     </section>
 
-    <section>
-      
+    <section className="w-3/4 mt-14 mx-auto flex">  
       <img src={moviePoster&& `${IMAGE_URL}w300${moviePoster}`} alt="poster"></img>
       <ul>
         기본정보
@@ -230,22 +285,24 @@ if(movieImage !== undefined) {
         <li>러닝타임 {movieRuntime&&movieRuntime}분</li>
         <li>감독 {movieDirector&&movieDirector}</li>
       </ul>
+
+    </section>
+
+    <section className="w-3/4  mx-auto ">
+      <div>
       <ul className='flex flex-row'>
         출연진
         {moreCredits ? tenMovieActors : fiveMovieActors}
         <li><button className='btn btn-primary btn-sm' onClick={()=>moreCredits ? setMoreCredits(false) :setMoreCredits(true)}>{moreCredits ? `접기` : `더보기`}</button></li>
       </ul>
-      
-    
-    </section>
+      </div>
 
-    <section>
     <div>
       <h3>줄거리</h3>
       <p>{movieOverview&&movieOverview}</p>
     </div>
     <h3>비슷한 영화</h3>
-    <ul className='flex flex-row'>
+    <ul className='flex flex-row justify-between'>
       {sevenSimilarMovies}
     </ul>
     <div>
@@ -254,8 +311,33 @@ if(movieImage !== undefined) {
     </section>
     
 
-    <section>
+    <section className="w-3/4  mx-auto flex flex-col">
       <h3>감상평</h3>
+      <div className='bg-gray-300 flex flex-col items-center'>
+       
+        <p>별점을 선택해주세요</p>
+
+        <div className="rating rating-md rating-half">
+          <input type="radio" name="rating-10" className="rating-hidden" />
+          <input type="radio" name="rating-10" className="bg-yellow-500 mask mask-star-2 mask-half-1" />
+          <input type="radio" name="rating-10" className="bg-yellow-500 mask mask-star-2 mask-half-2" />
+          <input type="radio" name="rating-10" className="bg-yellow-500 mask mask-star-2 mask-half-1" />
+          <input type="radio" name="rating-10" className="bg-yellow-500 mask mask-star-2 mask-half-2" />
+          <input type="radio" name="rating-10" className="bg-yellow-500 mask mask-star-2 mask-half-1" />
+          <input type="radio" name="rating-10" className="bg-yellow-500 mask mask-star-2 mask-half-2" />
+          <input type="radio" name="rating-10" className="bg-yellow-500 mask mask-star-2 mask-half-1" />
+          <input type="radio" name="rating-10" className="bg-yellow-500 mask mask-star-2 mask-half-2" />
+          <input type="radio" name="rating-10" className="bg-yellow-500 mask mask-star-2 mask-half-1" />
+          <input type="radio" name="rating-10" className="bg-yellow-500 mask mask-star-2 mask-half-2" />
+        </div>
+
+        <div className="flex">
+        <input type="text" placeholder="감상평을 입력해주세요" className="input input-bordered input-primary input-sm w-full" />
+        <button type="submit" className="btn btn-accent btn-sm ml-4">등록</button>
+        </div>
+      </div>
+      
+      
     </section>
       
     </>
