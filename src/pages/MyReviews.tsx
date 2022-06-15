@@ -411,6 +411,7 @@ const MyReviews = () => {
 
   const auth = getAuth();
   const [currentUserInfo, setCurrentUserInfo] = useState<CurrentUserInfo>();
+  const [isLoading, setIsLoading] = useState(true);
 
   const getUserInfo = async () => {
     const userRef = doc(db, "users", auth.currentUser.uid);
@@ -418,8 +419,13 @@ const MyReviews = () => {
     setCurrentUserInfo((userSnap.data() as CurrentUserInfo));
   }
   useEffect(() => {
-    getUserInfo();
+    getUserInfo()
+    .then(() => {
+      setIsLoading(false);
+    });
   }, []);
+
+  if(isLoading) return <div>Loading...</div>
 
   return (
     <>

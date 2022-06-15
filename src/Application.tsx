@@ -34,7 +34,9 @@ export interface CurrentUserInfo {
   email: string,
   id: string,
   nickname: string,
-  profileImg: string
+  profileImg: string,
+  age: number,
+  sex: string
 }
 
 const App = tw.div`

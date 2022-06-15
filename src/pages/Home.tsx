@@ -4,21 +4,51 @@ import MainImage from "../components/MainImage"
 import GridCards from "../components/GridCards";
 import { Link } from "react-router-dom";
 import InfiniteScroll from 'react-infinite-scroll-component'
-import {BsFillArrowLeftCircleFill, BsFillArrowRightCircleFill} from 'react-icons/bs'
+import Carousel from "../components/Carousel";
+import tw from "tailwind-styled-components/dist/tailwind";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { db } from "../Application";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { InputBox } from "./Register";
 
+const Ranking = tw.div`
+absolute
+top-3
+right-36
+text-2xl
+bg-primary
+z-10
+rounded-full
+p-2
+font-bold
+md:top-3
+md:right-3
+`
 
 export interface IHomePageProps {}
 
 
 const HomePage: React.FunctionComponent<IHomePageProps> = (props) => {
 
+  const auth = getAuth();
   const [Movies, setMovies] = useState([])
   const [hasMore, setHasMore] = useState(true)
   const [page, setPage] = useState(2)
-  // const [bestMovies, setBestMovies] = useState([])
+  const [bestMovies, setBestMovies] = useState([])
+  const [age, setAge] = useState(20)
+  const [selectedRadio, setSelectedRadio] = useState('여')
 
-  const movieCarouselRef = useRef<HTMLDivElement>()
-  const dramaCarouselRef = useRef<HTMLDivElement>()
+  const ageRef = useRef<HTMLInputElement>()
+
+  const handleRange = () => {
+    setAge(Number(ageRef.current.value))
+  }
+
+  const isRadioSelected = (value:string) : boolean => selectedRadio === value
+
+  const handleRadio = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    setSelectedRadio(e.currentTarget.value)
+  }
 
   useEffect(() => {
     const endpoint = `${API_URL}movie/top_rated?api_key=${API_KEY}&language=en-US&page=1`
@@ -26,22 +56,40 @@ const HomePage: React.FunctionComponent<IHomePageProps> = (props) => {
     .then(response => response.json())
     .then(response => {
       setMovies([...response.results])
-      // let bestIds = [response.results.slice(0,8)].map((movie) => movie.id)
-      // setBestMovies(bestIds)
+      let bestIds = [...response.results.slice(0,8)].map((movie) => movie.id)
+      setBestMovies(bestIds)
     })
   },[])
+  
+  useEffect(() => {
+    const AuthCheck = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const getUserInfo = async () => {
+          const userRef = doc(db, "users", user.uid);
+          const userSnap = await getDoc(userRef);
+          return userSnap.data();
+        }
+        getUserInfo()
+        .then((data) => {
+          if(data.age === undefined || data.sex === undefined) {
+            (document.querySelector("label.modal-button") as HTMLLabelElement).click();
+          }
+        });
+      }
+    });
 
- const fetchMovies = async () => {
-   const res = await fetch(`${API_URL}movie/top_rated?api_key=${API_KEY}&language=en-US&page=${page}`)
-   const data = await res.json()
-   return data.results
- }
+    return () => AuthCheck();
+  }, [auth]);
+
+  const fetchMovies = async () => {
+    const res = await fetch(`${API_URL}movie/top_rated?api_key=${API_KEY}&language=en-US&page=${page}`)
+    const data = await res.json()
+    return data.results
+  }
 
   const fetchData = async () => {
     const newMovies = await fetchMovies()
-    console.log(newMovies)
     setMovies([...Movies, ...newMovies])
-    console.log(Movies);
     
     setPage(page+1)
     if(page >= 12) {
@@ -49,86 +97,66 @@ const HomePage: React.FunctionComponent<IHomePageProps> = (props) => {
     }
   }
 
-  let tmp = 0
-  const movieRightShift = () => {
-    if (movieCarouselRef.current) {
-      movieCarouselRef.current.style.left = String(tmp - 100) +'px'
-      tmp-=100
-    }
-  }
-
-  const movieLeftShift = () => {
-    if (movieCarouselRef.current) {
-      movieCarouselRef.current.style.left = String(tmp + 100) +'px'
-      tmp+=100
-    }
-  }
-  const dramaRightShift = () => {
-    if (dramaCarouselRef.current) {
-      dramaCarouselRef.current.style.left = String(tmp - 100) +'px'
-      tmp-=100
-    }
-  }
-
-  const dramaLeftShift = () => {
-    if (dramaCarouselRef.current) {
-      dramaCarouselRef.current.style.left = String(tmp + 100) +'px'
-      tmp+=100
-    }
+  const updateUserInfo = async () => {
+    await updateDoc(doc(db,"users", auth.currentUser?.uid),
+                          {age: age,
+                          sex: selectedRadio})
   }
 
   return (
     <>
       <MainImage image={`/assets/FindurM_main_hero.jpg`}/>
+
+      <label htmlFor="my-modal-6" className="btn modal-button" style={{display: "none"}}>open modal</label>
+
+      <input type="checkbox" id="my-modal-6" className="modal-toggle" />
+      <div className="modal modal-bottom sm:modal-middle">
+        <div className="modal-box">
+          <h3 className="font-bold text-lg mb-5">성별과 나이를 입력해주세요!</h3>
+          <InputBox>
+            <label htmlFor="sex">
+              성별
+            </label>
+            <div className='mt-3 w-full flex'>
+              <div className='mr-3 flex justify-between w-10'> 
+                <span>남</span>
+                <input type="radio" name="radio-3" value='남' className="radio radio-secondary" 
+                checked={isRadioSelected('남')} 
+                onChange={handleRadio} />
+              </div>
+              <div className='flex justify-between w-10'>
+                <span>여</span>
+                <input type="radio" name="radio-3" value='여' className="radio radio-secondary" 
+                  checked={isRadioSelected('여')} 
+                  onChange={handleRadio} />
+              </div>
+            </div>
+          </InputBox>
+          <InputBox>
+            <label htmlFor="age">
+              나이: {age}세
+            </label>
+            <input 
+            type="range" min="10" max="90" value={age} step="1" className="range range-secondary my-3"
+            id='age'
+            name='age'
+            onChange={handleRange}
+            ref={ageRef}
+            />
+          </InputBox>
+          <div className="modal-action">
+            <label htmlFor="my-modal-6" className="btn" onClick={updateUserInfo}>확인</label>
+          </div>
+        </div>
+      </div>
+
       <section>
-        <div className="relative w-2/3 h-60 bg-black mx-auto mt-16">
-        <p className="absolute text-4xl text-primary top-16 left-12 text-center z-20">
-        <Link to='/movielist'> 영화 <br/>인기작</Link>
-          </p>
-          <div className="carousel  carousel-center p-4 space-x-4 bg-transparent rounded-box z-10 absolute top-3 left-40" ref={movieCarouselRef}>
-                <div className="carousel-item">
-                  <img src="https://api.lorem.space/image/furniture?w=180&h=180&hash=8B7BCDC2" className="rounded-box" />
-                </div> 
-                <div className="carousel-item">
-                  <img src="https://api.lorem.space/image/furniture?w=180&h=180&hash=500B67FB" className="rounded-box" />
-                </div> 
-                <div className="carousel-item">
-                  <img src="https://api.lorem.space/image/furniture?w=180&h=180&hash=A89D0DE6" className="rounded-box" />
-                </div>
-              </div>
-              <button className="absolute top-24 left-48 text-primary z-30" onClick={movieRightShift}><BsFillArrowLeftCircleFill size={36}/></button>
-              <button className="absolute top-24 right-2 text-primary z-30" onClick={movieLeftShift}><BsFillArrowRightCircleFill size={36}/></button>
-            <svg className="w-full h-full absolute top-0 left-0">
-                <line x1="0" y1="100%" x2="100%" y2="0" className="stroke-gray-400 stroke-2" />
-                <line x1="0" y1="0" x2="100%" y2="100%" className="stroke-gray-400 stroke-2"/>
-            </svg>
-        </div>
-        <div className="relative w-2/3 h-60 bg-black mx-auto mt-10">
-          <p className="absolute text-4xl text-primary top-16 left-12 text-center z-20">
-          <Link to='/tvshowlist'> 드라마 <br/>인기작</Link>
-            </p>
-              <div className="carousel  carousel-center p-4 space-x-4 bg-transparent rounded-box z-10 absolute top-3 left-40" ref={dramaCarouselRef}>
-                <div className="carousel-item">
-                  <img src="https://api.lorem.space/image/furniture?w=180&h=180&hash=8B7BCDC2" className="rounded-box" />
-                </div> 
-                <div className="carousel-item">
-                  <img src="https://api.lorem.space/image/furniture?w=180&h=180&hash=500B67FB" className="rounded-box" />
-                </div> 
-                <div className="carousel-item">
-                  <img src="https://api.lorem.space/image/furniture?w=180&h=180&hash=A89D0DE6" className="rounded-box" />
-                </div>
-              </div>
-            <button className="absolute top-24 left-48 text-primary z-30" onClick={dramaRightShift}><BsFillArrowLeftCircleFill size={36}/></button>
-              <button className="absolute top-24 right-2 text-primary z-30" onClick={dramaLeftShift}><BsFillArrowRightCircleFill size={36}/></button>
-            <svg className="w-full h-full absolute top-0 left-0">
-                <line x1="0" y1="100%" x2="100%" y2="0" className="stroke-gray-400 stroke-2" />
-                <line x1="0" y1="0" x2="100%" y2="100%" className="stroke-gray-400 stroke-2"/>
-            </svg>
-        </div>
+          <Carousel category='최신'/>
+          <Carousel category='개봉예정'/>
       </section>
 
-      <section className="max-w-7xl mx-auto mt-20">
-        <div className="mt-[3.75rem] mb-[1.875rem]">
+      <section className="mt-20">
+        <div className="w-3/4 mx-auto mt-[3.75rem] mb-[1.875rem]">
           <h2 className="text-5xl font-bold pb-10 mt-">영화평점 TOP 250</h2>
           <InfiniteScroll className="w-full h-full"
           dataLength={Movies.length}
@@ -142,11 +170,12 @@ const HomePage: React.FunctionComponent<IHomePageProps> = (props) => {
           }>
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 justify-items-center gap-5 m-auto">
           {Movies && Movies.map((movie,index) => (
-            <Link to={`/movies/${movie.id}`} key={index} className="w-full h-full">
+            <Link to={`/movies/${movie.id}`} key={index} className="w-full flex justify-center h-full relative">
               <GridCards 
                 image={movie.poster_path ? `${IMAGE_URL}w500${movie.poster_path}`: null}
                 alt={movie.original_title}
               />
+              {bestMovies.includes(movie.id) ? (<Ranking>{index+1}위</Ranking>): null}
             </Link>
                   ))}
           </div>

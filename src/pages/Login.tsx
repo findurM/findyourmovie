@@ -51,7 +51,7 @@ const LoginPage: React.FunctionComponent<ILoginPageProps> = (props) => {
                         {id: response.user?.uid , 
                         email:response.user?.email, 
                         nickname: response.user?.displayName, 
-                        profileImg: ""});
+                        profileImg: response.user?.photoURL});
             }
           })
         navigate('/');
@@ -63,7 +63,7 @@ const LoginPage: React.FunctionComponent<ILoginPageProps> = (props) => {
   };
 
   return (
-  <div className='bg-base-300 min-h-screen flex flex-col sm:flex-row sm:justify-around pt-20'>
+  <div className='bg-base-300 min-h-screen flex flex-col sm:flex-row sm:justify-around pt-20' style={{backgroundImage: 'url("/assets/FindurM_login_hero.jpg")', backgroundSize: 'contain', backgroundRepeat: 'no-repeat'}}>
     <div className=" h-5/6 sm:w-5/12 flex items-center mx-auto w-full justify-center py-5 px-4 sm:px-3 lg:px-5 bg-base-100 rounded-lg">
       <div className="max-w-md w-2/3 space-y-8">
         <div>
@@ -133,7 +133,7 @@ const LoginPage: React.FunctionComponent<ILoginPageProps> = (props) => {
         </form>
       </div>
     </div>
-    <div className='flex-col w-4/12 pt-24 mx-auto'>
+    <div className='flex-col w-4/12 pt-24 mx-auto text-white'>
       <div>
       <p className='text-5xl font-bold'>Hello, <br/> Welcome Friend!</p>
       <p className='mt-10 text-lg'>회원가입하고 많은 혜택을 누려보세요!</p>
