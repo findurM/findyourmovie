@@ -2,7 +2,7 @@ import { doc, getDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { CurrentUserInfo, db } from "../Application";
-import GridCards from "../components/GridCards";
+import { LikeGridCards } from "../components/GridCards";
 import { API_KEY, API_URL, IMAGE_URL } from "../config/config";
 
 const MyLikes = () => {
@@ -61,7 +61,7 @@ const MyLikes = () => {
         : (<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 justify-items-center gap-5 m-auto">
         {movieImages && movieImages.map(({movieId, poster}, index) => (
           <Link to={`/movies/${movieId}`} key={index} className="w-full h-full">
-            <GridCards 
+            <LikeGridCards 
               image={poster.file_path ? `${IMAGE_URL}w500${poster.file_path}`: null}
               alt={movieId}
             />

@@ -1,7 +1,11 @@
-import React from 'react'
 import { useDispatch } from 'react-redux'
 import {setCurrentMovie} from '../features/movieSlice'
 import {Movie} from '../features/searchResultSlice'
+import {BsHeart,BsFillHeartFill} from 'react-icons/bs'
+import tw from "tailwind-styled-components/dist/tailwind";
+import { useState } from 'react';
+import { arrayRemove, arrayUnion, doc, updateDoc } from 'firebase/firestore';
+import { db } from '../Application';
 
 interface Props {
     image: string,
@@ -25,4 +29,43 @@ const GridCards = ({image, alt, movie}:Props) => {
   )
 }
 
-export default GridCards
+const BtnHeart = tw.button`
+absolute
+btn
+border-transparent
+bottom-3
+right-3
+bg-base-100
+z-10
+rounded-full
+p-3
+`
+
+export const LikeGridCards = ({image, alt: movieId}:Props) => {
+  const localStorageUserInfo = JSON.parse(localStorage.getItem('user'));
+  const [like, setLike] = useState(true);
+
+  const likeRef = doc(db, "users", localStorageUserInfo.uid, 'likeMovies','movies');
+  const onHeartButtonClick = (e: Event) => {
+    e.preventDefault();
+    if(like) {
+      updateDoc(likeRef, {moviesArray: arrayRemove(Number(movieId))});
+      setLike(false);
+    } else {
+      updateDoc(likeRef, {moviesArray: arrayUnion(Number(movieId))});
+      setLike(true);
+    }
+  }
+
+  return (
+    <div className='relative'>
+      <GridCards 
+        image={image}
+        alt={movieId}
+      />
+      <BtnHeart onClick={onHeartButtonClick}>{like ? <BsFillHeartFill className="text-red-600 w-6 h-6"></BsFillHeartFill> : <BsHeart className="w-6 h-6"></BsHeart>}</BtnHeart>
+    </div>
+  )
+}
+
+export default GridCards;
