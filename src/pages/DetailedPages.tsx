@@ -1,7 +1,7 @@
 import { getAuth } from "firebase/auth";
 import { arrayRemove, arrayUnion, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams,Link } from "react-router-dom";
 import { db, CurrentUserInfo } from "../Application";
 import { API_URL,API_KEY,IMAGE_URL } from "../config/config"
 import {BsHeart,BsFillHeartFill} from 'react-icons/bs'
@@ -66,86 +66,90 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
   const [moreCredits, setMoreCredits] = useState(false)
   const movieId = useParams().id
 
-
-useEffect(() => {
-  getRecentRecords()
-  .then((isExist)  => {
-    if (!isExist) {
-      setDoc(recordRef, {movieArray: [Number(movieId)]});
-    } else {
-      updateDoc(recordRef, {movieArray: arrayUnion(Number(movieId))});
-    }
+  
+  useEffect(() => {
+    getRecentRecords()
+    .then((isExist)  => {
+      if (!isExist) {
+        setDoc(recordRef, {movieArray: [Number(movieId)]});
+      } else {
+        updateDoc(recordRef, {movieArray: arrayUnion(Number(movieId))});
+      }
+    })
+  },[])
+  
+  useEffect(() => {
+    getLikeMovies()
+    .then((isExit) => {
+      if(!isExit) {
+        setDoc(likeRef, {moviesArray: [Number(movieId)]});
+      } else {
+          if(like){
+            updateDoc(likeRef, {moviesArray: arrayUnion(Number(movieId))});
+          } else updateDoc(likeRef, {moviesArray:arrayRemove(Number(movieId))})
+    }})
   })
-},[])
-
-useEffect(() => {
-  getLikeMovies()
-  .then((isExit) => {
-    if(!isExit) {
-      setDoc(likeRef, {moviesArray: [Number(movieId)]});
-    } else {
-      updateDoc(likeRef, {movieArray: arrayUnion(Number(movieId))});
+  
+  useEffect(() => {
+    async function fullDetails(){
+      const movieDetailApi = `${API_URL}/movie/${movieId}?api_key=${API_KEY}`
+      const res = await fetch(movieDetailApi)
+      const results = await res.json()
+      setMovieFullDetails(results)
+      return results
     }
-  })
-},[])
+    fullDetails()
+  },[])
+  
+  useEffect(() => {
+    async function actorDetails(){
+      const actorDetailApi = `${API_URL}/movie/${movieId}/credits?api_key=${API_KEY}`
+      const res = await fetch(actorDetailApi)
+      const results = await res.json()
+      setActors(results.cast)
+      setDirector([results.crew[0]])
+      return results
+    }
+    actorDetails()
+  },[]) 
+  
+  useEffect(() => {
+    async function similarMovies(){
+      const similarMoviesApi = `${API_URL}/movie/${movieId}/similar?api_key=${API_KEY}`
+      const res = await fetch(similarMoviesApi)
+      const results = await res.json()
+      setSimilarMovies(results.results)
+      return results
+    }
+    similarMovies()
+  },[]) 
+  
 
-useEffect(() => {
-  async function fullDetails(){
-    const movieDetailApi = `${API_URL}/movie/${movieId}?api_key=${API_KEY}`
-    const res = await fetch(movieDetailApi)
-    const results = await res.json()
-    setMovieFullDetails(results)
-    return results
-  }
-  fullDetails()
-},[])
-
-useEffect(() => {
-  async function actorDetails(){
-    const actorDetailApi = `${API_URL}/movie/${movieId}/credits?api_key=${API_KEY}`
-    const res = await fetch(actorDetailApi)
-    const results = await res.json()
-    setActors(results.cast)
-    setDirector([results.crew[0]])
-    return results
-  }
-  actorDetails()
-},[]) 
-
-useEffect(() => {
-  async function similarMovies(){
-    const similarMoviesApi = `${API_URL}/movie/${movieId}/similar?api_key=${API_KEY}`
-    const res = await fetch(similarMoviesApi)
-    const results = await res.json()
-    setSimilarMovies(results.results)
-    return results
-  }
-  similarMovies()
-},[]) 
 
   const auth = getAuth();
-
-const recordRef = doc(db, "users", auth.currentUser?.uid, "recentRecords", "movies");
-const getRecentRecords = async () => {
+  
+  const recordRef = doc(db, "users", auth.currentUser?.uid, "recentRecords", "movies");
+  const getRecentRecords = async () => {
   const recordSnap = await getDoc(recordRef);
   const result = recordSnap.data();
   
   if(result === undefined) {
     return false;
-  } else if((result.movieArray as Number[]).includes(Number(movieId))) {
-    updateDoc(recordRef, {movieArray: arrayRemove(Number(movieId))});
-    updateDoc(recordRef, {movieArray: arrayUnion(Number(movieId))});
-  } else if((result.movieArray as Number[]).length >= 20) {
-    const oldestRecord = result.movieArray[0];
-    updateDoc(recordRef, {movieArray: arrayRemove(oldestRecord)});
+    } else if((result.movieArray as Number[]).includes(Number(movieId))) {
+      updateDoc(recordRef, {movieArray: arrayRemove(Number(movieId))});
+      updateDoc(recordRef, {movieArray: arrayUnion(Number(movieId))});
+    } else if((result.movieArray as Number[]).length >= 20) {
+      const oldestRecord = result.movieArray[0];
+      updateDoc(recordRef, {movieArray: arrayRemove(oldestRecord)});
+    }
+    return true;
   }
-  return true;
-}
 
-const likeRef = doc(db, "users", auth.currentUser?.uid, 'likeMovies','movies');
-const getLikeMovies =  async () => {
-  const likeSnap = await getDoc(likeRef);
-  const result = likeSnap.data();
+  const likeRef = doc(db, "users", auth.currentUser?.uid, 'likeMovies','movies');
+
+  const getLikeMovies =  async () => {
+    const likeSnap = await getDoc(likeRef);
+    const result = likeSnap.data();
 
   if(like){
     if(result === undefined) {
@@ -153,13 +157,15 @@ const getLikeMovies =  async () => {
     } else if((result.moviesArray as Number[]).includes(Number(movieId))) {
       updateDoc(likeRef, {moviesArray: arrayRemove(Number(movieId))});
       updateDoc(likeRef, {moviesArray: arrayUnion(Number(movieId))});
-    }
+    } else { updateDoc(likeRef, {moviesArray: arrayUnion(Number(movieId))});}
   } else if (like === false){
-      const unlikeMovie = result.moviesArray[result.moviesArray.indexOf(movieId)];
-      updateDoc(likeRef, {moviesArray: arrayRemove(unlikeMovie)})
-  }      
+      updateDoc(likeRef, {moviesArray: arrayRemove(Number(movieId))})
+  }
+
   return true
 }
+
+
 
 function maxTenActors(actors: any[]): Array<ActorInfo> {
   const result: Array<ActorInfo> = []
@@ -240,7 +246,7 @@ if(movieFullDetails !== undefined){
 const movieDirector: string = director[0]?.name
 const fiveMovieActors: JSX.Element[] = maxFiveActors(actors).map((actor) => <li key={actor.credit_id}><img className="w-20" src={`${IMAGE_URL}w300${actor.profile_path}`} alt='Actor Image'></img><p>{actor.character}역</p> <p>{actor.name}</p></li>)
 const tenMovieActors: JSX.Element[] = maxTenActors(actors).map((actor) => <li key={actor.credit_id}><img className="w-20" src={`${IMAGE_URL}w300${actor.profile_path}`} alt='Actor Image'></img><p>{actor.character}역</p> <p>{actor.name}</p></li>)
-const sevenSimilarMovies: JSX.Element[] = maxSevenMovies(similarMovies).map((movie)=> <li key={movie.id}><img  src={movie.poster_path ? `${IMAGE_URL}w300${movie.poster_path}`: null} alt='Similar Movie Image'/><p>{movie.title}</p></li>)
+const sevenSimilarMovies: JSX.Element[] = maxSevenMovies(similarMovies).map((movie)=> <li key={movie.id}><Link to={`/movies/${movie.id}`}><img  src={movie.poster_path ? `${IMAGE_URL}w300${movie.poster_path}`: null} alt='Similar Movie Image'/></Link><p>{movie.title}</p></li>)
 const movieYear: string = movieRelease !== undefined ? movieRelease.substring(0,4) : ""
 
 let imgUrl = ""
