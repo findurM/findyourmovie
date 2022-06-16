@@ -8,7 +8,6 @@ import {BsHeart,BsFillHeartFill} from 'react-icons/bs'
 import {BsStarFill,BsStarHalf} from 'react-icons/bs'
 import {BiStar} from 'react-icons/bi'
 
-
 export interface MovieDetailedPages {}
 
 interface MovieFullDetails {
@@ -55,8 +54,8 @@ interface ActorInfo {
   profile_path: string
 }
 
-
 const DetailedPages: React.FC<MovieDetailedPages> = () => {
+  const localStorageUserInfo = JSON.parse(localStorage.getItem('user'))
   const [currentUserInfo, setCurrentUserInfo] = useState<CurrentUserInfo>();
   const [movieFullDetails, setMovieFullDetails] = useState<MovieFullDetails>()
   const [actors, setActors] = useState([])
@@ -64,9 +63,9 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
   const [similarMovies, setSimilarMovies] = useState([])
   const [like, setLike] = useState(false)
   const [moreCredits, setMoreCredits] = useState(false)
+  const [isLoading, setIsLoading] = useState(true);
   const movieId = useParams().id
 
-  
   useEffect(() => {
     getRecentRecords()
     .then((isExist)  => {
@@ -80,15 +79,11 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
   
   useEffect(() => {
     getLikeMovies()
-    .then((isExit) => {
-      if(!isExit) {
-        setDoc(likeRef, {moviesArray: [Number(movieId)]});
-      } else {
-          if(like){
-            updateDoc(likeRef, {moviesArray: arrayUnion(Number(movieId))});
-          } else updateDoc(likeRef, {moviesArray:arrayRemove(Number(movieId))})
-    }})
-  })
+    .then((isLike) => {
+      setLike(isLike);
+      setIsLoading(false);
+    });
+  }, [])
   
   useEffect(() => {
     async function fullDetails(){
@@ -124,17 +119,15 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
     similarMovies()
   },[]) 
   
-
-
   const auth = getAuth();
   
-  const recordRef = doc(db, "users", auth.currentUser?.uid, "recentRecords", "movies");
+  const recordRef = doc(db, "users", localStorageUserInfo.uid, "recentRecords", "movies");
   const getRecentRecords = async () => {
-  const recordSnap = await getDoc(recordRef);
-  const result = recordSnap.data();
-  
-  if(result === undefined) {
-    return false;
+    const recordSnap = await getDoc(recordRef);
+    const result = recordSnap.data();
+    
+    if(result === undefined) {
+      return false;
     } else if((result.movieArray as Number[]).includes(Number(movieId))) {
       updateDoc(recordRef, {movieArray: arrayRemove(Number(movieId))});
       updateDoc(recordRef, {movieArray: arrayUnion(Number(movieId))});
@@ -145,118 +138,121 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
     return true;
   }
 
-  const likeRef = doc(db, "users", auth.currentUser?.uid, 'likeMovies','movies');
+  const likeRef = doc(db, "users", localStorageUserInfo.uid, 'likeMovies','movies');
 
   const getLikeMovies =  async () => {
     const likeSnap = await getDoc(likeRef);
     const result = likeSnap.data();
 
-  if(like){
-    if(result === undefined) {
-      return false;
-    } else if((result.moviesArray as Number[]).includes(Number(movieId))) {
+    if(result.moviesArray !== undefined) {
+      if((result.moviesArray as Number[]).includes(Number(movieId))) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  const onLikeButtonClick = () => {
+    if(like) {
       updateDoc(likeRef, {moviesArray: arrayRemove(Number(movieId))});
+      setLike(false);
+    } else {
       updateDoc(likeRef, {moviesArray: arrayUnion(Number(movieId))});
-    } else { updateDoc(likeRef, {moviesArray: arrayUnion(Number(movieId))});}
-  } else if (like === false){
-      updateDoc(likeRef, {moviesArray: arrayRemove(Number(movieId))})
-  }
-
-  return true
-}
-
-
-
-function maxTenActors(actors: any[]): Array<ActorInfo> {
-  const result: Array<ActorInfo> = []
-  if(actors.length > 10){
-    for(let i = 0; i < 10; i++){
-      result.push(actors[i])
+      setLike(true);
     }
-  } else {
-    return actors
   }
-  return result
-}
 
-function maxFiveActors(actors: Array<ActorInfo>): Array<ActorInfo> {
-  const result: Array<ActorInfo> = []
-  if(actors.length > 5){
+  function maxTenActors(actors: any[]): Array<ActorInfo> {
+    const result: Array<ActorInfo> = []
+    if(actors.length > 10){
+      for(let i = 0; i < 10; i++){
+        result.push(actors[i])
+      }
+    } else {
+      return actors
+    }
+    return result
+  }
+
+  function maxFiveActors(actors: Array<ActorInfo>): Array<ActorInfo> {
+    const result: Array<ActorInfo> = []
+    if(actors.length > 5){
+      for(let i = 0; i < 5; i++){
+        result.push(actors[i])
+      }
+    } else {
+      return actors
+    }
+    return result
+  }
+
+  function maxSevenMovies(movies: Array<MovieFullDetails>): Array<MovieFullDetails> {
+    const result: Array<MovieFullDetails> = []
+    if(movies.length > 7){
+      for(let i = 0; i < 7; i++){
+        result.push(movies[i])
+      }
+    } else {
+      return movies
+    }
+    return result
+  }
+
+  function ratingStar(rate: number): JSX.Element[] {
+    let rating: number = rate / 2;
+    const result: JSX.Element[] = [];
+
     for(let i = 0; i < 5; i++){
-      result.push(actors[i])
+      if(rating > 1){
+        result.push(<BsStarFill fill="yellow" size="1.5rem" key={i}></BsStarFill>)
+        rating -= 1;
+      } else if(rating >= 0.25) {
+        result.push(<BsStarHalf fill="yellow" size="1.5rem" key={i}></BsStarHalf>)
+        rating = 0
+      } else result.push(<BiStar fill="yellow"  size="1.5rem" key={i}></BiStar>)
     }
-  } else {
-    return actors
+    return result
   }
-  return result
-}
 
-function maxSevenMovies(movies: Array<MovieFullDetails>): Array<MovieFullDetails> {
-  const result: Array<MovieFullDetails> = []
-  if(movies.length > 7){
-    for(let i = 0; i < 7; i++){
-      result.push(movies[i])
-    }
-  } else {
-    return movies
+  let movieTitle 
+  let movieGenres 
+  let moviePoster 
+  let movieImage 
+  let movieRelease 
+  let movieLanguage 
+  let movieRuntime
+  let movieOverview 
+  let movieRate
+
+  if(movieFullDetails !== undefined){
+    const {original_title, genres, poster_path, backdrop_path, release_date, spoken_languages, runtime, overview, vote_average} = movieFullDetails
+
+    movieTitle = original_title
+    movieGenres = genres
+    moviePoster = poster_path
+    movieImage = backdrop_path
+    movieRelease = release_date
+    movieLanguage = spoken_languages[0].name
+    movieRuntime = runtime
+    movieOverview = overview
+    movieRate = vote_average
   }
-  return result
-}
 
-function ratingStar(rate: number): JSX.Element[] {
-  let rating: number = rate / 2;
-  const result: JSX.Element[] = [];
+  const movieDirector: string = director[0]?.name
+  const fiveMovieActors: JSX.Element[] = maxFiveActors(actors).map((actor) => <li key={actor.credit_id}><img className="w-20" src={`${IMAGE_URL}w300${actor.profile_path}`} alt='Actor Image'></img><p>{actor.character}역</p> <p>{actor.name}</p></li>)
+  const tenMovieActors: JSX.Element[] = maxTenActors(actors).map((actor) => <li key={actor.credit_id}><img className="w-20" src={`${IMAGE_URL}w300${actor.profile_path}`} alt='Actor Image'></img><p>{actor.character}역</p> <p>{actor.name}</p></li>)
+  const sevenSimilarMovies: JSX.Element[] = maxSevenMovies(similarMovies).map((movie)=> <li key={movie.id}><Link to={`/movies/${movie.id}`}><img  src={movie.poster_path ? `${IMAGE_URL}w300${movie.poster_path}`: null} alt='Similar Movie Image'/></Link><p>{movie.title}</p></li>)
+  const movieYear: string = movieRelease !== undefined ? movieRelease.substring(0,4) : ""
 
-  for(let i = 0; i < 5; i++){
-    if(rating > 1){
-      result.push(<BsStarFill fill="yellow" size="1.5rem" key={i}></BsStarFill>)
-      rating -= 1;
-    } else if(rating >= 0.25) {
-      result.push(<BsStarHalf fill="yellow" size="1.5rem" key={i}></BsStarHalf>)
-      rating = 0
-    } else result.push(<BiStar fill="yellow"  size="1.5rem" key={i}></BiStar>)
+  let imgUrl = ""
+  if(movieImage !== undefined) {
+    imgUrl = `${IMAGE_URL}w500${movieImage}` 
   }
-  return result
-}
-
-let movieTitle 
-let movieGenres 
-let moviePoster 
-let movieImage 
-let movieRelease 
-let movieLanguage 
-let movieRuntime
-let movieOverview 
-let movieRate
-
-if(movieFullDetails !== undefined){
-  const {original_title, genres, poster_path, backdrop_path, release_date, spoken_languages, runtime, overview, vote_average} = movieFullDetails
-
-  movieTitle = original_title
-  movieGenres = genres
-  moviePoster = poster_path
-  movieImage = backdrop_path
-  movieRelease = release_date
-  movieLanguage = spoken_languages[0].name
-  movieRuntime = runtime
-  movieOverview = overview
-  movieRate = vote_average
-}
-
-const movieDirector: string = director[0]?.name
-const fiveMovieActors: JSX.Element[] = maxFiveActors(actors).map((actor) => <li key={actor.credit_id}><img className="w-20" src={`${IMAGE_URL}w300${actor.profile_path}`} alt='Actor Image'></img><p>{actor.character}역</p> <p>{actor.name}</p></li>)
-const tenMovieActors: JSX.Element[] = maxTenActors(actors).map((actor) => <li key={actor.credit_id}><img className="w-20" src={`${IMAGE_URL}w300${actor.profile_path}`} alt='Actor Image'></img><p>{actor.character}역</p> <p>{actor.name}</p></li>)
-const sevenSimilarMovies: JSX.Element[] = maxSevenMovies(similarMovies).map((movie)=> <li key={movie.id}><Link to={`/movies/${movie.id}`}><img  src={movie.poster_path ? `${IMAGE_URL}w300${movie.poster_path}`: null} alt='Similar Movie Image'/></Link><p>{movie.title}</p></li>)
-const movieYear: string = movieRelease !== undefined ? movieRelease.substring(0,4) : ""
-
-let imgUrl = ""
-if(movieImage !== undefined) {
-  imgUrl = `${IMAGE_URL}w500${movieImage}` 
-}
 
 
 
 
+  if(isLoading) return <div>Loading...</div>
 
   return (
     <>
@@ -272,7 +268,7 @@ if(movieImage !== undefined) {
          
           
         </div>
-        <button className="btn btn-accent btn-sm rounded-2xl w-28 opacity-100" onClick={()=> like ? setLike(false) : setLike(true)}>{like ? <BsFillHeartFill className="mr-3 text-red-600"></BsFillHeartFill> : <BsHeart className="mr-3"></BsHeart>}좋아요</button>
+        <button className="btn btn-accent btn-sm rounded-2xl w-28 opacity-100" onClick={onLikeButtonClick}>{like ? <BsFillHeartFill className="mr-3 text-red-600"></BsFillHeartFill> : <BsHeart className="mr-3"></BsHeart>}좋아요</button>
       </div>
     </section>
 
