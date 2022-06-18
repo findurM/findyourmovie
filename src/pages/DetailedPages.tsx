@@ -2,7 +2,7 @@ import { getAuth } from "firebase/auth";
 import { arrayRemove, arrayUnion, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import { useParams,Link } from "react-router-dom";
-import { db, CurrentUserInfo } from "../Application";
+import { db } from "../Application";
 import { API_URL,API_KEY,IMAGE_URL } from "../config/config"
 import {BsHeart,BsFillHeartFill} from 'react-icons/bs'
 import {BsStarFill,BsStarHalf} from 'react-icons/bs'
@@ -56,7 +56,6 @@ interface ActorInfo {
 
 const DetailedPages: React.FC<MovieDetailedPages> = () => {
   const localStorageUserInfo = JSON.parse(localStorage.getItem('user'))
-  const [currentUserInfo, setCurrentUserInfo] = useState<CurrentUserInfo>();
   const [movieFullDetails, setMovieFullDetails] = useState<MovieFullDetails>()
   const [actors, setActors] = useState([])
   const [director, setDirector] = useState([])

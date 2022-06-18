@@ -4,6 +4,7 @@ import mypageCategorySlice from "../features/mypageCategorySlice";
 import searchResultSlice from "../features/searchResultSlice";
 import movieSlice from "../features/movieSlice"
 import movieImagesSlice from "../features/fetchMovieImagesSlice";
+import userInfoSlice from "../features/fetchUserInfoSlice";
 
 export const store = configureStore({
   reducer: {
@@ -11,6 +12,7 @@ export const store = configureStore({
     mypageCategory: mypageCategorySlice,
     searchResult: searchResultSlice,
     currentMovie: movieSlice,
+    userInfo: userInfoSlice,
     movieImages: movieImagesSlice
   }
 })

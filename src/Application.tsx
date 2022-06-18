@@ -30,15 +30,6 @@ export const db = getFirestore()
 
 export interface IApplicationProps {}
 
-export interface CurrentUserInfo {
-  email: string,
-  id: string,
-  nickname: string,
-  profileImg: string,
-  age: number,
-  sex: string
-}
-
 const App = tw.div`
 min-h-screen
 `

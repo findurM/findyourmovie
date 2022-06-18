@@ -4,8 +4,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { CustomInput, RoundButton  } from './Register';
 import {FaGooglePlus} from 'react-icons/fa'
 import { toast } from 'react-toastify';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, setDoc } from 'firebase/firestore';
 import { db } from '../Application';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '../app/store';
+import { isExistUserInfo } from '../features/fetchUserInfoSlice';
 
 export interface ILoginPageProps {}
 
@@ -15,12 +18,7 @@ const LoginPage: React.FunctionComponent<ILoginPageProps> = (props) => {
   const [authing, setAuthing] = useState(false);
   const emailRef = useRef<HTMLInputElement>()
   const passwordRef = useRef<HTMLInputElement>()
-
-  const getUserInfo = async (uid: string) => {
-    const userRef = doc(db, "users", uid);
-    const userSnap = await getDoc(userRef);
-    return userSnap.data() === undefined;
-  }
+  const dispatch = useDispatch<AppDispatch>();
 
   const signIn = async () => {
     setAuthing(true)
@@ -44,16 +42,16 @@ const LoginPage: React.FunctionComponent<ILoginPageProps> = (props) => {
 
     signInWithPopup(auth, new GoogleAuthProvider())
       .then((response) => {
-        getUserInfo(response.user?.uid)
-          .then((isMember)  => {
-            if (isMember) {
-              setDoc(doc(db,"users", response.user?.uid), 
-                        {id: response.user?.uid , 
-                        email:response.user?.email, 
-                        nickname: response.user?.displayName, 
-                        profileImg: response.user?.photoURL});
-            }
-          })
+        dispatch(isExistUserInfo(response.user?.uid))
+        .then((isExist) => {
+          if(!isExist) {
+            setDoc(doc(db,"users", response.user?.uid), 
+                      {id: response.user?.uid , 
+                      email:response.user?.email, 
+                      nickname: response.user?.displayName, 
+                      profileImg: response.user?.photoURL});
+          }
+        });
         navigate('/');
         setAuthing(false);
       })

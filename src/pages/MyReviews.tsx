@@ -1,9 +1,10 @@
 import { getAuth } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
-import { useEffect, useState } from "react";
-import { db, CurrentUserInfo } from "../Application";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../app/store";
 import ReviewCards from "../components/ReviewCards";
 import { IMAGE_URL } from "../config/config";
+import { fetchUserInfo, UserInfoState } from "../features/fetchUserInfoSlice";
 
 const MyReviews = () => {
   // 임시로 넣어놓은 것. 감상평 데이터 추가되면 변경.
@@ -410,22 +411,14 @@ const MyReviews = () => {
   ];
 
   const auth = getAuth();
-  const [currentUserInfo, setCurrentUserInfo] = useState<CurrentUserInfo>();
-  const [isLoading, setIsLoading] = useState(true);
+  const dispatch = useDispatch<AppDispatch>();
+  const {userInfo: currentUserInfo, loading: currentUserInfoLoading} = useSelector<RootState, UserInfoState>((state) => state.userInfo);
 
-  const getUserInfo = async () => {
-    const userRef = doc(db, "users", auth.currentUser.uid);
-    const userSnap = await getDoc(userRef);
-    setCurrentUserInfo((userSnap.data() as CurrentUserInfo));
-  }
   useEffect(() => {
-    getUserInfo()
-    .then(() => {
-      setIsLoading(false);
-    });
+    dispatch(fetchUserInfo());
   }, []);
 
-  if(isLoading) return <div>Loading...</div>
+  if(currentUserInfoLoading !== 'succeeded') return <div>Loading...</div>
 
   return (
     <>

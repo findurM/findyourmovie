@@ -35,16 +35,17 @@ export const movieImagesSlice = createSlice({
     }
   },
   extraReducers: (builder) => {
-    builder.addCase(fetchMovieImages.pending.type, (state) => {
+    builder
+    .addCase(fetchMovieImages.pending.type, (state) => {
       state.loading = 'pending';
-    });
-    builder.addCase(fetchMovieImages.fulfilled.type, (state, action: PayloadAction<MovieImages[]>) => {
+    })
+    .addCase(fetchMovieImages.fulfilled.type, (state, action: PayloadAction<MovieImages[]>) => {
       state.movieImages = [...state.movieImages, ...action.payload]
       state.loading = 'succeeded';
-    });
-    builder.addCase(fetchMovieImages.rejected.type, (state) => {
+    })
+    .addCase(fetchMovieImages.rejected.type, (state) => {
       state.loading = 'failed';
-    });
+    })
   }
 })
 

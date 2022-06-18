@@ -3,25 +3,20 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { AppDispatch, RootState } from "../app/store";
-import { CurrentUserInfo, db } from "../Application";
+import { db } from "../Application";
 import { LikeGridCards } from "../components/GridCards";
 import { IMAGE_URL } from "../config/config";
 import { fetchMovieImages, MovieImagesState, resetMovieImages } from "../features/fetchMovieImagesSlice";
+import { fetchUserInfo, UserInfoState } from "../features/fetchUserInfoSlice";
 
 const MyLikes = () => {
 
   const localStorageUserInfo = JSON.parse(localStorage.getItem('user'))
-  const [currentUserInfo, setCurrentUserInfo] = useState<CurrentUserInfo>();
   const [likeMovies, setLikeMovies] = useState<Number[]>();
   const [isLoading, setIsLoading] = useState(true);
   const dispatch = useDispatch<AppDispatch>();
-  const {movieImages, loading} = useSelector<RootState, MovieImagesState>((state) => state.movieImages);
-
-  const getUserInfo = async () => {
-    const userRef = doc(db, "users", localStorageUserInfo.uid);
-    const userSnap = await getDoc(userRef);
-    setCurrentUserInfo((userSnap.data() as CurrentUserInfo));
-  }
+  const {movieImages, loading: movieImagesLoading} = useSelector<RootState, MovieImagesState>((state) => state.movieImages);
+  const {userInfo: currentUserInfo, loading: currentUserInfoLoading} = useSelector<RootState, UserInfoState>((state) => state.userInfo);
 
   const getLikeMovies = async () => {
     const likeRef = doc(db, "users", localStorageUserInfo.uid, "likeMovies", "movies");
@@ -30,7 +25,7 @@ const MyLikes = () => {
   }
 
   useEffect(() => {
-    getUserInfo();
+    dispatch(fetchUserInfo());
     getLikeMovies()
     .then(() => {
       setIsLoading(false);

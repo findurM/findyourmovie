@@ -3,25 +3,20 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { AppDispatch, RootState } from "../app/store";
-import { CurrentUserInfo, db } from "../Application";
+import { db } from "../Application";
 import GridCards from "../components/GridCards";
 import { IMAGE_URL } from "../config/config";
 import { fetchMovieImages, MovieImagesState, resetMovieImages } from "../features/fetchMovieImagesSlice";
+import { fetchUserInfo, UserInfoState } from "../features/fetchUserInfoSlice";
 
 const RecentRecords = () => {
 
   const localStorageUserInfo = JSON.parse(localStorage.getItem('user'))
-  const [currentUserInfo, setCurrentUserInfo] = useState<CurrentUserInfo>();
   const [recentRecords, setRecentRecords] = useState<Number[]>();
   const [isLoading, setIsLoading] = useState(true);
   const dispatch = useDispatch<AppDispatch>();
-  const {movieImages, loading} = useSelector<RootState, MovieImagesState>((state) => state.movieImages);
-
-  const getUserInfo = async () => {
-    const userRef = doc(db, "users", localStorageUserInfo.uid);
-    const userSnap = await getDoc(userRef);
-    setCurrentUserInfo((userSnap.data() as CurrentUserInfo));
-  }
+  const {userInfo: currentUserInfo, loading: currentUserInfoLoading} = useSelector<RootState, UserInfoState>((state) => state.userInfo);
+  const {movieImages, loading: movieImagesLoading} = useSelector<RootState, MovieImagesState>((state) => state.movieImages);
 
   const getRecentRecords = async () => {
     const recordRef = doc(db, "users", localStorageUserInfo.uid, "recentRecords", "movies");
@@ -30,7 +25,7 @@ const RecentRecords = () => {
   }
 
   useEffect(() => {
-    getUserInfo();
+    dispatch(fetchUserInfo());
     getRecentRecords()
     .then(() => {
       setIsLoading(false);
