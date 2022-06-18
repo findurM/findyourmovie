@@ -107,7 +107,6 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
   }, [])
 
   useEffect(() => {
-
     getComments()
     .then((isComment) => {
         if(!isComment) {
@@ -115,7 +114,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
           setDoc(movieCommentRef,{comments})
         }
       })
-  })
+  },[comments])
 
   useEffect(() => {
     getUserComment()
@@ -185,11 +184,13 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
   const getLikeMovies =  async () => {
     const likeSnap = await getDoc(likeRef);
     const result = likeSnap.data();
-
-    if(result.moviesArray !== undefined) {
+   
+    if(result&&result.movieArray !== undefined) {
       if((result.moviesArray as Number[]).includes(Number(movieId))) {
         return true;
       }
+    } else if (!result) {
+      setDoc(likeRef,{moviesArray:[]})
     }
     return false;
   }
@@ -299,7 +300,6 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
     const commentsSnap = await getDoc(movieCommentRef);
     const result = commentsSnap.data();
    
-
     if(result !== undefined) {
       setComments(result.comments)
       return true
