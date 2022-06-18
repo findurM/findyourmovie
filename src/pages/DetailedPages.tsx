@@ -7,37 +7,40 @@ import { API_URL,API_KEY,IMAGE_URL } from "../config/config"
 import {BsHeart,BsFillHeartFill} from 'react-icons/bs'
 import {BsStarFill,BsStarHalf} from 'react-icons/bs'
 import {BiStar} from 'react-icons/bi'
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../app/store";
+import { fetchMovieDetails, MovieDetails, MovieDetailsState } from "../features/fetchMovieDetailsSlice";
 
 export interface MovieDetailedPages {}
 
-interface MovieFullDetails {
-  adult?: boolean,
-  backdrop_path?: string,
-  belongs_to_collection?: null | object,
-  budget?: number,
-  genres?: [{id: number , name: string}],
-  genre_ids?: [number],
-  homepage?: string | null,
-  id?: number,
-  imdb_id?: string | null,
-  original_language?: string,
-  original_title?: string,
-  overview?: string | null,
-  popularity?: number,
-  poster_path?: string | null,
-  production_companies?: [{id: number, logo_path: string, name: string, origin_country: string}],
-  production_countries?: [{iso_3166_1: string, name: string}],
-  release_date?: string,
-  revenue?: number,
-  runtime?: number | null,
-  spoken_languages?: [{iso_639_1: string, name: string}],
-  status?: string,
-  tagline?: string | null,
-  title?: string,
-  video?: boolean,
-  vote_average?: number,
-  vote_count?: number
-}
+// interface MovieFullDetails {
+//   adult?: boolean,
+//   backdrop_path?: string,
+//   belongs_to_collection?: null | object,
+//   budget?: number,
+//   genres?: [{id: number , name: string}],
+//   genre_ids?: [number],
+//   homepage?: string | null,
+//   id?: number,
+//   imdb_id?: string | null,
+//   original_language?: string,
+//   original_title?: string,
+//   overview?: string | null,
+//   popularity?: number,
+//   poster_path?: string | null,
+//   production_companies?: [{id: number, logo_path: string, name: string, origin_country: string}],
+//   production_countries?: [{iso_3166_1: string, name: string}],
+//   release_date?: string,
+//   revenue?: number,
+//   runtime?: number | null,
+//   spoken_languages?: [{iso_639_1: string, name: string}],
+//   status?: string,
+//   tagline?: string | null,
+//   title?: string,
+//   video?: boolean,
+//   vote_average?: number,
+//   vote_count?: number
+// }
 
 interface ActorInfo {
   adult: boolean
@@ -56,7 +59,6 @@ interface ActorInfo {
 
 const DetailedPages: React.FC<MovieDetailedPages> = () => {
   const localStorageUserInfo = JSON.parse(localStorage.getItem('user'))
-  const [movieFullDetails, setMovieFullDetails] = useState<MovieFullDetails>()
   const [actors, setActors] = useState([])
   const [director, setDirector] = useState([])
   const [similarMovies, setSimilarMovies] = useState([])
@@ -64,6 +66,9 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
   const [moreCredits, setMoreCredits] = useState(false)
   const [isLoading, setIsLoading] = useState(true);
   const movieId = useParams().id
+
+  const dispatch = useDispatch<AppDispatch>();
+  const {movieDetails, loading: movieDetailsLoading} = useSelector<RootState, MovieDetailsState>((state) => state.movieDetails);
 
   useEffect(() => {
     getRecentRecords()
@@ -85,14 +90,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
   }, [])
   
   useEffect(() => {
-    async function fullDetails(){
-      const movieDetailApi = `${API_URL}/movie/${movieId}?api_key=${API_KEY}`
-      const res = await fetch(movieDetailApi)
-      const results = await res.json()
-      setMovieFullDetails(results)
-      return results
-    }
-    fullDetails()
+    dispatch(fetchMovieDetails(Number(movieId)));
   },[])
   
   useEffect(() => {
@@ -187,8 +185,8 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
     return result
   }
 
-  function maxSevenMovies(movies: Array<MovieFullDetails>): Array<MovieFullDetails> {
-    const result: Array<MovieFullDetails> = []
+  function maxSevenMovies(movies: Array<MovieDetails>): Array<MovieDetails> {
+    const result: Array<MovieDetails> = []
     if(movies.length > 7){
       for(let i = 0; i < 7; i++){
         result.push(movies[i])
@@ -215,45 +213,21 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
     return result
   }
 
-  let movieTitle 
-  let movieGenres 
-  let moviePoster 
-  let movieImage 
-  let movieRelease 
-  let movieLanguage 
-  let movieRuntime
-  let movieOverview 
-  let movieRate
-
-  if(movieFullDetails !== undefined){
-    const {original_title, genres, poster_path, backdrop_path, release_date, spoken_languages, runtime, overview, vote_average} = movieFullDetails
-
-    movieTitle = original_title
-    movieGenres = genres
-    moviePoster = poster_path
-    movieImage = backdrop_path
-    movieRelease = release_date
-    movieLanguage = spoken_languages[0].name
-    movieRuntime = runtime
-    movieOverview = overview
-    movieRate = vote_average
-  }
-
   const movieDirector: string = director[0]?.name
   const fiveMovieActors: JSX.Element[] = maxFiveActors(actors).map((actor) => <li key={actor.credit_id}><img className="w-20" src={`${IMAGE_URL}w300${actor.profile_path}`} alt='Actor Image'></img><p>{actor.character}역</p> <p>{actor.name}</p></li>)
   const tenMovieActors: JSX.Element[] = maxTenActors(actors).map((actor) => <li key={actor.credit_id}><img className="w-20" src={`${IMAGE_URL}w300${actor.profile_path}`} alt='Actor Image'></img><p>{actor.character}역</p> <p>{actor.name}</p></li>)
   const sevenSimilarMovies: JSX.Element[] = maxSevenMovies(similarMovies).map((movie)=> <li key={movie.id}><Link to={`/movies/${movie.id}`}><img  src={movie.poster_path ? `${IMAGE_URL}w300${movie.poster_path}`: null} alt='Similar Movie Image'/></Link><p>{movie.title}</p></li>)
-  const movieYear: string = movieRelease !== undefined ? movieRelease.substring(0,4) : ""
+  const movieYear: string = movieDetails.movieRelease !== undefined ? movieDetails.movieRelease.substring(0,4) : ""
 
   let imgUrl = ""
-  if(movieImage !== undefined) {
-    imgUrl = `${IMAGE_URL}w500${movieImage}` 
+  if(movieDetails.movieImage !== undefined) {
+    imgUrl = `${IMAGE_URL}w500${movieDetails.movieImage}` 
   }
 
 
 
 
-  if(isLoading) return <div>Loading...</div>
+  if(movieDetailsLoading !== 'succeeded' || isLoading) return <div>Loading...</div>
 
   return (
     <>
@@ -262,9 +236,9 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
       
       <div className="absolute w-3/4 left-[12.5%] bottom-10 flex flex-row justify-between">
         <div className='flex flex-row '>
-          <h2 className="text-3xl font-bold">{movieTitle}({movieYear})</h2> 
-          <div className='flex flex-row items-end ml-4'>{ratingStar(movieRate)} 
-          <p className="text-lg font-bold ">({movieRate})</p>
+          <h2 className="text-3xl font-bold">{movieDetails.movieTitle}({movieYear})</h2> 
+          <div className='flex flex-row items-end ml-4'>{ratingStar(movieDetails.movieRate)} 
+          <p className="text-lg font-bold ">({movieDetails.movieRate})</p>
           </div>
          
           
@@ -274,19 +248,19 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
     </section>
 
     <section className="w-3/4 mt-14 mx-auto flex">  
-      <img src={moviePoster&& `${IMAGE_URL}w300${moviePoster}`} alt="poster"></img>
+      <img src={movieDetails.moviePoster&& `${IMAGE_URL}w300${movieDetails.moviePoster}`} alt="poster"></img>
       <ul>
         기본정보
         <li>
           <ul className='flex flex-row'>
           장르
-          {movieGenres&&movieGenres.map((genre) => <li key={genre.id} className="pl-2">{genre.name}</li>)}
+          {movieDetails.movieGenres && movieDetails.movieGenres.map((genre) => <li key={genre.id} className="pl-2">{genre.name}</li>)}
           </ul>
         </li>
-        <li>개봉날짜 {movieRelease&&movieRelease}</li>
-        <li>언어 {movieLanguage&&movieLanguage}</li>
-        <li>러닝타임 {movieRuntime&&movieRuntime}분</li>
-        <li>감독 {movieDirector&&movieDirector}</li>
+        <li>개봉날짜 {movieDetails.movieRelease && movieDetails.movieRelease}</li>
+        <li>언어 {movieDetails.movieLanguage && movieDetails.movieLanguage}</li>
+        <li>러닝타임 {movieDetails.movieRuntime && movieDetails.movieRuntime}분</li>
+        <li>감독 {movieDirector && movieDirector}</li>
       </ul>
 
     </section>
@@ -302,7 +276,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
 
     <div>
       <h3>줄거리</h3>
-      <p>{movieOverview&&movieOverview}</p>
+      <p>{movieDetails.movieOverview && movieDetails.movieOverview}</p>
     </div>
     <h3>비슷한 영화</h3>
     <ul className='flex flex-row justify-between'>
