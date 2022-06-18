@@ -10,6 +10,7 @@ import {BiStar} from 'react-icons/bi'
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../app/store";
 import { fetchMovieDetails, MovieDetails, MovieDetailsState } from "../features/fetchMovieDetailsSlice";
+import { ActorDetailsState, ActorInfo, fetchActorDetails } from "../features/fetchActorDetailsSlice";
 
 export interface MovieDetailedPages {}
 
@@ -42,25 +43,8 @@ export interface MovieDetailedPages {}
 //   vote_count?: number
 // }
 
-interface ActorInfo {
-  adult: boolean
-  cast_id: number
-  character: string
-  credit_id: string
-  gender: number
-  id: number
-  known_for_department: string
-  name: string
-  order: number
-  original_name: string
-  popularity: number
-  profile_path: string
-}
-
 const DetailedPages: React.FC<MovieDetailedPages> = () => {
   const localStorageUserInfo = JSON.parse(localStorage.getItem('user'))
-  const [actors, setActors] = useState([])
-  const [director, setDirector] = useState([])
   const [similarMovies, setSimilarMovies] = useState([])
   const [like, setLike] = useState(false)
   const [moreCredits, setMoreCredits] = useState(false)
@@ -69,6 +53,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
 
   const dispatch = useDispatch<AppDispatch>();
   const {movieDetails, loading: movieDetailsLoading} = useSelector<RootState, MovieDetailsState>((state) => state.movieDetails);
+  const {actors, director, loading: actorDetailsLoading} = useSelector<RootState, ActorDetailsState>((state) => state.actorDetails);
 
   useEffect(() => {
     getRecentRecords()
@@ -94,15 +79,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
   },[])
   
   useEffect(() => {
-    async function actorDetails(){
-      const actorDetailApi = `${API_URL}/movie/${movieId}/credits?api_key=${API_KEY}`
-      const res = await fetch(actorDetailApi)
-      const results = await res.json()
-      setActors(results.cast)
-      setDirector([results.crew[0]])
-      return results
-    }
-    actorDetails()
+    dispatch(fetchActorDetails(Number(movieId)));
   },[]) 
   
   useEffect(() => {
@@ -213,7 +190,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
     return result
   }
 
-  const movieDirector: string = director[0]?.name
+  const movieDirector: string = director?.name;
   const fiveMovieActors: JSX.Element[] = maxFiveActors(actors).map((actor) => <li key={actor.credit_id}><img className="w-20" src={`${IMAGE_URL}w300${actor.profile_path}`} alt='Actor Image'></img><p>{actor.character}역</p> <p>{actor.name}</p></li>)
   const tenMovieActors: JSX.Element[] = maxTenActors(actors).map((actor) => <li key={actor.credit_id}><img className="w-20" src={`${IMAGE_URL}w300${actor.profile_path}`} alt='Actor Image'></img><p>{actor.character}역</p> <p>{actor.name}</p></li>)
   const sevenSimilarMovies: JSX.Element[] = maxSevenMovies(similarMovies).map((movie)=> <li key={movie.id}><Link to={`/movies/${movie.id}`}><img  src={movie.poster_path ? `${IMAGE_URL}w300${movie.poster_path}`: null} alt='Similar Movie Image'/></Link><p>{movie.title}</p></li>)
@@ -227,7 +204,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
 
 
 
-  if(movieDetailsLoading !== 'succeeded' || isLoading) return <div>Loading...</div>
+  if(movieDetailsLoading !== 'succeeded' || actorDetailsLoading !== 'succeeded' || isLoading) return <div>Loading...</div>
 
   return (
     <>

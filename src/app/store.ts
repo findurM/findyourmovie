@@ -6,6 +6,7 @@ import movieSlice from "../features/movieSlice"
 import movieImagesSlice from "../features/fetchMovieImagesSlice";
 import userInfoSlice from "../features/fetchUserInfoSlice";
 import movieDetailsSlice from "../features/fetchMovieDetailsSlice";
+import actorDetailsSlice from "../features/fetchActorDetailsSlice";
 
 export const store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ export const store = configureStore({
     searchResult: searchResultSlice,
     currentMovie: movieSlice,
     movieDetails: movieDetailsSlice,
+    actorDetails: actorDetailsSlice,
     userInfo: userInfoSlice,
     movieImages: movieImagesSlice
   }

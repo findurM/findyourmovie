@@ -2,7 +2,7 @@ import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { API_KEY, API_URL } from "../config/config";
 
 export const fetchMovieDetails = createAsyncThunk(
-  'movieImages/fetchMovieDetails',
+  'movieDetails/fetchMovieDetails',
   async (movieId: Number) =>{
     const res = await fetch(`${API_URL}/movie/${movieId}?api_key=${API_KEY}`);
     const results = await res.json();
