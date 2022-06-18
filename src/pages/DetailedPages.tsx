@@ -247,7 +247,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
     const result: JSX.Element[] = [];
 
     for(let i = 0; i < 5; i++){
-      if(rating > 1){
+      if(rating >= 1){
         result.push(<BsStarFill fill="#eab308" size="1.5rem" key={i}></BsStarFill>)
         rating -= 1;
       } else if(rating >= 0.25) {
