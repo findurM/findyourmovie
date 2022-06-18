@@ -1,17 +1,21 @@
 import { doc, getDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
+import { AppDispatch, RootState } from "../app/store";
 import { CurrentUserInfo, db } from "../Application";
 import { LikeGridCards } from "../components/GridCards";
-import { API_KEY, API_URL, IMAGE_URL } from "../config/config";
+import { IMAGE_URL } from "../config/config";
+import { fetchMovieImages, MovieImagesState, resetMovieImages } from "../features/fetchMovieImagesSlice";
 
 const MyLikes = () => {
 
   const localStorageUserInfo = JSON.parse(localStorage.getItem('user'))
   const [currentUserInfo, setCurrentUserInfo] = useState<CurrentUserInfo>();
   const [likeMovies, setLikeMovies] = useState<Number[]>();
-  const [movieImages, setMovieImages] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const dispatch = useDispatch<AppDispatch>();
+  const {movieImages, loading} = useSelector<RootState, MovieImagesState>((state) => state.movieImages);
 
   const getUserInfo = async () => {
     const userRef = doc(db, "users", localStorageUserInfo.uid);
@@ -22,14 +26,7 @@ const MyLikes = () => {
   const getLikeMovies = async () => {
     const likeRef = doc(db, "users", localStorageUserInfo.uid, "likeMovies", "movies");
     const likeSnap = await getDoc(likeRef);
-    setLikeMovies((likeSnap.data().moviesArray as Number[]));
-  }
-
-  const getMovieImages = async (movieId: Number) => {
-    const res = await fetch(`${API_URL}/movie/${movieId}/images?api_key=${API_KEY}`);
-    const data = await res.json();
-    const newImage = [{movieId: movieId, poster: data.posters[0]}];
-    setMovieImages((movieImages) => {return [...movieImages, ...newImage]});
+    if(likeSnap.data()) setLikeMovies((likeSnap.data().moviesArray as Number[]));
   }
 
   useEffect(() => {
@@ -41,9 +38,10 @@ const MyLikes = () => {
   }, []);
 
   useEffect(() => {
+    dispatch(resetMovieImages());
     if(likeMovies !== null && likeMovies !== undefined) {
       likeMovies.reverse().forEach((movieId: Number) => {
-        getMovieImages(movieId);
+        dispatch(fetchMovieImages(movieId));
       })
     }
   }, [likeMovies])
@@ -63,7 +61,7 @@ const MyLikes = () => {
           <Link to={`/movies/${movieId}`} key={index} className="w-full h-full">
             <LikeGridCards 
               image={poster.file_path ? `${IMAGE_URL}w500${poster.file_path}`: null}
-              alt={movieId}
+              alt={String(movieId)}
             />
           </Link>
                 ))}

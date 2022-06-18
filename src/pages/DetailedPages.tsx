@@ -144,10 +144,12 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
     const likeSnap = await getDoc(likeRef);
     const result = likeSnap.data();
 
-    if(result.moviesArray !== undefined) {
+    if(result && result.moviesArray !== undefined) {
       if((result.moviesArray as Number[]).includes(Number(movieId))) {
         return true;
       }
+    } else if(!result) {
+      setDoc(likeRef, {moviesArray: []});
     }
     return false;
   }
