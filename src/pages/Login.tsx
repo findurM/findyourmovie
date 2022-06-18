@@ -136,11 +136,11 @@ const LoginPage: React.FunctionComponent<ILoginPageProps> = (props) => {
       <p className='text-5xl font-bold'>Hello, <br/> Welcome Friend!</p>
       <p className='mt-10 text-lg'>회원가입하고 많은 혜택을 누려보세요!</p>
       </div>
-      <RoundButton className="mx-auto my-10" >
       <Link to='/register'>
-          회원가입
-        </Link>
-      </RoundButton>
+        <RoundButton className="mx-auto my-10">
+              회원가입
+        </RoundButton>
+      </Link>
     </div>
   </div>
   );
