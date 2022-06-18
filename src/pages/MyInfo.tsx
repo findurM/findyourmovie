@@ -41,13 +41,15 @@ const MyInfo = () => {
   }, []);
 
   useEffect(() => {
-    if(currentUserInfo && currentUserInfo.profileImg !== "" && !currentUserInfo.profileImg.includes("googleusercontent.com")) {
+    if(currentUserInfo) {
       setNicknameInputValue(currentUserInfo.nickname);
-      imageDownload(currentUserInfo.profileImg);
-    } else if(currentUserInfo?.profileImg.includes("googleusercontent.com")) {
-      setUrl(currentUserInfo?.profileImg);
-    } else {
-      setUrl('/assets/defaultImage.png');
+      if(currentUserInfo.profileImg !== "" && !currentUserInfo.profileImg.includes("googleusercontent.com")) {
+        imageDownload(currentUserInfo.profileImg);
+      } else if(currentUserInfo?.profileImg.includes("googleusercontent.com")) {
+        setUrl(currentUserInfo?.profileImg);
+      } else {
+        setUrl('/assets/defaultImage.png');
+      }
     }
   }, [currentUserInfo])
 
@@ -134,7 +136,7 @@ const MyInfo = () => {
     confirmClick()
     .then(() => {
       alert("회원정보가 수정되었습니다.");
-      document.getElementById("nicknameTitle").textContent = nicknameInputValue;
+      dispatch(fetchUserInfo());
     })
     .catch((error) => {
       console.log(error);
