@@ -1,6 +1,6 @@
 import { getAuth } from "firebase/auth";
 import { arrayRemove, arrayUnion, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useParams,Link } from "react-router-dom";
 import { db } from "../Application";
 import { IMAGE_URL } from "../config/config"
@@ -14,6 +14,7 @@ import { ActorDetailsState, ActorInfo, fetchActorDetails } from "../features/fet
 import { fetchSimilarMovies, SimilarMoviesState } from "../features/fetchSimilarMoviesSlice";
 import { fetchRecentRecords, RecentRecordsState } from "../features/fetchRecentRecordsSlice";
 import { fetchLikeMovies, LikeMoviesState } from "../features/fetchLikeMoviesSlice";
+import { fetchUserInfo, UserInfoState } from "../features/fetchUserInfoSlice";
 
 export interface MovieDetailedPages {}
 
@@ -46,20 +47,69 @@ export interface MovieDetailedPages {}
 //   vote_count?: number
 // }
 
+interface CommentsInput {
+  comment: string
+  nickname: string
+  rate: number
+}
+
+interface UserComment {
+  comment: string
+  movieId: number
+  rate: number
+}
+
+interface InputValue {
+  comment: string
+  rate: number
+}
+
 const DetailedPages: React.FC<MovieDetailedPages> = () => {
   const localStorageUserInfo = JSON.parse(localStorage.getItem('user'))
+  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading2, setIsLoading2] = useState(true);
   const [like, setLike] = useState(false)
   const [moreCredits, setMoreCredits] = useState(false)
+  const [inputValue, setInputValue] = useState<InputValue>()
+  const [comments, setComments] = useState<CommentsInput[]>([])
   const movieId = useParams().id
+  const rateInputRef = useRef(null)
 
   const dispatch = useDispatch<AppDispatch>();
+  const {userInfo: currentUserInfo, loading: currentUserInfoLoading} = useSelector<RootState, UserInfoState>((state) => state.userInfo);
   const {movieDetails, loading: movieDetailsLoading} = useSelector<RootState, MovieDetailsState>((state) => state.movieDetails);
   const {actors, director, loading: actorDetailsLoading} = useSelector<RootState, ActorDetailsState>((state) => state.actorDetails);
   const {similarMovies, loading: similarMoviesLoading} = useSelector<RootState, SimilarMoviesState>((state) => state.similarMovies);
   const {recentRecords, loading: recentRecordsLoading} = useSelector<RootState, RecentRecordsState>((state) => state.recentRecords);
   const {likeMovies, loading: likeMoviesLoading} = useSelector<RootState, LikeMoviesState>((state) => state.likeMovies);
+
+  useEffect(() => {
+    getComments()
+    .then(() => {
+      setIsLoading(false);
+    })
+  }, [])
+
+  useEffect(() => {
+    if(comments === []) {
+      const comments: Array<CommentsInput> = [];
+      setDoc(movieCommentRef,{comments});
+    }
+  }, [comments])
+
+  useEffect(() => {
+    getUserComment()
+    .then((isUserComment) => {
+      if(!isUserComment) {
+        const commentsArray: Array<UserComment> = [];
+        setDoc(userCommentRef,{commentsArray})
+      }
+      setIsLoading2(false)
+    })
+  }, [])
   
   useEffect(() => {
+    dispatch(fetchUserInfo());
     dispatch(fetchMovieDetails(Number(movieId)));
     dispatch(fetchActorDetails(Number(movieId)));
     dispatch(fetchSimilarMovies(Number(movieId)));
@@ -147,13 +197,13 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
     const result: JSX.Element[] = [];
 
     for(let i = 0; i < 5; i++){
-      if(rating > 1){
-        result.push(<BsStarFill fill="yellow" size="1.5rem" key={i}></BsStarFill>)
+      if(rating >= 1){
+        result.push(<BsStarFill fill="#eab308" size="1.5rem" key={i}></BsStarFill>)
         rating -= 1;
       } else if(rating >= 0.25) {
-        result.push(<BsStarHalf fill="yellow" size="1.5rem" key={i}></BsStarHalf>)
+        result.push(<BsStarHalf fill="#eab308" size="1.5rem" key={i}></BsStarHalf>)
         rating = 0
-      } else result.push(<BiStar fill="yellow"  size="1.5rem" key={i}></BiStar>)
+      } else result.push(<BiStar fill="#eab308"  size="1.5rem" key={i}></BiStar>)
     }
     return result
   }
@@ -169,101 +219,160 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
     imgUrl = `${IMAGE_URL}w500${movieDetails.movieImage}` 
   }
 
+  const movieCommentRef = doc(db, 'movies', movieId)
+  const userCommentRef = doc(db, 'users', localStorageUserInfo.uid, 'movieComments', 'comments')
+
+  const getComments = async() => {
+    const commentsSnap = await getDoc(movieCommentRef);
+    const result = commentsSnap.data();
+   
+    if(result !== undefined) {
+      setComments(result.comments)
+      return true
+    }else return false
+  }
+
+  const getUserComment = async() => {
+    const userCommentSnap = await getDoc(userCommentRef);
+    const result = userCommentSnap.data();
+    
+    if(result !== undefined) return true
+    else return false
+  }
+
+  const onSubmit = async() => {
+    
+   updateDoc(movieCommentRef, 
+                      {comments: arrayUnion({comment: inputValue.comment,
+                                            nickname: currentUserInfo?.nickname,
+                                            rate: inputValue.rate})})
+
+    updateDoc(userCommentRef, 
+                      {commentsArray: arrayUnion({comment : inputValue.comment,
+                                                  movieId: movieId,
+                                                  rate: inputValue.rate})})
+  }
+
+  const handleInput = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue({...inputValue, [event.target.name]: event.target.value})
+  }
+
+  const handleRateInput = () => {
+    let count = 0;
+    const stars = rateInputRef.current.childNodes
+    for(let i = 0; i < stars.length; i++) {
+      if(stars[i].checked) count = i;
+    }
+    setInputValue({...inputValue, rate: count})
+  }
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    onSubmit()
+    .then(() => {
+      getComments();
+    });
+  }
+
 
 
 
   if(movieDetailsLoading !== 'succeeded' || actorDetailsLoading !== 'succeeded' || 
     similarMoviesLoading !==  'succeeded' || recentRecordsLoading !==  'succeeded' || 
-    likeMoviesLoading !==  'succeeded') return <div>Loading...</div>
+    likeMoviesLoading !==  'succeeded' || currentUserInfoLoading !== 'succeeded' || isLoading || isLoading2) return <div>Loading...</div>
 
   return (
     <>
-    <section className="relative">
-      <div className="opacity-50" style={{backgroundImage: `url(${imgUrl})`, backgroundRepeat: 'no-repeat', backgroundSize: 'cover', width: '100%', height: '40vw'}}></div>
-      
-      <div className="absolute w-3/4 left-[12.5%] bottom-10 flex flex-row justify-between">
-        <div className='flex flex-row '>
-          <h2 className="text-3xl font-bold">{movieDetails.movieTitle}({movieYear})</h2> 
-          <div className='flex flex-row items-end ml-4'>{ratingStar(movieDetails.movieRate)} 
-          <p className="text-lg font-bold ">({movieDetails.movieRate})</p>
+      <section className="relative">
+        <div className="opacity-50" style={{backgroundImage: `url(${imgUrl})`, backgroundRepeat: 'no-repeat', backgroundSize: 'cover', width: '100%', height: '40vw'}}></div>
+
+        <div className="absolute w-3/4 left-[12.5%] bottom-10 flex flex-row justify-between">
+          <div className='flex flex-row '>
+            <h2 className="text-3xl font-bold">{movieDetails.movieTitle}({movieYear})</h2> 
+            <div className='flex flex-row items-end ml-4'>{ratingStar(movieDetails.movieRate)} 
+              <p className="text-lg font-bold ">({movieDetails.movieRate})</p>
+            </div>
           </div>
-         
-          
-        </div>
-        <button className="btn btn-accent btn-sm rounded-2xl w-28 opacity-100" onClick={onLikeButtonClick}>{like ? <BsFillHeartFill className="mr-3 text-red-600"></BsFillHeartFill> : <BsHeart className="mr-3"></BsHeart>}좋아요</button>
-      </div>
-    </section>
 
-    <section className="w-3/4 mt-14 mx-auto flex">  
-      <img src={movieDetails.moviePoster&& `${IMAGE_URL}w300${movieDetails.moviePoster}`} alt="poster"></img>
-      <ul>
-        기본정보
-        <li>
+          <button className="btn btn-accent btn-sm rounded-2xl w-28 opacity-100" onClick={onLikeButtonClick}>{like ? <BsFillHeartFill className="mr-3 text-red-600"></BsFillHeartFill> : <BsHeart className="mr-3"></BsHeart>}좋아요</button>
+        </div>
+      </section>
+
+      <section className="w-3/4 mt-14 mx-auto flex">  
+        <img src={movieDetails.moviePoster && `${IMAGE_URL}w300${movieDetails.moviePoster}`} alt="poster"></img>
+        <ul>
+          기본정보
+          <li>
+            <ul className='flex flex-row'>
+            장르
+            {movieDetails.movieGenres && movieDetails.movieGenres.map((genre) => <li key={genre.id} className="pl-2">{genre.name}</li>)}
+            </ul>
+          </li>
+          <li>개봉날짜 {movieDetails.movieRelease && movieDetails.movieRelease}</li>
+          <li>언어 {movieDetails.movieLanguage && movieDetails.movieLanguage}</li>
+          <li>러닝타임 {movieDetails.movieRuntime && movieDetails.movieRuntime}분</li>
+          <li>감독 {movieDirector&&movieDirector}</li>
+        </ul>
+
+      </section>
+
+      <section className="w-3/4  mx-auto ">
+        <div>
           <ul className='flex flex-row'>
-          장르
-          {movieDetails.movieGenres && movieDetails.movieGenres.map((genre) => <li key={genre.id} className="pl-2">{genre.name}</li>)}
+            출연진
+            {moreCredits ? tenMovieActors : fiveMovieActors}
+            <li><button className='btn btn-primary btn-sm' onClick={()=>moreCredits ? setMoreCredits(false) :setMoreCredits(true)}>{moreCredits ? `접기` : `더보기`}</button></li>
           </ul>
-        </li>
-        <li>개봉날짜 {movieDetails.movieRelease && movieDetails.movieRelease}</li>
-        <li>언어 {movieDetails.movieLanguage && movieDetails.movieLanguage}</li>
-        <li>러닝타임 {movieDetails.movieRuntime && movieDetails.movieRuntime}분</li>
-        <li>감독 {movieDirector && movieDirector}</li>
-      </ul>
-
-    </section>
-
-    <section className="w-3/4  mx-auto ">
-      <div>
-      <ul className='flex flex-row'>
-        출연진
-        {moreCredits ? tenMovieActors : fiveMovieActors}
-        <li><button className='btn btn-primary btn-sm' onClick={()=>moreCredits ? setMoreCredits(false) :setMoreCredits(true)}>{moreCredits ? `접기` : `더보기`}</button></li>
-      </ul>
-      </div>
-
-    <div>
-      <h3>줄거리</h3>
-      <p>{movieDetails.movieOverview && movieDetails.movieOverview}</p>
-    </div>
-    <h3>비슷한 영화</h3>
-    <ul className='flex flex-row justify-between'>
-      {sevenSimilarMovies}
-    </ul>
-    <div>
-
-    </div>
-    </section>
-    
-
-    <section className="w-3/4  mx-auto flex flex-col">
-      <h3>감상평</h3>
-      <div className='bg-gray-300 flex flex-col items-center'>
-       
-        <p>별점을 선택해주세요</p>
-
-        <div className="rating rating-md rating-half">
-          <input type="radio" name="rating-10" className="rating-hidden" />
-          <input type="radio" name="rating-10" className="bg-yellow-500 mask mask-star-2 mask-half-1" />
-          <input type="radio" name="rating-10" className="bg-yellow-500 mask mask-star-2 mask-half-2" />
-          <input type="radio" name="rating-10" className="bg-yellow-500 mask mask-star-2 mask-half-1" />
-          <input type="radio" name="rating-10" className="bg-yellow-500 mask mask-star-2 mask-half-2" />
-          <input type="radio" name="rating-10" className="bg-yellow-500 mask mask-star-2 mask-half-1" />
-          <input type="radio" name="rating-10" className="bg-yellow-500 mask mask-star-2 mask-half-2" />
-          <input type="radio" name="rating-10" className="bg-yellow-500 mask mask-star-2 mask-half-1" />
-          <input type="radio" name="rating-10" className="bg-yellow-500 mask mask-star-2 mask-half-2" />
-          <input type="radio" name="rating-10" className="bg-yellow-500 mask mask-star-2 mask-half-1" />
-          <input type="radio" name="rating-10" className="bg-yellow-500 mask mask-star-2 mask-half-2" />
         </div>
 
-        <div className="flex">
-        <input type="text" placeholder="감상평을 입력해주세요" className="input input-bordered input-primary input-sm w-full" />
-        <button type="submit" className="btn btn-accent btn-sm ml-4">등록</button>
+        <div>
+          <h3>줄거리</h3>
+          <p>{movieDetails.movieOverview && movieDetails.movieOverview}</p>
         </div>
-      </div>
-      
-      
-    </section>
-      
+
+        <h3>비슷한 영화</h3>
+
+        <ul className='flex flex-row justify-between'>
+          {sevenSimilarMovies}
+        </ul>
+      </section>
+
+
+      <section className="w-3/4  mx-auto flex flex-col">
+        <h3>감상평</h3>
+        <div className='bg-gray-300 flex flex-col items-center'>
+
+          <p>별점을 선택해주세요</p>
+
+          <form className="flex flex-col items-center w-full" onSubmit={handleSubmit} >
+
+          <div className="rating rating-md rating-half" ref={rateInputRef}>
+            <input type="radio" name="rating-10" className="rating-hidden" />
+            <input type="radio" name="rating-10" className="bg-yellow-500 mask mask-star-2 mask-half-1" />
+            <input type="radio" name="rating-10" className="bg-yellow-500 mask mask-star-2 mask-half-2" />
+            <input type="radio" name="rating-10" className="bg-yellow-500 mask mask-star-2 mask-half-1" />
+            <input type="radio" name="rating-10" className="bg-yellow-500 mask mask-star-2 mask-half-2" />
+            <input type="radio" name="rating-10" className="bg-yellow-500 mask mask-star-2 mask-half-1" />
+            <input type="radio" name="rating-10" className="bg-yellow-500 mask mask-star-2 mask-half-2" />
+            <input type="radio" name="rating-10" className="bg-yellow-500 mask mask-star-2 mask-half-1" />
+            <input type="radio" name="rating-10" className="bg-yellow-500 mask mask-star-2 mask-half-2" />
+            <input type="radio" name="rating-10" className="bg-yellow-500 mask mask-star-2 mask-half-1" />
+            <input type="radio" name="rating-10" className="bg-yellow-500 mask mask-star-2 mask-half-2" />
+          </div>
+
+          <div className="w-3/4 flex flex-row">
+            <input type="text" placeholder="감상평을 입력해주세요" name='comment' className="input input-bordered input-primary input-sm w-full" onChange={handleInput}/>
+            <button type="submit" className="btn btn-accent btn-sm ml-4" onClick={handleRateInput}>등록</button>
+          </div>
+
+          </form>
+        </div>
+
+        <div>
+          {comments.map((comment, index)=> <div key={index}> <div className="flex flex-row">{ratingStar(comment.rate)}</div> <p>{comment.nickname}</p> <span>{comment.comment}</span></div>)}
+        </div>
+      </section>
+
     </>
   )
 };
