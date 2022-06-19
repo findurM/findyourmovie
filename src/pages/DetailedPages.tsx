@@ -12,6 +12,7 @@ import { AppDispatch, RootState } from "../app/store";
 import { fetchMovieDetails, MovieDetails, MovieDetailsState } from "../features/fetchMovieDetailsSlice";
 import { ActorDetailsState, ActorInfo, fetchActorDetails } from "../features/fetchActorDetailsSlice";
 import { fetchSimilarMovies, SimilarMoviesState } from "../features/fetchSimilarMoviesSlice";
+import { fetchRecentRecords, RecentRecordsState } from "../features/fetchRecentRecordsSlice";
 
 export interface MovieDetailedPages {}
 
@@ -55,17 +56,29 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
   const {movieDetails, loading: movieDetailsLoading} = useSelector<RootState, MovieDetailsState>((state) => state.movieDetails);
   const {actors, director, loading: actorDetailsLoading} = useSelector<RootState, ActorDetailsState>((state) => state.actorDetails);
   const {similarMovies, loading: similarMoviesLoading} = useSelector<RootState, SimilarMoviesState>((state) => state.similarMovies);
+  const {recentRecords, loading: recentRecordsLoading} = useSelector<RootState, RecentRecordsState>((state) => state.recentRecords);
+  
+  useEffect(() => {
+    dispatch(fetchMovieDetails(Number(movieId)));
+    dispatch(fetchActorDetails(Number(movieId)));
+    dispatch(fetchSimilarMovies(Number(movieId)));
+    dispatch(fetchRecentRecords());
+  },[])
 
   useEffect(() => {
-    getRecentRecords()
-    .then((isExist)  => {
-      if (!isExist) {
-        setDoc(recordRef, {movieArray: [Number(movieId)]});
-      } else {
-        updateDoc(recordRef, {movieArray: arrayUnion(Number(movieId))});
+    const recordRef = doc(db, "users", localStorageUserInfo.uid, "recentRecords", "movies");
+    if(recentRecordsLoading === 'succeeded' && recentRecords.length === 0) {
+      setDoc(recordRef, {movieArray: [Number(movieId)]});
+    } else {
+      if(recentRecords.includes(Number(movieId))) {
+        updateDoc(recordRef, {movieArray: arrayRemove(Number(movieId))});
+      } else if(recentRecords.length >= 20) {
+        const oldestRecord = recentRecords[0];
+        updateDoc(recordRef, {movieArray: arrayRemove(oldestRecord)});
       }
-    })
-  },[])
+      updateDoc(recordRef, {movieArray: arrayUnion(Number(movieId))});
+    }
+  },[recentRecordsLoading])
   
   useEffect(() => {
     getLikeMovies()
@@ -75,33 +88,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
     });
   }, [])
   
-  useEffect(() => {
-    dispatch(fetchMovieDetails(Number(movieId)));
-    dispatch(fetchActorDetails(Number(movieId)));
-  },[])
-  
-  useEffect(() => {
-    dispatch(fetchSimilarMovies(Number(movieId)));
-  },[]) 
-  
   const auth = getAuth();
-  
-  const recordRef = doc(db, "users", localStorageUserInfo.uid, "recentRecords", "movies");
-  const getRecentRecords = async () => {
-    const recordSnap = await getDoc(recordRef);
-    const result = recordSnap.data();
-    
-    if(result === undefined) {
-      return false;
-    } else if((result.movieArray as Number[]).includes(Number(movieId))) {
-      updateDoc(recordRef, {movieArray: arrayRemove(Number(movieId))});
-      updateDoc(recordRef, {movieArray: arrayUnion(Number(movieId))});
-    } else if((result.movieArray as Number[]).length >= 20) {
-      const oldestRecord = result.movieArray[0];
-      updateDoc(recordRef, {movieArray: arrayRemove(oldestRecord)});
-    }
-    return true;
-  }
 
   const likeRef = doc(db, "users", localStorageUserInfo.uid, 'likeMovies','movies');
 
@@ -196,7 +183,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
 
 
   if(movieDetailsLoading !== 'succeeded' || actorDetailsLoading !== 'succeeded' || 
-    similarMoviesLoading !==  'succeeded' || isLoading) return <div>Loading...</div>
+    similarMoviesLoading !==  'succeeded' || recentRecordsLoading !==  'succeeded' || isLoading) return <div>Loading...</div>
 
   return (
     <>
