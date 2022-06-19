@@ -3,7 +3,7 @@ import { arrayRemove, arrayUnion, doc, getDoc, setDoc, updateDoc } from "firebas
 import React, { useEffect, useState } from "react";
 import { useParams,Link } from "react-router-dom";
 import { db } from "../Application";
-import { API_URL,API_KEY,IMAGE_URL } from "../config/config"
+import { IMAGE_URL } from "../config/config"
 import {BsHeart,BsFillHeartFill} from 'react-icons/bs'
 import {BsStarFill,BsStarHalf} from 'react-icons/bs'
 import {BiStar} from 'react-icons/bi'
@@ -11,6 +11,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../app/store";
 import { fetchMovieDetails, MovieDetails, MovieDetailsState } from "../features/fetchMovieDetailsSlice";
 import { ActorDetailsState, ActorInfo, fetchActorDetails } from "../features/fetchActorDetailsSlice";
+import { fetchSimilarMovies, SimilarMoviesState } from "../features/fetchSimilarMoviesSlice";
 
 export interface MovieDetailedPages {}
 
@@ -45,7 +46,6 @@ export interface MovieDetailedPages {}
 
 const DetailedPages: React.FC<MovieDetailedPages> = () => {
   const localStorageUserInfo = JSON.parse(localStorage.getItem('user'))
-  const [similarMovies, setSimilarMovies] = useState([])
   const [like, setLike] = useState(false)
   const [moreCredits, setMoreCredits] = useState(false)
   const [isLoading, setIsLoading] = useState(true);
@@ -54,6 +54,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
   const dispatch = useDispatch<AppDispatch>();
   const {movieDetails, loading: movieDetailsLoading} = useSelector<RootState, MovieDetailsState>((state) => state.movieDetails);
   const {actors, director, loading: actorDetailsLoading} = useSelector<RootState, ActorDetailsState>((state) => state.actorDetails);
+  const {similarMovies, loading: similarMoviesLoading} = useSelector<RootState, SimilarMoviesState>((state) => state.similarMovies);
 
   useEffect(() => {
     getRecentRecords()
@@ -76,21 +77,11 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
   
   useEffect(() => {
     dispatch(fetchMovieDetails(Number(movieId)));
+    dispatch(fetchActorDetails(Number(movieId)));
   },[])
   
   useEffect(() => {
-    dispatch(fetchActorDetails(Number(movieId)));
-  },[]) 
-  
-  useEffect(() => {
-    async function similarMovies(){
-      const similarMoviesApi = `${API_URL}/movie/${movieId}/similar?api_key=${API_KEY}`
-      const res = await fetch(similarMoviesApi)
-      const results = await res.json()
-      setSimilarMovies(results.results)
-      return results
-    }
-    similarMovies()
+    dispatch(fetchSimilarMovies(Number(movieId)));
   },[]) 
   
   const auth = getAuth();
@@ -204,7 +195,8 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
 
 
 
-  if(movieDetailsLoading !== 'succeeded' || actorDetailsLoading !== 'succeeded' || isLoading) return <div>Loading...</div>
+  if(movieDetailsLoading !== 'succeeded' || actorDetailsLoading !== 'succeeded' || 
+    similarMoviesLoading !==  'succeeded' || isLoading) return <div>Loading...</div>
 
   return (
     <>
