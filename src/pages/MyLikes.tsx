@@ -1,47 +1,34 @@
-import { doc, getDoc } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { AppDispatch, RootState } from "../app/store";
-import { db } from "../Application";
 import { LikeGridCards } from "../components/GridCards";
 import { IMAGE_URL } from "../config/config";
+import { fetchLikeMovies, LikeMoviesState } from "../features/fetchLikeMoviesSlice";
 import { fetchMovieImages, MovieImagesState, resetMovieImages } from "../features/fetchMovieImagesSlice";
 import { fetchUserInfo, UserInfoState } from "../features/fetchUserInfoSlice";
 
 const MyLikes = () => {
-
-  const localStorageUserInfo = JSON.parse(localStorage.getItem('user'))
-  const [likeMovies, setLikeMovies] = useState<Number[]>();
-  const [isLoading, setIsLoading] = useState(true);
   const dispatch = useDispatch<AppDispatch>();
-  const {movieImages, loading: movieImagesLoading} = useSelector<RootState, MovieImagesState>((state) => state.movieImages);
   const {userInfo: currentUserInfo, loading: currentUserInfoLoading} = useSelector<RootState, UserInfoState>((state) => state.userInfo);
-
-  const getLikeMovies = async () => {
-    const likeRef = doc(db, "users", localStorageUserInfo.uid, "likeMovies", "movies");
-    const likeSnap = await getDoc(likeRef);
-    if(likeSnap.data()) setLikeMovies((likeSnap.data().moviesArray as Number[]));
-  }
+  const {movieImages, loading: movieImagesLoading} = useSelector<RootState, MovieImagesState>((state) => state.movieImages);
+  const {likeMovies, loading: likeMoviesLoading} = useSelector<RootState, LikeMoviesState>((state) => state.likeMovies);
 
   useEffect(() => {
     dispatch(fetchUserInfo());
-    getLikeMovies()
-    .then(() => {
-      setIsLoading(false);
-    });
+    dispatch(fetchLikeMovies());
   }, []);
 
   useEffect(() => {
-    dispatch(resetMovieImages());
-    if(likeMovies !== null && likeMovies !== undefined) {
-      likeMovies.reverse().forEach((movieId: Number) => {
+    if(likeMoviesLoading === 'succeeded' && likeMovies.length > 0) {
+      dispatch(resetMovieImages());
+      likeMovies.forEach((movieId: Number) => {
         dispatch(fetchMovieImages(movieId));
       })
     }
-  }, [likeMovies])
+  }, [likeMoviesLoading])
 
-  if(isLoading) return <div>Loading...</div>
+  if(currentUserInfoLoading !== 'succeeded' || movieImagesLoading !== 'succeeded' || likeMoviesLoading !== 'succeeded') return <div>Loading...</div>
 
   return (
     <>
@@ -49,7 +36,7 @@ const MyLikes = () => {
         <div className="mb-[3.75rem]">
           <h2 className="text-5xl font-bold">{currentUserInfo?.nickname} 님의 좋아요</h2>
         </div>
-        {likeMovies === null || likeMovies === undefined
+        {likeMovies.length === 0
         ? (<div>좋아요한 영화가 없습니다.</div>)
         : (<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 justify-items-center gap-5 m-auto">
         {movieImages && movieImages.map(({movieId, poster}, index) => (

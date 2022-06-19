@@ -13,6 +13,7 @@ import { fetchMovieDetails, MovieDetails, MovieDetailsState } from "../features/
 import { ActorDetailsState, ActorInfo, fetchActorDetails } from "../features/fetchActorDetailsSlice";
 import { fetchSimilarMovies, SimilarMoviesState } from "../features/fetchSimilarMoviesSlice";
 import { fetchRecentRecords, RecentRecordsState } from "../features/fetchRecentRecordsSlice";
+import { fetchLikeMovies, LikeMoviesState } from "../features/fetchLikeMoviesSlice";
 
 export interface MovieDetailedPages {}
 
@@ -49,7 +50,6 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
   const localStorageUserInfo = JSON.parse(localStorage.getItem('user'))
   const [like, setLike] = useState(false)
   const [moreCredits, setMoreCredits] = useState(false)
-  const [isLoading, setIsLoading] = useState(true);
   const movieId = useParams().id
 
   const dispatch = useDispatch<AppDispatch>();
@@ -57,12 +57,14 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
   const {actors, director, loading: actorDetailsLoading} = useSelector<RootState, ActorDetailsState>((state) => state.actorDetails);
   const {similarMovies, loading: similarMoviesLoading} = useSelector<RootState, SimilarMoviesState>((state) => state.similarMovies);
   const {recentRecords, loading: recentRecordsLoading} = useSelector<RootState, RecentRecordsState>((state) => state.recentRecords);
+  const {likeMovies, loading: likeMoviesLoading} = useSelector<RootState, LikeMoviesState>((state) => state.likeMovies);
   
   useEffect(() => {
     dispatch(fetchMovieDetails(Number(movieId)));
     dispatch(fetchActorDetails(Number(movieId)));
     dispatch(fetchSimilarMovies(Number(movieId)));
     dispatch(fetchRecentRecords());
+    dispatch(fetchLikeMovies());
   },[])
 
   useEffect(() => {
@@ -79,32 +81,20 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
       updateDoc(recordRef, {movieArray: arrayUnion(Number(movieId))});
     }
   },[recentRecordsLoading])
-  
-  useEffect(() => {
-    getLikeMovies()
-    .then((isLike) => {
-      setLike(isLike);
-      setIsLoading(false);
-    });
-  }, [])
-  
-  const auth = getAuth();
 
   const likeRef = doc(db, "users", localStorageUserInfo.uid, 'likeMovies','movies');
-
-  const getLikeMovies =  async () => {
-    const likeSnap = await getDoc(likeRef);
-    const result = likeSnap.data();
-
-    if(result && result.moviesArray !== undefined) {
-      if((result.moviesArray as Number[]).includes(Number(movieId))) {
-        return true;
+  
+  useEffect(() => {
+    if(likeMoviesLoading === 'succeeded') {
+      if(likeMovies.length > 0 && likeMovies.includes(Number(movieId))) {
+        setLike(true);
+      } else if(likeMovies.length === 0) {
+        setDoc(likeRef, {moviesArray: []});
       }
-    } else if(!result) {
-      setDoc(likeRef, {moviesArray: []});
     }
-    return false;
-  }
+  }, [likeMoviesLoading])
+  
+  const auth = getAuth();
 
   const onLikeButtonClick = () => {
     if(like) {
@@ -183,7 +173,8 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
 
 
   if(movieDetailsLoading !== 'succeeded' || actorDetailsLoading !== 'succeeded' || 
-    similarMoviesLoading !==  'succeeded' || recentRecordsLoading !==  'succeeded' || isLoading) return <div>Loading...</div>
+    similarMoviesLoading !==  'succeeded' || recentRecordsLoading !==  'succeeded' || 
+    likeMoviesLoading !==  'succeeded') return <div>Loading...</div>
 
   return (
     <>
