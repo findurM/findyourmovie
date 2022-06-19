@@ -15,6 +15,7 @@ import { fetchSimilarMovies, SimilarMoviesState } from "../features/fetchSimilar
 import { fetchRecentRecords, RecentRecordsState } from "../features/fetchRecentRecordsSlice";
 import { fetchLikeMovies, LikeMoviesState } from "../features/fetchLikeMoviesSlice";
 import { fetchUserInfo, UserInfoState } from "../features/fetchUserInfoSlice";
+import { fetchUserComments, UserCommentsState } from "../features/fetchUserCommentsSlice";
 
 export interface MovieDetailedPages {}
 
@@ -53,12 +54,6 @@ interface CommentsInput {
   rate: number
 }
 
-interface UserComment {
-  comment: string
-  movieId: number
-  rate: number
-}
-
 interface InputValue {
   comment: string
   rate: number
@@ -67,7 +62,6 @@ interface InputValue {
 const DetailedPages: React.FC<MovieDetailedPages> = () => {
   const localStorageUserInfo = JSON.parse(localStorage.getItem('user'))
   const [isLoading, setIsLoading] = useState(true);
-  const [isLoading2, setIsLoading2] = useState(true);
   const [like, setLike] = useState(false)
   const [moreCredits, setMoreCredits] = useState(false)
   const [inputValue, setInputValue] = useState<InputValue>()
@@ -82,6 +76,12 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
   const {similarMovies, loading: similarMoviesLoading} = useSelector<RootState, SimilarMoviesState>((state) => state.similarMovies);
   const {recentRecords, loading: recentRecordsLoading} = useSelector<RootState, RecentRecordsState>((state) => state.recentRecords);
   const {likeMovies, loading: likeMoviesLoading} = useSelector<RootState, LikeMoviesState>((state) => state.likeMovies);
+  const {userComments, loading: userCommentsLoading} = useSelector<RootState, UserCommentsState>((state) => state.userComments);
+
+  const recordRef = doc(db, "users", localStorageUserInfo.uid, "recentRecords", "movies");
+  const likeRef = doc(db, "users", localStorageUserInfo.uid, 'likeMovies','movies');
+  const movieCommentRef = doc(db, 'movies', movieId);
+  const userCommentRef = doc(db, 'users', localStorageUserInfo.uid, 'movieComments', 'comments');
 
   useEffect(() => {
     getComments()
@@ -96,17 +96,6 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
       setDoc(movieCommentRef,{comments});
     }
   }, [comments])
-
-  useEffect(() => {
-    getUserComment()
-    .then((isUserComment) => {
-      if(!isUserComment) {
-        const commentsArray: Array<UserComment> = [];
-        setDoc(userCommentRef,{commentsArray})
-      }
-      setIsLoading2(false)
-    })
-  }, [])
   
   useEffect(() => {
     dispatch(fetchUserInfo());
@@ -115,10 +104,10 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
     dispatch(fetchSimilarMovies(Number(movieId)));
     dispatch(fetchRecentRecords());
     dispatch(fetchLikeMovies());
+    dispatch(fetchUserComments());
   },[])
 
   useEffect(() => {
-    const recordRef = doc(db, "users", localStorageUserInfo.uid, "recentRecords", "movies");
     if(recentRecordsLoading === 'succeeded' && recentRecords.length === 0) {
       setDoc(recordRef, {movieArray: [Number(movieId)]});
     } else {
@@ -131,8 +120,6 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
       updateDoc(recordRef, {movieArray: arrayUnion(Number(movieId))});
     }
   },[recentRecordsLoading])
-
-  const likeRef = doc(db, "users", localStorageUserInfo.uid, 'likeMovies','movies');
   
   useEffect(() => {
     if(likeMoviesLoading === 'succeeded') {
@@ -143,8 +130,12 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
       }
     }
   }, [likeMoviesLoading])
-  
-  const auth = getAuth();
+
+  useEffect(() => {
+    if(userCommentsLoading === 'succeeded' && userComments.length === 0) {
+      setDoc(userCommentRef, {commentsArray: []});
+    }
+  }, [userCommentsLoading])
 
   const onLikeButtonClick = () => {
     if(like) {
@@ -219,9 +210,6 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
     imgUrl = `${IMAGE_URL}w500${movieDetails.movieImage}` 
   }
 
-  const movieCommentRef = doc(db, 'movies', movieId)
-  const userCommentRef = doc(db, 'users', localStorageUserInfo.uid, 'movieComments', 'comments')
-
   const getComments = async() => {
     const commentsSnap = await getDoc(movieCommentRef);
     const result = commentsSnap.data();
@@ -230,14 +218,6 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
       setComments(result.comments)
       return true
     }else return false
-  }
-
-  const getUserComment = async() => {
-    const userCommentSnap = await getDoc(userCommentRef);
-    const result = userCommentSnap.data();
-    
-    if(result !== undefined) return true
-    else return false
   }
 
   const onSubmit = async() => {
@@ -249,7 +229,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
 
     updateDoc(userCommentRef, 
                       {commentsArray: arrayUnion({comment : inputValue.comment,
-                                                  movieId: movieId,
+                                                  movieId: Number(movieId),
                                                   rate: inputValue.rate})})
   }
 
@@ -279,7 +259,8 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
 
   if(movieDetailsLoading !== 'succeeded' || actorDetailsLoading !== 'succeeded' || 
     similarMoviesLoading !==  'succeeded' || recentRecordsLoading !==  'succeeded' || 
-    likeMoviesLoading !==  'succeeded' || currentUserInfoLoading !== 'succeeded' || isLoading || isLoading2) return <div>Loading...</div>
+    likeMoviesLoading !==  'succeeded' || currentUserInfoLoading !== 'succeeded' || 
+    userCommentsLoading !==  'succeeded' || isLoading) return <div>Loading...</div>
 
   return (
     <>
