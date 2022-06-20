@@ -1,13 +1,15 @@
 import { Link } from "react-router-dom";
+import { ratingStar } from "../pages/DetailedPages";
 
 interface Props {
   image: string,
   review: string,
   title: string,
   movieId: number,
+  rate: number,
 }
 
-const ReviewCards = ({image, review, title, movieId}: Props) => {
+const ReviewCards = ({image, review, title, movieId, rate}: Props) => {
 return(
   <div className="card card-compact bg-base-100 shadow-xl w-ful h-fulll max-w-[305px]">
     <Link to={`/movies/${movieId}`} key={movieId}>
@@ -16,6 +18,7 @@ return(
       </figure>
     </Link>
     <div className="card-body">
+    <div className="flex flex-row">{ratingStar(rate)}</div>
       <p className="text-base ellipsis-box-3">{review}</p>
       <div className="card-actions justify-end items-center">
         <h2 className="flex-1 text-lg font-bold truncate">{title}</h2>

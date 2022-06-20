@@ -44,6 +44,7 @@ const MyReviews = () => {
               review={comment.comment} 
               title={comment.title} 
               movieId={comment.movieId}
+              rate={comment.rate}
               key={comment.movieId}
             />
           ))}
