@@ -4,9 +4,18 @@ import React, { useEffect, useState, useRef } from "react";
 import { useParams,Link } from "react-router-dom";
 import { db, CurrentUserInfo } from "../Application";
 import { API_URL,API_KEY,IMAGE_URL } from "../config/config"
-import {BsHeart,BsFillHeartFill} from 'react-icons/bs'
-import {BsStarFill,BsStarHalf} from 'react-icons/bs'
-import {BiStar} from 'react-icons/bi'
+import {BsFillHeartFill,BsHeart} from 'react-icons/bs'
+import RatingStar from '../components/RatingStar'
+
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../app/store";
+// import { fetchMovieDetails, MovieDetails, MovieDetailsState } from "../features/fetchMovieDetailsSlice";
+// import { ActorDetailsState, ActorInfo, fetchActorDetails } from "../features/fetchActorDetailsSlice";
+// import { fetchSimilarMovies, SimilarMoviesState } from "../features/fetchSimilarMoviesSlice";
+// import { fetchRecentRecords, RecentRecordsState } from "../features/fetchRecentRecordsSlice";
+// import { fetchLikeMovies, LikeMoviesState } from "../features/fetchLikeMoviesSlice";
+// import { fetchUserInfo, UserInfoState } from "../features/fetchUserInfoSlice";
+// import { fetchUserComments, UserCommentsState } from "../features/fetchUserCommentsSlice";
 
 export interface MovieDetailedPages {}
 
@@ -71,19 +80,28 @@ interface InputValue {
   rate: number
 }
 
+interface WidthValue {
+  postwidth: number
+  trailerWidth: number
+}
+
 const DetailedPages: React.FC<MovieDetailedPages> = () => {
   const localStorageUserInfo = JSON.parse(localStorage.getItem('user'))
   const [currentUserInfo, setCurrentUserInfo] = useState<CurrentUserInfo>()
   const [movieFullDetails, setMovieFullDetails] = useState<MovieFullDetails>()
+  const [trailer, setTrailer] = useState([])
   const [actors, setActors] = useState([])
   const [director, setDirector] = useState([])
   const [similarMovies, setSimilarMovies] = useState([])
   const [like, setLike] = useState(false)
   const [moreCredits, setMoreCredits] = useState(false)
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true)
   const [inputValue, setInputValue] = useState<InputValue>()
   const [comments, setComments] = useState<CommentsInput[]>([])
+  const [contentsHeight, setContentsHeight] = useState<WidthValue>()
   const movieId = useParams().id
+  const posterRef = useRef(null)
+  const trailerRef = useRef(null)
   const rateInputRef = useRef(null)
 
   useEffect(() => {
@@ -108,13 +126,14 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
 
   useEffect(() => {
     getComments()
-    .then((isComment) => {
-        if(!isComment) {
-          const comments: Array<CommentsInput> = [];
-          setDoc(movieCommentRef,{comments})
-        }
-      })
-  },[comments])
+  },[])
+
+  useEffect(() => {
+    if(comments === []){
+      const comments: Array<CommentsInput> = [];
+      setDoc(movieCommentRef,{comments})
+    }
+  },[])
 
   useEffect(() => {
     getUserComment()
@@ -136,6 +155,18 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
     }
     fullDetails()
   },[])
+
+  useEffect(() => {
+    async function trailerApi(){
+      const trailerApi = `${API_URL}/movie/${movieId}/videos?api_key=${API_KEY}`
+      const res = await fetch(trailerApi)
+      const results = await res.json()
+      setTrailer(results.results)
+      return results
+    }
+    trailerApi()
+  },[]) 
+  
   
   useEffect(() => {
     async function actorDetails(){
@@ -185,7 +216,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
     const likeSnap = await getDoc(likeRef);
     const result = likeSnap.data();
    
-    if(result&&result.movieArray !== undefined) {
+    if(result !== undefined) {
       if((result.moviesArray as Number[]).includes(Number(movieId))) {
         return true;
       }
@@ -204,6 +235,25 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
       updateDoc(likeRef, {moviesArray: arrayUnion(Number(movieId))});
       setLike(true);
     }
+  }
+
+  const posterHeight = () => {
+    if(posterRef !== undefined) {
+      const width = posterRef.current.clientWidth;
+      const height = width * 1.5;  
+      return height;
+    }
+  }
+
+  const trailerKey = () => {
+    const result: string[] = []
+    if(trailer !== undefined) {
+      for(let i = 0; i < trailer.length; i++) {
+        trailer[i].official = true ? result.push(trailer[i].key) : ""
+      }
+    }
+
+    return result[0]
   }
 
   function maxTenActors(actors: any[]): Array<ActorInfo> {
@@ -242,21 +292,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
     return result
   }
 
-  function ratingStar(rate: number): JSX.Element[] {
-    let rating: number = rate / 2;
-    const result: JSX.Element[] = [];
 
-    for(let i = 0; i < 5; i++){
-      if(rating >= 1){
-        result.push(<BsStarFill fill="#eab308" size="1.5rem" key={i}></BsStarFill>)
-        rating -= 1;
-      } else if(rating >= 0.25) {
-        result.push(<BsStarHalf fill="#eab308" size="1.5rem" key={i}></BsStarHalf>)
-        rating = 0
-      } else result.push(<BiStar fill="#eab308"  size="1.5rem" key={i}></BiStar>)
-    }
-    return result
-  }
 
   let movieTitle 
   let movieGenres 
@@ -282,8 +318,10 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
     movieRate = vote_average
   }
 
+
+  const movieTrailer: string = trailerKey() 
   const movieDirector: string = director[0]?.name
-  const fiveMovieActors: JSX.Element[] = maxFiveActors(actors).map((actor) => <li key={actor.credit_id}><img className="w-20" src={`${IMAGE_URL}w300${actor.profile_path}`} alt='Actor Image'></img><p>{actor.character}역</p> <p>{actor.name}</p></li>)
+  const fiveMovieActors: JSX.Element[] = maxFiveActors(actors).map((actor) => <li key={actor.credit_id} className="flex-1"><img className="w-20" src={`${IMAGE_URL}w300${actor.profile_path}`} alt='Actor Image'></img><p>{actor.character}역</p> <p>{actor.name}</p></li>)
   const tenMovieActors: JSX.Element[] = maxTenActors(actors).map((actor) => <li key={actor.credit_id}><img className="w-20" src={`${IMAGE_URL}w300${actor.profile_path}`} alt='Actor Image'></img><p>{actor.character}역</p> <p>{actor.name}</p></li>)
   const sevenSimilarMovies: JSX.Element[] = maxSevenMovies(similarMovies).map((movie)=> <li key={movie.id}><Link to={`/movies/${movie.id}`}><img  src={movie.poster_path ? `${IMAGE_URL}w300${movie.poster_path}`: null} alt='Similar Movie Image'/></Link><p>{movie.title}</p></li>)
   const movieYear: string = movieRelease !== undefined ? movieRelease.substring(0,4) : ""
@@ -293,8 +331,10 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
     imgUrl = `${IMAGE_URL}w500${movieImage}` 
   }
 
+  
+
   const movieCommentRef = doc(db, 'movies', movieId)
-  const userCommentRef = doc(db, 'users', auth.currentUser?.uid, 'movieComments', 'comments')
+  const userCommentRef = doc(db, 'users', localStorageUserInfo?.uid, 'movieComments', 'comments')
 
   const getComments = async() => {
     const commentsSnap = await getDoc(movieCommentRef);
@@ -362,7 +402,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
         <div className="absolute w-3/4 left-[12.5%] bottom-10 flex flex-row justify-between">
           <div className='flex flex-row '>
             <h2 className="text-3xl font-bold">{movieTitle}({movieYear})</h2> 
-            <div className='flex flex-row items-end ml-4'>{ratingStar(movieRate)} 
+            <div className='flex flex-row items-end ml-4'>{RatingStar(movieRate)} 
               <p className="text-lg font-bold ">({movieRate})</p>
             </div>
           </div>
@@ -372,48 +412,57 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
       </section>
 
       <section className="w-3/4 mt-14 mx-auto flex">  
-        <img src={moviePoster&& `${IMAGE_URL}w300${moviePoster}`} alt="poster"></img>
-        <ul>
-          기본정보
-          <li>
-            <ul className='flex flex-row'>
-            장르
-            {movieGenres&&movieGenres.map((genre) => <li key={genre.id} className="pl-2">{genre.name}</li>)}
-            </ul>
-          </li>
-          <li>개봉날짜 {movieRelease&&movieRelease}</li>
-          <li>언어 {movieLanguage&&movieLanguage}</li>
-          <li>러닝타임 {movieRuntime&&movieRuntime}분</li>
-          <li>감독 {movieDirector&&movieDirector}</li>
-        </ul>
-
+        <div className="basis-1/4 mr-4" ref={posterRef} style={{backgroundImage: `url(${IMAGE_URL}w300${moviePoster})`, backgroundRepeat: 'no-repeat', backgroundSize: 'cover', height: `${posterHeight()}px`}}></div>
+        <div className="basis-2/4 ">
+          <h3 className="text-2xl font-bold">기본정보</h3>
+          <ul className="mr-4 text-lg">
+            <li>
+              <ul className='flex flex-row'>
+              장르
+              {movieGenres&&movieGenres.map((genre) => <li key={genre.id} className="pl-2">{genre.name}</li>)}
+              </ul>
+            </li>
+            <li>개봉날짜 {movieRelease&&movieRelease}</li>
+            <li>언어 {movieLanguage&&movieLanguage}</li>
+            <li>러닝타임 {movieRuntime&&movieRuntime}분</li>
+            <li>감독 {movieDirector&&movieDirector}</li>
+          </ul>
+        </div>
+        
+        <div className="basis-1/4">
+          <h3 className="text-2xl font-bold">트레일러</h3>
+          {movieTrailer&&<iframe  src={`https://www.youtube.com/embed/${movieTrailer}`} title="YouTube video player" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>}
+        </div>
+        
       </section>
 
       <section className="w-3/4  mx-auto ">
+        <div className='divider'></div>
         <div>
+          <h3 className="text-2xl font-bold">출연진</h3>
           <ul className='flex flex-row'>
-            출연진
             {moreCredits ? tenMovieActors : fiveMovieActors}
             <li><button className='btn btn-primary btn-sm' onClick={()=>moreCredits ? setMoreCredits(false) :setMoreCredits(true)}>{moreCredits ? `접기` : `더보기`}</button></li>
           </ul>
         </div>
-
+        <div className='divider'></div>
         <div>
-          <h3>줄거리</h3>
+          <h3 className="text-2xl font-bold">줄거리</h3>
           <p>{movieOverview&&movieOverview}</p>
         </div>
-
-        <h3>비슷한 영화</h3>
+        <div className='divider'></div>
+        <h3 className="text-2xl font-bold">비슷한 영화</h3>
 
         <ul className='flex flex-row justify-between'>
           {sevenSimilarMovies}
         </ul>
+        <div className='divider'></div>
       </section>
 
 
       <section className="w-3/4  mx-auto flex flex-col">
-        <h3>감상평</h3>
-        <div className='bg-gray-300 flex flex-col items-center'>
+        <h3 className="text-2xl font-bold">감상평</h3>
+        <div className='bg-gray-300 flex flex-col items-center py-8'>
 
           <p>별점을 선택해주세요</p>
 
@@ -442,7 +491,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
         </div>
 
         <div>
-          {comments.map((comment, index)=> <div key={index}> <div className="flex flex-row">{ratingStar(comment.rate)}</div> <p>{comment.nickname}</p> <span>{comment.comment}</span></div>)}
+          {comments.map((comment, index)=> <div key={index}> <div className="flex flex-row">{RatingStar(comment.rate)}</div> <p>{comment.nickname}</p> <span>{comment.comment}</span> <div className="divider"></div></div>)}
         </div>
       </section>
 
