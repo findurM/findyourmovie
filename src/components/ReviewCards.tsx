@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ratingStar } from "../pages/DetailedPages";
+import RatingStar  from "../components/RatingStar";
 
 interface Props {
   image: string,
@@ -18,7 +18,7 @@ return(
       </figure>
     </Link>
     <div className="card-body">
-    <div className="flex flex-row">{ratingStar(rate)}</div>
+    <div className="flex flex-row">{RatingStar(rate)}</div>
       <p className="text-base ellipsis-box-3">{review}</p>
       <div className="card-actions justify-end items-center">
         <h2 className="flex-1 text-lg font-bold truncate">{title}</h2>
