@@ -1,66 +1,33 @@
 import { getAuth } from "firebase/auth";
 import { arrayRemove, arrayUnion, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
-import React, { useEffect, useState, useRef } from "react";
-import { useParams,Link } from "react-router-dom";
-import { db, CurrentUserInfo } from "../Application";
-import { API_URL,API_KEY,IMAGE_URL } from "../config/config"
-import {BsFillHeartFill,BsHeart} from 'react-icons/bs'
 import RatingStar from '../components/RatingStar'
-
+import React, { useEffect, useRef, useState } from "react";
+import { useParams,Link } from "react-router-dom";
+import { db } from "../Application";
+import { API_URL,API_KEY,IMAGE_URL } from "../config/config"
+import {BsHeart,BsFillHeartFill} from 'react-icons/bs'
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../app/store";
-// import { fetchMovieDetails, MovieDetails, MovieDetailsState } from "../features/fetchMovieDetailsSlice";
-// import { ActorDetailsState, ActorInfo, fetchActorDetails } from "../features/fetchActorDetailsSlice";
-// import { fetchSimilarMovies, SimilarMoviesState } from "../features/fetchSimilarMoviesSlice";
-// import { fetchRecentRecords, RecentRecordsState } from "../features/fetchRecentRecordsSlice";
-// import { fetchLikeMovies, LikeMoviesState } from "../features/fetchLikeMoviesSlice";
-// import { fetchUserInfo, UserInfoState } from "../features/fetchUserInfoSlice";
-// import { fetchUserComments, UserCommentsState } from "../features/fetchUserCommentsSlice";
+import { fetchMovieDetails, MovieDetails, MovieDetailsState } from "../features/fetchMovieDetailsSlice";
+import { ActorDetailsState, ActorInfo, fetchActorDetails } from "../features/fetchActorDetailsSlice";
+import { fetchSimilarMovies, SimilarMoviesState } from "../features/fetchSimilarMoviesSlice";
+import { fetchRecentRecords, RecentRecordsState } from "../features/fetchRecentRecordsSlice";
+import { fetchLikeMovies, LikeMoviesState } from "../features/fetchLikeMoviesSlice";
+import { fetchUserInfo, UserInfoState } from "../features/fetchUserInfoSlice";
+import { fetchUserComments, UserCommentsState } from "../features/fetchUserCommentsSlice";
+
 
 export interface MovieDetailedPages {}
 
-interface MovieFullDetails {
-  adult?: boolean,
-  backdrop_path?: string,
-  belongs_to_collection?: null | object,
-  budget?: number,
-  genres?: [{id: number , name: string}],
-  genre_ids?: [number],
-  homepage?: string | null,
-  id?: number,
-  imdb_id?: string | null,
-  original_language?: string,
-  original_title?: string,
-  overview?: string | null,
-  popularity?: number,
-  poster_path?: string | null,
-  production_companies?: [{id: number, logo_path: string, name: string, origin_country: string}],
-  production_countries?: [{iso_3166_1: string, name: string}],
-  release_date?: string,
-  revenue?: number,
-  runtime?: number | null,
-  spoken_languages?: [{iso_639_1: string, name: string}],
-  status?: string,
-  tagline?: string | null,
-  title?: string,
-  video?: boolean,
-  vote_average?: number,
-  vote_count?: number
+interface CommentsInput {
+  comment: string
+  nickname: string
+  rate: number
 }
 
-interface ActorInfo {
-  adult: boolean
-  cast_id: number
-  character: string
-  credit_id: string
-  gender: number
-  id: number
-  known_for_department: string
-  name: string
-  order: number
-  original_name: string
-  popularity: number
-  profile_path: string
+interface InputValue {
+  comment: string
+  rate: number
 }
 
 interface CommentsInput {
@@ -87,74 +54,33 @@ interface WidthValue {
 
 const DetailedPages: React.FC<MovieDetailedPages> = () => {
   const localStorageUserInfo = JSON.parse(localStorage.getItem('user'))
-  const [currentUserInfo, setCurrentUserInfo] = useState<CurrentUserInfo>()
-  const [movieFullDetails, setMovieFullDetails] = useState<MovieFullDetails>()
   const [trailer, setTrailer] = useState([])
-  const [actors, setActors] = useState([])
-  const [director, setDirector] = useState([])
-  const [similarMovies, setSimilarMovies] = useState([])
-  const [like, setLike] = useState(false)
   const [moreCredits, setMoreCredits] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
   const [inputValue, setInputValue] = useState<InputValue>()
   const [comments, setComments] = useState<CommentsInput[]>([])
   const [contentsHeight, setContentsHeight] = useState<WidthValue>()
+  const [isLoading, setIsLoading] = useState(true);
+  const [like, setLike] = useState(false)
+  
+  const dispatch = useDispatch<AppDispatch>();
+  const {userInfo: currentUserInfo, loading: currentUserInfoLoading} = useSelector<RootState, UserInfoState>((state) => state.userInfo);
+  const {movieDetails, loading: movieDetailsLoading} = useSelector<RootState, MovieDetailsState>((state) => state.movieDetails);
+  const {actors, director, loading: actorDetailsLoading} = useSelector<RootState, ActorDetailsState>((state) => state.actorDetails);
+  const {similarMovies, loading: similarMoviesLoading} = useSelector<RootState, SimilarMoviesState>((state) => state.similarMovies);
+  const {recentRecords, loading: recentRecordsLoading} = useSelector<RootState, RecentRecordsState>((state) => state.recentRecords);
+  const {likeMovies, loading: likeMoviesLoading} = useSelector<RootState, LikeMoviesState>((state) => state.likeMovies);
+  const {userComments, loading: userCommentsLoading} = useSelector<RootState, UserCommentsState>((state) => state.userComments);
+
   const movieId = useParams().id
   const posterRef = useRef(null)
   const trailerRef = useRef(null)
   const rateInputRef = useRef(null)
 
-  useEffect(() => {
-    getUserInfo();
-    getRecentRecords()
-    .then((isExist)  => {
-      if (!isExist) {
-        setDoc(recordRef, {movieArray: [Number(movieId)]});
-      } else {
-        updateDoc(recordRef, {movieArray: arrayUnion(Number(movieId))});
-      }
-    })
-  },[])
+  const auth = getAuth();
   
-  useEffect(() => {
-    getLikeMovies()
-    .then((isLike) => {
-      setLike(isLike);
-      setIsLoading(false);
-    });
-  }, [])
-
-  useEffect(() => {
-    getComments()
-  },[])
-
-  useEffect(() => {
-    if(comments === []){
-      const comments: Array<CommentsInput> = [];
-      setDoc(movieCommentRef,{comments})
-    }
-  },[])
-
-  useEffect(() => {
-    getUserComment()
-    .then((isUserComment) => {
-      if(!isUserComment) {
-        const commentsArray: Array<UserComment> = [];
-        setDoc(userCommentRef,{commentsArray})
-      }
-    })
-  })
-  
-  useEffect(() => {
-    async function fullDetails(){
-      const movieDetailApi = `${API_URL}/movie/${movieId}?api_key=${API_KEY}`
-      const res = await fetch(movieDetailApi)
-      const results = await res.json()
-      setMovieFullDetails(results)
-      return results
-    }
-    fullDetails()
-  },[])
+  const recordRef = doc(db, "users", localStorageUserInfo.uid, "recentRecords", "movies");
+  const likeRef = doc(db, "users", localStorageUserInfo.uid, 'likeMovies','movies');
+ 
 
   useEffect(() => {
     async function trailerApi(){
@@ -166,65 +92,61 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
     }
     trailerApi()
   },[]) 
-  
+
+
+  useEffect(() => {
+    getComments()
+    .then(() => {
+      setIsLoading(false);
+    })
+  }, [])
+
+  useEffect(() => {
+    if(comments === []) {
+      const comments: Array<CommentsInput> = [];
+      setDoc(movieCommentRef,{comments});
+    }
+  }, [comments])
   
   useEffect(() => {
-    async function actorDetails(){
-      const actorDetailApi = `${API_URL}/movie/${movieId}/credits?api_key=${API_KEY}`
-      const res = await fetch(actorDetailApi)
-      const results = await res.json()
-      setActors(results.cast)
-      setDirector([results.crew[0]])
-      return results
-    }
-    actorDetails()
-  },[]) 
-  
+    dispatch(fetchUserInfo());
+    dispatch(fetchMovieDetails(Number(movieId)));
+    dispatch(fetchActorDetails(Number(movieId)));
+    dispatch(fetchSimilarMovies(Number(movieId)));
+    dispatch(fetchRecentRecords());
+    dispatch(fetchLikeMovies());
+    dispatch(fetchUserComments());
+  },[])
+
   useEffect(() => {
-    async function similarMovies(){
-      const similarMoviesApi = `${API_URL}/movie/${movieId}/similar?api_key=${API_KEY}`
-      const res = await fetch(similarMoviesApi)
-      const results = await res.json()
-      setSimilarMovies(results.results)
-      return results
-    }
-    similarMovies()
-  },[]) 
-  
-  const auth = getAuth();
-  
-  const recordRef = doc(db, "users", localStorageUserInfo.uid, "recentRecords", "movies");
-  const getRecentRecords = async () => {
-    const recordSnap = await getDoc(recordRef);
-    const result = recordSnap.data();
-    
-    if(result === undefined) {
-      return false;
-    } else if((result.movieArray as Number[]).includes(Number(movieId))) {
-      updateDoc(recordRef, {movieArray: arrayRemove(Number(movieId))});
-      updateDoc(recordRef, {movieArray: arrayUnion(Number(movieId))});
-    } else if((result.movieArray as Number[]).length >= 20) {
-      const oldestRecord = result.movieArray[0];
-      updateDoc(recordRef, {movieArray: arrayRemove(oldestRecord)});
-    }
-    return true;
-  }
-
-  const likeRef = doc(db, "users", localStorageUserInfo.uid, 'likeMovies','movies');
-
-  const getLikeMovies =  async () => {
-    const likeSnap = await getDoc(likeRef);
-    const result = likeSnap.data();
-   
-    if(result !== undefined) {
-      if((result.moviesArray as Number[]).includes(Number(movieId))) {
-        return true;
+    if(recentRecordsLoading === 'succeeded' && recentRecords.length === 0) {
+      setDoc(recordRef, {movieArray: [Number(movieId)]});
+    } else {
+      if(recentRecords.includes(Number(movieId))) {
+        updateDoc(recordRef, {movieArray: arrayRemove(Number(movieId))});
+      } else if(recentRecords.length >= 20) {
+        const oldestRecord = recentRecords[0];
+        updateDoc(recordRef, {movieArray: arrayRemove(oldestRecord)});
       }
-    } else if (!result) {
-      setDoc(likeRef,{moviesArray:[]})
+      updateDoc(recordRef, {movieArray: arrayUnion(Number(movieId))});
     }
-    return false;
-  }
+  },[recentRecordsLoading])
+  
+  useEffect(() => {
+    if(likeMoviesLoading === 'succeeded') {
+      if(likeMovies.length > 0 && likeMovies.includes(Number(movieId))) {
+        setLike(true);
+      } else if(likeMovies.length === 0) {
+        setDoc(likeRef, {moviesArray: []});
+      }
+    }
+  }, [likeMoviesLoading])
+
+  useEffect(() => {
+    if(userCommentsLoading === 'succeeded' && userComments.length === 0) {
+      setDoc(userCommentRef, {commentsArray: []});
+    }
+  }, [userCommentsLoading])
 
 
   const onLikeButtonClick = () => {
@@ -280,8 +202,8 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
     return result
   }
 
-  function maxSevenMovies(movies: Array<MovieFullDetails>): Array<MovieFullDetails> {
-    const result: Array<MovieFullDetails> = []
+  function maxSevenMovies(movies: Array<MovieDetails>): Array<MovieDetails> {
+    const result: Array<MovieDetails> = []
     if(movies.length > 7){
       for(let i = 0; i < 7; i++){
         result.push(movies[i])
@@ -293,44 +215,21 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
   }
 
 
-
-  let movieTitle 
-  let movieGenres 
-  let moviePoster 
-  let movieImage 
-  let movieRelease 
-  let movieLanguage 
-  let movieRuntime
-  let movieOverview 
-  let movieRate
-
-  if(movieFullDetails !== undefined){
-    const {original_title, genres, poster_path, backdrop_path, release_date, spoken_languages, runtime, overview, vote_average, } = movieFullDetails
-
-    movieTitle = original_title
-    movieGenres = genres
-    moviePoster = poster_path
-    movieImage = backdrop_path
-    movieRelease = release_date
-    movieLanguage = spoken_languages[0].name
-    movieRuntime = runtime
-    movieOverview = overview
-    movieRate = vote_average
-  }
-
-
   const movieTrailer: string = trailerKey() 
-  const movieDirector: string = director[0]?.name
-  const fiveMovieActors: JSX.Element[] = maxFiveActors(actors).map((actor) => <li key={actor.credit_id} className="flex-1"><img className="w-20" src={`${IMAGE_URL}w300${actor.profile_path}`} alt='Actor Image'></img><p>{actor.character}역</p> <p>{actor.name}</p></li>)
+  const movieDirector: string = director?.name;
+  const fiveMovieActors: JSX.Element[] = maxFiveActors(actors).map((actor) => <li key={actor.credit_id}><img className="w-20" src={`${IMAGE_URL}w300${actor.profile_path}`} alt='Actor Image'></img><p>{actor.character}역</p> <p>{actor.name}</p></li>)
   const tenMovieActors: JSX.Element[] = maxTenActors(actors).map((actor) => <li key={actor.credit_id}><img className="w-20" src={`${IMAGE_URL}w300${actor.profile_path}`} alt='Actor Image'></img><p>{actor.character}역</p> <p>{actor.name}</p></li>)
   const sevenSimilarMovies: JSX.Element[] = maxSevenMovies(similarMovies).map((movie)=> <li key={movie.id}><Link to={`/movies/${movie.id}`}><img  src={movie.poster_path ? `${IMAGE_URL}w300${movie.poster_path}`: null} alt='Similar Movie Image'/></Link><p>{movie.title}</p></li>)
-  const movieYear: string = movieRelease !== undefined ? movieRelease.substring(0,4) : ""
+  const movieYear: string = movieDetails.movieRelease !== undefined ? movieDetails.movieRelease.substring(0,4) : ""
 
   let imgUrl = ""
-  if(movieImage !== undefined) {
-    imgUrl = `${IMAGE_URL}w500${movieImage}` 
+  if(movieDetails.movieImage !== undefined) {
+    imgUrl = `${IMAGE_URL}w500${movieDetails.movieImage}` 
   }
 
+  
+
+  
   
 
   const movieCommentRef = doc(db, 'movies', movieId)
@@ -368,11 +267,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
   }
 
 
-  const getUserInfo = async () => {
-    const userRef = doc(db, "users", localStorageUserInfo.uid);
-    const userSnap = await getDoc(userRef);
-    setCurrentUserInfo((userSnap.data() as CurrentUserInfo));
-  }
+
 
  const handleInput = (event: React.ChangeEvent<HTMLInputElement>) => {
   setInputValue({...inputValue, [event.target.name]: event.target.value})
@@ -392,7 +287,10 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
   onSubmit();
  }
 
-  if(isLoading) return <div>Loading...</div>
+  if(movieDetailsLoading !== 'succeeded' || actorDetailsLoading !== 'succeeded' || 
+    similarMoviesLoading !==  'succeeded' || recentRecordsLoading !==  'succeeded' || 
+    likeMoviesLoading !==  'succeeded' || currentUserInfoLoading !== 'succeeded' || 
+    userCommentsLoading !==  'succeeded' || isLoading) return <div>Loading...</div>
 
   return (
     <>
@@ -401,9 +299,10 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
 
         <div className="absolute w-3/4 left-[12.5%] bottom-10 flex flex-row justify-between">
           <div className='flex flex-row '>
-            <h2 className="text-3xl font-bold">{movieTitle}({movieYear})</h2> 
-            <div className='flex flex-row items-end ml-4'>{RatingStar(movieRate)} 
-              <p className="text-lg font-bold ">({movieRate})</p>
+
+            <h2 className="text-3xl font-bold">{movieDetails.movieTitle}({movieYear})</h2> 
+            <div className='flex flex-row items-end ml-4'>{RatingStar(movieDetails.movieRate)} 
+              <p className="text-lg font-bold ">({movieDetails.movieRate})</p>
             </div>
           </div>
 
@@ -412,19 +311,19 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
       </section>
 
       <section className="w-3/4 mt-14 mx-auto flex">  
-        <div className="basis-1/4 mr-4" ref={posterRef} style={{backgroundImage: `url(${IMAGE_URL}w300${moviePoster})`, backgroundRepeat: 'no-repeat', backgroundSize: 'cover', height: `${posterHeight()}px`}}></div>
+        <div className="basis-1/4 mr-4" ref={posterRef} style={{backgroundImage: `url(${IMAGE_URL}w300${movieDetails.moviePoster})`, backgroundRepeat: 'no-repeat', backgroundSize: 'cover', height: `${posterHeight()}px`}}></div>
         <div className="basis-2/4 ">
           <h3 className="text-2xl font-bold">기본정보</h3>
           <ul className="mr-4 text-lg">
             <li>
               <ul className='flex flex-row'>
               장르
-              {movieGenres&&movieGenres.map((genre) => <li key={genre.id} className="pl-2">{genre.name}</li>)}
+              {movieDetails.movieGenres&&movieDetails.movieGenres.map((genre) => <li key={genre.id} className="pl-2">{genre.name}</li>)}
               </ul>
             </li>
-            <li>개봉날짜 {movieRelease&&movieRelease}</li>
-            <li>언어 {movieLanguage&&movieLanguage}</li>
-            <li>러닝타임 {movieRuntime&&movieRuntime}분</li>
+            <li>개봉날짜 {movieDetails.movieRelease&&movieDetails.movieRelease}</li>
+            <li>언어 {movieDetails.movieLanguage&&movieDetails.movieLanguage}</li>
+            <li>러닝타임 {movieDetails.movieRuntime&&movieDetails.movieRuntime}분</li>
             <li>감독 {movieDirector&&movieDirector}</li>
           </ul>
         </div>
@@ -448,7 +347,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
         <div className='divider'></div>
         <div>
           <h3 className="text-2xl font-bold">줄거리</h3>
-          <p>{movieOverview&&movieOverview}</p>
+          <p>{movieDetails.movieOverview&&movieDetails.movieOverview}</p>
         </div>
         <div className='divider'></div>
         <h3 className="text-2xl font-bold">비슷한 영화</h3>

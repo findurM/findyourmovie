@@ -6,10 +6,13 @@ import { Link } from "react-router-dom";
 import InfiniteScroll from 'react-infinite-scroll-component'
 import Carousel from "../components/Carousel";
 import tw from "tailwind-styled-components/dist/tailwind";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../Application";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { InputBox } from "./Register";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../app/store";
+import { isExistUserInfo } from "../features/fetchUserInfoSlice";
 
 const Ranking = tw.div`
 absolute
@@ -37,6 +40,7 @@ const HomePage: React.FunctionComponent<IHomePageProps> = (props) => {
   const [bestMovies, setBestMovies] = useState([])
   const [age, setAge] = useState(20)
   const [selectedRadio, setSelectedRadio] = useState('여')
+  const dispatch = useDispatch<AppDispatch>();
 
   const ageRef = useRef<HTMLInputElement>()
 
@@ -64,14 +68,9 @@ const HomePage: React.FunctionComponent<IHomePageProps> = (props) => {
   useEffect(() => {
     const AuthCheck = onAuthStateChanged(auth, (user) => {
       if (user) {
-        const getUserInfo = async () => {
-          const userRef = doc(db, "users", user.uid);
-          const userSnap = await getDoc(userRef);
-          return userSnap.data();
-        }
-        getUserInfo()
-        .then((data) => {
-          if(data.age === undefined || data.sex === undefined) {
+        dispatch(isExistUserInfo(user.uid))
+        .then((isExist) => {
+          if(!isExist) {
             (document.querySelector("label.modal-button") as HTMLLabelElement).click();
           }
         });

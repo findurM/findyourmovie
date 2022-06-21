@@ -1,11 +1,14 @@
 import { EmailAuthProvider, getAuth, reauthenticateWithCredential, updatePassword } from "firebase/auth";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { doc, updateDoc } from "firebase/firestore";
 import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { db, CurrentUserInfo } from "../Application";
+import { db } from "../Application";
 import { CustomInput, RoundButton, Warning } from "./Register";
 import tw from "tailwind-styled-components"
 import { SubmitHandler, useForm } from "react-hook-form";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../app/store";
+import { fetchUserInfo, UserInfoState } from "../features/fetchUserInfoSlice";
 
 const InfoTitle = tw.p`
 font-bold
@@ -26,34 +29,27 @@ const MyInfo = () => {
   const [authing, setAuthing] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [file, setFile] = useState<File>();
-  const [currentUserInfo, setCurrentUserInfo] = useState<CurrentUserInfo>();
   const [url, setUrl] = useState<string>();
   const passwordRef = useRef<HTMLInputElement>()
   const [currentPassword, setCurrentPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
   const [nicknameInputValue, setNicknameInputValue] = useState<string>();
-  
-  const userRef = doc(db, "users", localStorageUserInfo.uid);
-  const getUserInfo = async () => {
-    const userSnap = await getDoc(userRef);
-    setCurrentUserInfo((userSnap.data() as CurrentUserInfo));
-  }
+  const dispatch = useDispatch<AppDispatch>();
+  const {userInfo: currentUserInfo, loading: currentUserInfoLoading} = useSelector<RootState, UserInfoState>((state) => state.userInfo);
 
   useEffect(() => {
-    getUserInfo()
-    .then(() => {
-      setIsLoading(false);
-    });
+    dispatch(fetchUserInfo());
   }, []);
 
   useEffect(() => {
-    if(currentUserInfo && currentUserInfo.profileImg !== "" && !currentUserInfo.profileImg.includes("googleusercontent.com")) {
+    if(currentUserInfo) {
       setNicknameInputValue(currentUserInfo.nickname);
-      imageDownload(currentUserInfo.profileImg);
-    } else if(currentUserInfo?.profileImg.includes("googleusercontent.com")) {
-      setUrl(currentUserInfo?.profileImg);
-    } else {
-      setUrl('/assets/defaultImage.png');
+      if(currentUserInfo.profileImg !== "" && !currentUserInfo.profileImg.includes("googleusercontent.com")) {
+        imageDownload(currentUserInfo.profileImg);
+      } else if(currentUserInfo?.profileImg.includes("googleusercontent.com")) {
+        setUrl(currentUserInfo?.profileImg);
+      } else {
+        setUrl('/assets/defaultImage.png');
+      }
     }
   }, [currentUserInfo])
 
@@ -85,6 +81,7 @@ const MyInfo = () => {
     preview.readAsDataURL((document.getElementById("selectImg") as HTMLInputElement).files[0]);
   }
 
+  const userRef = doc(db, "users", localStorageUserInfo.uid);
   const imageUpload = (file: File) => {
     const storage = getStorage();
     const storageRef = ref(storage, 'images/' + file.name);
@@ -139,14 +136,14 @@ const MyInfo = () => {
     confirmClick()
     .then(() => {
       alert("회원정보가 수정되었습니다.");
-      document.getElementById("nicknameTitle").textContent = nicknameInputValue;
+      dispatch(fetchUserInfo());
     })
     .catch((error) => {
       console.log(error);
     })
   }
 
-  if(isLoading) return <div>Loading...</div>
+  if(currentUserInfoLoading !== 'succeeded') return <div>Loading...</div>
   
   return (
     <>

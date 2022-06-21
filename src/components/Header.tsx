@@ -3,13 +3,12 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Link, useNavigate } from 'react-router-dom'
 import { getAuth, signOut } from 'firebase/auth';
 import {deleteUserInfo} from '../features/userSlice'
-import { RootState } from '../app/store';
+import { AppDispatch, RootState } from '../app/store';
 import {User} from '../features/userSlice'
 import { CgProfile } from "react-icons/cg";
 import { setCategory } from '../features/mypageCategorySlice';
-import { doc, getDoc } from 'firebase/firestore';
-import { db, CurrentUserInfo } from '../Application';
 import { getDownloadURL, getStorage, ref } from 'firebase/storage';
+import { fetchUserInfo, UserInfoState } from '../features/fetchUserInfoSlice';
 
 interface Props {}
 
@@ -18,21 +17,13 @@ const Header = () => {
   const localStorageUserInfo = JSON.parse(localStorage.getItem('user'))
   const userInfo = useSelector<RootState, User>((state) => state.user)
   const auth = getAuth();
-  const [currentUserInfo, setCurrentUserInfo] = useState<CurrentUserInfo>();
   const [url, setUrl] = useState<string>();
-  const dispatch = useDispatch()
+  const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate()
+  const {userInfo: currentUserInfo, loading: currentUserInfoLoading} = useSelector<RootState, UserInfoState>((state) => state.userInfo);
   
-  const getUserInfo = async () => {
-    const userRef = doc(db, "users", localStorageUserInfo.uid);
-    const userSnap = await getDoc(userRef);
-    setCurrentUserInfo(userSnap.data() as CurrentUserInfo);
-  }
   useEffect(() => {
-    getUserInfo()
-    .catch((error) => {
-      console.log(error);
-    })
+    dispatch(fetchUserInfo());
   }, []);
   useEffect(() => {
     if(currentUserInfo && currentUserInfo.profileImg !== "" && !currentUserInfo.profileImg.includes("googleusercontent.com")) {
