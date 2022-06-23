@@ -1,11 +1,11 @@
-import { getAuth } from "firebase/auth";
 import { arrayRemove, arrayUnion, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
-import RatingStar from '../components/RatingStar'
-import React, { useEffect, useRef, useState } from "react";
-import { useParams,Link } from "react-router-dom";
+import RatingStar from '../components/RatingStar';
+import React, { useEffect, useRef, useState} from "react";
+import { useParams, Link } from "react-router-dom";
 import { db } from "../Application";
 import { API_URL,API_KEY,IMAGE_URL } from "../config/config"
 import {BsHeart,BsFillHeartFill} from 'react-icons/bs'
+import {BiXCircle} from 'react-icons/bi'
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../app/store";
 import { fetchMovieDetails, MovieDetails, MovieDetailsState } from "../features/fetchMovieDetailsSlice";
@@ -34,12 +34,7 @@ interface CommentsInput {
   comment: string
   nickname: string
   rate: number
-}
-
-interface UserComment {
-  comment: string
-  movieId: number
-  rate: number
+  id: string
 }
 
 interface InputValue {
@@ -47,9 +42,9 @@ interface InputValue {
   rate: number
 }
 
-interface WidthValue {
-  postwidth: number
-  trailerWidth: number
+interface HeightValue {
+  posterHeight: number
+  trailerHeight: number
 }
 
 const DetailedPages: React.FC<MovieDetailedPages> = () => {
@@ -58,9 +53,10 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
   const [moreCredits, setMoreCredits] = useState(false)
   const [inputValue, setInputValue] = useState<InputValue>()
   const [comments, setComments] = useState<CommentsInput[]>([])
-  const [contentsHeight, setContentsHeight] = useState<WidthValue>()
+  const [contentsHeight, setContentsHeight] = useState<HeightValue>({posterHeight: 500, trailerHeight:200})
   const [isLoading, setIsLoading] = useState(true);
   const [like, setLike] = useState(false)
+
   
   const dispatch = useDispatch<AppDispatch>();
   const {userInfo: currentUserInfo, loading: currentUserInfoLoading} = useSelector<RootState, UserInfoState>((state) => state.userInfo);
@@ -72,15 +68,10 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
   const {userComments, loading: userCommentsLoading} = useSelector<RootState, UserCommentsState>((state) => state.userComments);
 
   const movieId = useParams().id
-  const posterRef = useRef(null)
-  const trailerRef = useRef(null)
   const rateInputRef = useRef(null)
-
-  const auth = getAuth();
-  
   const recordRef = doc(db, "users", localStorageUserInfo.uid, "recentRecords", "movies");
   const likeRef = doc(db, "users", localStorageUserInfo.uid, 'likeMovies','movies');
- 
+
 
   useEffect(() => {
     async function trailerApi(){
@@ -102,7 +93,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
   }, [])
 
   useEffect(() => {
-    if(comments === []) {
+    if(comments === undefined) {
       const comments: Array<CommentsInput> = [];
       setDoc(movieCommentRef,{comments});
     }
@@ -149,6 +140,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
   }, [userCommentsLoading])
 
 
+
   const onLikeButtonClick = () => {
     if(like) {
       updateDoc(likeRef, {moviesArray: arrayRemove(Number(movieId))});
@@ -156,14 +148,6 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
     } else {
       updateDoc(likeRef, {moviesArray: arrayUnion(Number(movieId))});
       setLike(true);
-    }
-  }
-
-  const posterHeight = () => {
-    if(posterRef !== undefined) {
-      const width = posterRef.current.clientWidth;
-      const height = width * 1.5;  
-      return height;
     }
   }
 
@@ -177,6 +161,23 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
 
     return result[0]
   }
+
+  const reportWindowSize = () => {
+    let contentsWidth = (window.innerWidth * 0.75) * 0.25;
+    let posterHeight = contentsWidth * 1.5;
+    let trailerHeight = contentsWidth * 0.7;
+   
+    if(window.innerWidth <= 320){
+      contentsWidth = 300;
+    } else if (window.innerWidth <= 640) {
+      posterHeight = (contentsWidth * 2) * 1.5;
+      trailerHeight = (contentsWidth * 4) * 0.7
+    }
+
+    setContentsHeight({...contentsHeight, posterHeight: posterHeight, trailerHeight: trailerHeight})
+  }
+  
+  window.onresize = reportWindowSize;
 
   function maxTenActors(actors: any[]): Array<ActorInfo> {
     const result: Array<ActorInfo> = []
@@ -213,24 +214,20 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
     }
     return result
   }
+  
 
 
   const movieTrailer: string = trailerKey() 
   const movieDirector: string = director?.name;
-  const fiveMovieActors: JSX.Element[] = maxFiveActors(actors).map((actor) => <li key={actor.credit_id}><img className="w-20" src={`${IMAGE_URL}w300${actor.profile_path}`} alt='Actor Image'></img><p>{actor.character}역</p> <p>{actor.name}</p></li>)
-  const tenMovieActors: JSX.Element[] = maxTenActors(actors).map((actor) => <li key={actor.credit_id}><img className="w-20" src={`${IMAGE_URL}w300${actor.profile_path}`} alt='Actor Image'></img><p>{actor.character}역</p> <p>{actor.name}</p></li>)
-  const sevenSimilarMovies: JSX.Element[] = maxSevenMovies(similarMovies).map((movie)=> <li key={movie.id}><Link to={`/movies/${movie.id}`}><img  src={movie.poster_path ? `${IMAGE_URL}w300${movie.poster_path}`: null} alt='Similar Movie Image'/></Link><p>{movie.title}</p></li>)
+  const fiveMovieActors: JSX.Element[] = maxFiveActors(actors).map((actor) => <li className = 'w-28'  key={actor.credit_id}><img className="w-20" src={`${IMAGE_URL}w300${actor.profile_path}`} alt='Actor Image'></img><p className = 'display whitespace-nowrap overflow-hidden text-ellipsis'>{actor.character}역</p> <p className = 'display whitespace-nowrap overflow-hidden text-ellipsis'>{actor.name}</p></li>)
+  const tenMovieActors: JSX.Element[] = maxTenActors(actors).map((actor) => <li className = 'w-28' key={actor.credit_id}><img className="w-20" src={`${IMAGE_URL}w300${actor.profile_path}`} alt='Actor Image'></img><p className = 'display whitespace-nowrap overflow-hidden text-ellipsis'>{actor.character}역</p> <p className = 'display whitespace-nowrap overflow-hidden text-ellipsis'>{actor.name}</p></li>)
+  const sevenSimilarMovies: JSX.Element[] = maxSevenMovies(similarMovies).map((movie)=> <li key={movie.id} onClick={()=> window.location.reload()}><Link to={`/movies/${movie.id}`}><img  src={movie.poster_path ? `${IMAGE_URL}w300${movie.poster_path}`: null} alt='Similar Movie Image'/></Link></li>)
   const movieYear: string = movieDetails.movieRelease !== undefined ? movieDetails.movieRelease.substring(0,4) : ""
 
   let imgUrl = ""
   if(movieDetails.movieImage !== undefined) {
     imgUrl = `${IMAGE_URL}w500${movieDetails.movieImage}` 
   }
-
-  
-
-  
-  
 
   const movieCommentRef = doc(db, 'movies', movieId)
   const userCommentRef = doc(db, 'users', localStorageUserInfo?.uid, 'movieComments', 'comments')
@@ -245,29 +242,19 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
     }else return false
   }
 
-  const getUserComment = async() => {
-    const userCommentSnap = await getDoc(userCommentRef);
-    const result = userCommentSnap.data();
-    
-    if(result !== undefined) return true
-    else return false
-  }
-
   const onSubmit = async() => {
     
    updateDoc(movieCommentRef, 
                       {comments: arrayUnion({comment: inputValue.comment,
                                             nickname: currentUserInfo?.nickname,
-                                            rate: inputValue.rate})})
+                                            rate: inputValue.rate,
+                                            id: currentUserInfo?.id})})
 
     updateDoc(userCommentRef, 
                       {commentsArray: arrayUnion({comment : inputValue.comment,
                                                   movieId: movieId,
                                                   rate: inputValue.rate})})
   }
-
-
-
 
  const handleInput = (event: React.ChangeEvent<HTMLInputElement>) => {
   setInputValue({...inputValue, [event.target.name]: event.target.value})
@@ -286,6 +273,12 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
   event.preventDefault();
   onSubmit();
  }
+
+ const removeComments = () => {
+
+ }
+
+
 
   if(movieDetailsLoading !== 'succeeded' || actorDetailsLoading !== 'succeeded' || 
     similarMoviesLoading !==  'succeeded' || recentRecordsLoading !==  'succeeded' || 
@@ -311,14 +304,15 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
       </section>
 
       <section className="w-3/4 mt-14 mx-auto flex">  
-        <div className="basis-1/4 mr-4" ref={posterRef} style={{backgroundImage: `url(${IMAGE_URL}w300${movieDetails.moviePoster})`, backgroundRepeat: 'no-repeat', backgroundSize: 'cover', height: `${posterHeight()}px`}}></div>
+        <div className="basis-1/4 mr-4 shrink-0" style={{backgroundImage: `url(${IMAGE_URL}w300${movieDetails.moviePoster})`, backgroundRepeat: 'no-repeat', backgroundSize: 'contain', height: `${contentsHeight.posterHeight}px`}}></div>
+        
         <div className="basis-2/4 ">
-          <h3 className="text-2xl font-bold">기본정보</h3>
+          <h3 className="text-2xl font-bold mb-4">기본정보</h3>
           <ul className="mr-4 text-lg">
             <li>
               <ul className='flex flex-row'>
               장르
-              {movieDetails.movieGenres&&movieDetails.movieGenres.map((genre) => <li key={genre.id} className="pl-2">{genre.name}</li>)}
+              {movieDetails.movieGenres&&movieDetails.movieGenres.map((genre) => <li key={genre.id} className="pl-2 display whitespace-nowrap overflow-hidden text-ellipsis">{genre.name}</li>)}
               </ul>
             </li>
             <li>개봉날짜 {movieDetails.movieRelease&&movieDetails.movieRelease}</li>
@@ -329,8 +323,8 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
         </div>
         
         <div className="basis-1/4">
-          <h3 className="text-2xl font-bold">트레일러</h3>
-          {movieTrailer&&<iframe  src={`https://www.youtube.com/embed/${movieTrailer}`} title="YouTube video player" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>}
+          <h3 className="text-2xl font-bold mb-4">트레일러</h3>
+          {movieTrailer&& <iframe  height={contentsHeight.trailerHeight} src={`https://www.youtube.com/embed/${movieTrailer}`} title="YouTube video player" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>}
         </div>
         
       </section>
@@ -338,19 +332,19 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
       <section className="w-3/4  mx-auto ">
         <div className='divider'></div>
         <div>
-          <h3 className="text-2xl font-bold">출연진</h3>
-          <ul className='flex flex-row'>
+          <h3 className="text-2xl font-bold mb-4">출연진</h3>
+          <ul className='flex flex-row overflow-auto'>
             {moreCredits ? tenMovieActors : fiveMovieActors}
             <li><button className='btn btn-primary btn-sm' onClick={()=>moreCredits ? setMoreCredits(false) :setMoreCredits(true)}>{moreCredits ? `접기` : `더보기`}</button></li>
           </ul>
         </div>
         <div className='divider'></div>
         <div>
-          <h3 className="text-2xl font-bold">줄거리</h3>
+          <h3 className="text-2xl font-bold mb-4">줄거리</h3>
           <p>{movieDetails.movieOverview&&movieDetails.movieOverview}</p>
         </div>
         <div className='divider'></div>
-        <h3 className="text-2xl font-bold">비슷한 영화</h3>
+        <h3 className="text-2xl font-bold mb-4">비슷한 영화</h3>
 
         <ul className='flex flex-row justify-between'>
           {sevenSimilarMovies}
@@ -359,15 +353,15 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
       </section>
 
 
-      <section className="w-3/4  mx-auto flex flex-col">
-        <h3 className="text-2xl font-bold">감상평</h3>
+      <section className="w-3/4  mx-auto flex flex-col mb-8">
+        <h3 className="text-2xl font-bold mb-4">감상평</h3>
         <div className='bg-gray-300 flex flex-col items-center py-8'>
 
-          <p>별점을 선택해주세요</p>
+          <p className='mb-4'>별점을 선택해주세요</p>
 
           <form className="flex flex-col items-center w-full" onSubmit={handleSubmit} >
 
-          <div className="rating rating-md rating-half" ref={rateInputRef}>
+          <div className="rating rating-md rating-half mb-4" ref={rateInputRef}>
             <input type="radio" name="rating-10" className="rating-hidden" />
             <input type="radio" name="rating-10" className="bg-yellow-500 mask mask-star-2 mask-half-1" />
             <input type="radio" name="rating-10" className="bg-yellow-500 mask mask-star-2 mask-half-2" />
@@ -390,7 +384,17 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
         </div>
 
         <div>
-          {comments.map((comment, index)=> <div key={index}> <div className="flex flex-row">{RatingStar(comment.rate)}</div> <p>{comment.nickname}</p> <span>{comment.comment}</span> <div className="divider"></div></div>)}
+          {comments.map((comment, index)=> <div key={index}>
+                                            <div className="flex flex-row justify-between" > 
+                                              <div> 
+                                                <div className="flex flex-row my-4">{RatingStar(comment.rate)}</div>  
+                                                <span >{comment.comment}</span> 
+                                                <p className="text-gray-400">{comment.nickname}</p>
+                                              </div> 
+                                              <div>{comment.id == currentUserInfo?.id ?<button><BiXCircle className="text-gray-400 text-2xl" ></BiXCircle> </button> : ""}</div> 
+                                            </div> 
+                                            <div className="divider"></div>
+                                          </div>)}
         </div>
       </section>
 
