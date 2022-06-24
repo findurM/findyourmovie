@@ -219,9 +219,28 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
 
   const movieTrailer: string = trailerKey() 
   const movieDirector: string = director?.name;
-  const fiveMovieActors: JSX.Element[] = maxFiveActors(actors).map((actor) => <li className = 'w-28'  key={actor.credit_id}><img className="w-20" src={`${IMAGE_URL}w300${actor.profile_path}`} alt='Actor Image'></img><p className = 'display whitespace-nowrap overflow-hidden text-ellipsis'>{actor.character}역</p> <p className = 'display whitespace-nowrap overflow-hidden text-ellipsis'>{actor.name}</p></li>)
-  const tenMovieActors: JSX.Element[] = maxTenActors(actors).map((actor) => <li className = 'w-28' key={actor.credit_id}><img className="w-20" src={`${IMAGE_URL}w300${actor.profile_path}`} alt='Actor Image'></img><p className = 'display whitespace-nowrap overflow-hidden text-ellipsis'>{actor.character}역</p> <p className = 'display whitespace-nowrap overflow-hidden text-ellipsis'>{actor.name}</p></li>)
-  const sevenSimilarMovies: JSX.Element[] = maxSevenMovies(similarMovies).map((movie)=> <li key={movie.id} onClick={()=> window.location.reload()}><Link to={`/movies/${movie.id}`}><img  src={movie.poster_path ? `${IMAGE_URL}w300${movie.poster_path}`: null} alt='Similar Movie Image'/></Link></li>)
+  const fiveMovieActors: JSX.Element[] = maxFiveActors(actors).map((actor) => (
+    <li className = 'w-28'  key={actor.credit_id}>
+      <img className="w-20" src={`${IMAGE_URL}w300${actor.profile_path}`} alt='Actor Image'/>
+      <p className = 'display whitespace-nowrap overflow-hidden text-ellipsis'>{actor.character}역</p> 
+      <p className = 'display whitespace-nowrap overflow-hidden text-ellipsis'>{actor.name}</p>
+    </li>
+  ))
+  const tenMovieActors: JSX.Element[] = maxTenActors(actors).map((actor) => (
+  <li className = 'w-28' key={actor.credit_id}>
+    <img className="w-20" src={`${IMAGE_URL}w300${actor.profile_path}`} alt='Actor Image'/>
+    <p className = 'display whitespace-nowrap overflow-hidden text-ellipsis'>{actor.character}역</p> 
+    <p className = 'display whitespace-nowrap overflow-hidden text-ellipsis'>{actor.name}</p>
+  </li>
+  ))
+  const sevenSimilarMovies: JSX.Element[] = maxSevenMovies(similarMovies).map((movie)=> (
+  <li key={movie.id} onClick={()=> window.location.reload()}>
+    <Link to={`/movies/${movie.id}`}>
+      <img  src={movie.poster_path ? `${IMAGE_URL}w300${movie.poster_path}`: null} alt='Similar Movie Image'/>
+    </Link>
+  </li>
+  ))
+
   const movieYear: string = movieDetails.movieRelease !== undefined ? movieDetails.movieRelease.substring(0,4) : ""
 
   let imgUrl = ""
@@ -245,15 +264,17 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
   const onSubmit = async() => {
     
    updateDoc(movieCommentRef, 
-                      {comments: arrayUnion({comment: inputValue.comment,
-                                            nickname: currentUserInfo?.nickname,
-                                            rate: inputValue.rate,
-                                            id: currentUserInfo?.id})})
+    {comments: arrayUnion({
+      comment: inputValue.comment,
+      nickname: currentUserInfo?.nickname,
+      rate: inputValue.rate,
+      id: currentUserInfo?.id})})
 
     updateDoc(userCommentRef, 
-                      {commentsArray: arrayUnion({comment : inputValue.comment,
-                                                  movieId: movieId,
-                                                  rate: inputValue.rate})})
+    {commentsArray: arrayUnion({
+      comment : inputValue.comment,
+      movieId: movieId,
+      rate: inputValue.rate})})
   }
 
  const handleInput = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -384,17 +405,20 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
         </div>
 
         <div>
-          {comments.map((comment, index)=> <div key={index}>
-                                            <div className="flex flex-row justify-between" > 
-                                              <div> 
-                                                <div className="flex flex-row my-4">{RatingStar(comment.rate)}</div>  
-                                                <span >{comment.comment}</span> 
-                                                <p className="text-gray-400">{comment.nickname}</p>
-                                              </div> 
-                                              <div>{comment.id == currentUserInfo?.id ?<button><BiXCircle className="text-gray-400 text-2xl" ></BiXCircle> </button> : ""}</div> 
-                                            </div> 
-                                            <div className="divider"></div>
-                                          </div>)}
+          {comments.map((comment, index)=> (
+          <div key={index}>
+            <div className="flex flex-row justify-between" > 
+              <div> 
+                <div className="flex flex-row my-4">{RatingStar(comment.rate)}</div>  
+                <span >{comment.comment}</span> 
+                <p className="text-gray-400">{comment.nickname}</p>
+              </div> 
+              <div>{comment.id == currentUserInfo?.id ?<button><BiXCircle className="text-gray-400 text-2xl" ></BiXCircle> </button> : ""}</div> 
+            </div> 
+            <div className="divider"></div>
+          </div>
+          )
+        )}
         </div>
       </section>
 
