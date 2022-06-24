@@ -58,7 +58,7 @@ export const LikeGridCards = ({image, alt: movieId}:Props) => {
   }
 
   return (
-    <div className='relative'>
+    <div className='relative w-fit'>
       <GridCards 
         image={image}
         alt={movieId}
