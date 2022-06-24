@@ -26,6 +26,7 @@ p-2
 font-bold
 md:top-3
 md:right-3
+xl3:right-14
 `
 
 export interface IHomePageProps {}
@@ -97,9 +98,10 @@ const HomePage: React.FunctionComponent<IHomePageProps> = (props) => {
   }
 
   const updateUserInfo = async () => {
-    await updateDoc(doc(db,"users", auth.currentUser?.uid),
-                          {age: age,
-                          sex: selectedRadio})
+    await updateDoc(
+      doc(db,"users", auth.currentUser?.uid),
+      {age: age,
+      sex: selectedRadio})
   }
 
   return (
