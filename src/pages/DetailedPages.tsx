@@ -263,18 +263,20 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
 
   const onSubmit = async() => {
     
-   updateDoc(movieCommentRef, 
+   await updateDoc(movieCommentRef, 
     {comments: arrayUnion({
       comment: inputValue.comment,
       nickname: currentUserInfo?.nickname,
       rate: inputValue.rate,
       id: currentUserInfo?.id})})
 
-    updateDoc(userCommentRef, 
+    await updateDoc(userCommentRef, 
     {commentsArray: arrayUnion({
       comment : inputValue.comment,
       movieId: movieId,
       rate: inputValue.rate})})
+
+      getComments()
   }
 
  const handleInput = (event: React.ChangeEvent<HTMLInputElement>) => {
