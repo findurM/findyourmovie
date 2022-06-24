@@ -185,7 +185,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
     const likeSnap = await getDoc(likeRef);
     const result = likeSnap.data();
    
-    if(result&&result.movieArray !== undefined) {
+    if(result) {
       if((result.moviesArray as Number[]).includes(Number(movieId))) {
         return true;
       }
