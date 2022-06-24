@@ -56,6 +56,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
   const [contentsHeight, setContentsHeight] = useState<HeightValue>({posterHeight: 500, trailerHeight:200})
   const [isLoading, setIsLoading] = useState(true);
   const [like, setLike] = useState(false)
+  const [deleteComment, setDeleteComment] = useState<CommentsInput>();
 
   
   const dispatch = useDispatch<AppDispatch>();
@@ -297,6 +298,14 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
     onSubmit();
   }
 
+  const removeComment = async() => {
+    if(deleteComment) {
+      await updateDoc(movieCommentRef, {comments: arrayRemove(deleteComment)});
+      getComments();
+      setDeleteComment(null);
+    }
+  }
+
 
   if(movieDetailsLoading !== 'succeeded' || actorDetailsLoading !== 'succeeded' || 
     similarMoviesLoading !==  'succeeded' || recentRecordsLoading !==  'succeeded' || 
@@ -411,12 +420,9 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
                 <p className="text-gray-400">{comment.nickname}</p>
               </div> 
               <div>{comment.id == currentUserInfo?.id ?
-                <button onClick={async() => {
-                  await updateDoc(movieCommentRef, {comments: arrayRemove(comment)});
-                  getComments();
-                }}>
+                <label htmlFor="my-modal-6" className="modal-button cursor-pointer" onClick={() => {setDeleteComment(comment)}}>
                   <BiXCircle className="text-gray-400 text-2xl" ></BiXCircle> 
-                </button> : ""}
+                </label> : ""}
               </div> 
             </div> 
             <div className="divider"></div>
@@ -424,8 +430,17 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
           )
         )}
         </div>
+        <input type="checkbox" id="my-modal-6" className="modal-toggle" />
+        <div className="modal modal-bottom sm:modal-middle">
+          <div className="modal-box">
+            <h3 className="font-bold text-lg">정말 감상평을 삭제하시겠습니까?</h3>
+            <p className="py-4">삭제 후엔 되돌릴 수 없습니다.</p>
+            <div className="modal-action">
+              <label htmlFor="my-modal-6" className="btn" onClick={removeComment}>삭제</label>
+            </div>
+          </div>
+        </div>
       </section>
-
     </>
   )
 };
