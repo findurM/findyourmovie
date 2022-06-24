@@ -279,28 +279,23 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
       getComments()
   }
 
- const handleInput = (event: React.ChangeEvent<HTMLInputElement>) => {
-  setInputValue({...inputValue, [event.target.name]: event.target.value})
- }
-
- const handleRateInput = () => {
-  let count = 0;
-  const stars = rateInputRef.current.childNodes
-  for(let i = 0; i < stars.length; i++) {
-    if(stars[i].checked) count = i;
+  const handleInput = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue({...inputValue, [event.target.name]: event.target.value})
   }
-  setInputValue({...inputValue, rate: count})
- }
 
- const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-  event.preventDefault();
-  onSubmit();
- }
+  const handleRateInput = () => {
+    let count = 0;
+    const stars = rateInputRef.current.childNodes
+    for(let i = 0; i < stars.length; i++) {
+      if(stars[i].checked) count = i;
+    }
+    setInputValue({...inputValue, rate: count})
+  }
 
- const removeComments = () => {
-
- }
-
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    onSubmit();
+  }
 
 
   if(movieDetailsLoading !== 'succeeded' || actorDetailsLoading !== 'succeeded' || 
@@ -415,7 +410,14 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
                 <span >{comment.comment}</span> 
                 <p className="text-gray-400">{comment.nickname}</p>
               </div> 
-              <div>{comment.id == currentUserInfo?.id ?<button><BiXCircle className="text-gray-400 text-2xl" ></BiXCircle> </button> : ""}</div> 
+              <div>{comment.id == currentUserInfo?.id ?
+                <button onClick={async() => {
+                  await updateDoc(movieCommentRef, {comments: arrayRemove(comment)});
+                  getComments();
+                }}>
+                  <BiXCircle className="text-gray-400 text-2xl" ></BiXCircle> 
+                </button> : ""}
+              </div> 
             </div> 
             <div className="divider"></div>
           </div>
