@@ -391,7 +391,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
                                                 <span >{comment.comment}</span> 
                                                 <p className="text-gray-400">{comment.nickname}</p>
                                               </div> 
-                                              <div>{comment.id == currentUserInfo?.id ?<button><BiXCircle className="text-gray-400 text-2xl" ></BiXCircle> </button> : ""}</div> 
+                                              <div>{comment.id === currentUserInfo?.id ?<button><BiXCircle className="text-gray-400 text-2xl" ></BiXCircle> </button> : ""}</div> 
                                             </div> 
                                             <div className="divider"></div>
                                           </div>)}
