@@ -11,6 +11,7 @@ import similarMoviesSlice from "../features/fetchSimilarMoviesSlice";
 import recentRecordsSlice from "../features/fetchRecentRecordsSlice";
 import likeMoviesSlice from "../features/fetchLikeMoviesSlice";
 import userCommentsSlice from "../features/fetchUserCommentsSlice";
+import movieCommentsSlice from "../features/fetchMovieCommentsSlice";
 
 export const store = configureStore({
   reducer: {
@@ -26,6 +27,7 @@ export const store = configureStore({
     recentRecords: recentRecordsSlice,
     likeMovies: likeMoviesSlice,
     userComments: userCommentsSlice,
+    movieComments: movieCommentsSlice,
   }
 })
 

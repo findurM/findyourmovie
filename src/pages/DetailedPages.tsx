@@ -15,22 +15,12 @@ import { fetchRecentRecords, RecentRecordsState } from "../features/fetchRecentR
 import { fetchLikeMovies, LikeMoviesState } from "../features/fetchLikeMoviesSlice";
 import { fetchUserInfo, UserInfoState } from "../features/fetchUserInfoSlice";
 import { fetchUserComments, UserCommentsState } from "../features/fetchUserCommentsSlice";
+import { fetchMovieComments, MovieCommentsState } from "../features/fetchMovieCommentsSlice";
 
 
 export interface MovieDetailedPages {}
 
-interface CommentsInput {
-  comment: string
-  nickname: string
-  rate: number
-}
-
-interface InputValue {
-  comment: string
-  rate: number
-}
-
-interface CommentsInput {
+export interface CommentsInput {
   comment: string
   nickname: string
   rate: number
@@ -48,14 +38,12 @@ interface HeightValue {
 }
 
 const DetailedPages: React.FC<MovieDetailedPages> = () => {
-  const localStorageUserInfo = JSON.parse(localStorage.getItem('user'))
-  const [trailer, setTrailer] = useState([])
-  const [moreCredits, setMoreCredits] = useState(false)
-  const [inputValue, setInputValue] = useState<InputValue>()
-  const [comments, setComments] = useState<CommentsInput[]>([])
-  const [contentsHeight, setContentsHeight] = useState<HeightValue>({posterHeight: 500, trailerHeight:200})
-  const [isLoading, setIsLoading] = useState(true);
-  const [like, setLike] = useState(false)
+  const localStorageUserInfo = JSON.parse(localStorage.getItem('user'));
+  const [trailer, setTrailer] = useState([]);
+  const [moreCredits, setMoreCredits] = useState(false);
+  const [inputValue, setInputValue] = useState<InputValue>();
+  const [contentsHeight, setContentsHeight] = useState<HeightValue>({posterHeight: 500, trailerHeight:200});
+  const [like, setLike] = useState(false);
   const [deleteComment, setDeleteComment] = useState<CommentsInput>();
 
   
@@ -67,11 +55,14 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
   const {recentRecords, loading: recentRecordsLoading} = useSelector<RootState, RecentRecordsState>((state) => state.recentRecords);
   const {likeMovies, loading: likeMoviesLoading} = useSelector<RootState, LikeMoviesState>((state) => state.likeMovies);
   const {userComments, loading: userCommentsLoading} = useSelector<RootState, UserCommentsState>((state) => state.userComments);
+  const {movieComments: comments, loading: movieCommentsLoading} = useSelector<RootState, MovieCommentsState>((state) => state.movieComments);
 
-  const movieId = useParams().id
-  const rateInputRef = useRef(null)
+  const movieId = useParams().id;
+  const rateInputRef = useRef(null);
   const recordRef = doc(db, "users", localStorageUserInfo.uid, "recentRecords", "movies");
   const likeRef = doc(db, "users", localStorageUserInfo.uid, 'likeMovies','movies');
+  const movieCommentRef = doc(db, 'movies', movieId);
+  const userCommentRef = doc(db, 'users', localStorageUserInfo.uid, 'movieComments', 'comments');
 
 
   useEffect(() => {
@@ -83,22 +74,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
       return results
     }
     trailerApi()
-  },[]) 
-
-
-  useEffect(() => {
-    getComments()
-    .then(() => {
-      setIsLoading(false);
-    })
-  }, [])
-
-  useEffect(() => {
-    if(comments === undefined) {
-      const comments: Array<CommentsInput> = [];
-      setDoc(movieCommentRef,{comments});
-    }
-  }, [comments])
+  },[])
   
   useEffect(() => {
     dispatch(fetchUserInfo());
@@ -108,6 +84,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
     dispatch(fetchRecentRecords());
     dispatch(fetchLikeMovies());
     dispatch(fetchUserComments());
+    dispatch(fetchMovieComments(movieId));
   },[])
 
   useEffect(() => {
@@ -139,6 +116,12 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
       setDoc(userCommentRef, {commentsArray: []});
     }
   }, [userCommentsLoading])
+
+  useEffect(() => {
+    if(movieCommentsLoading === 'succeeded' && comments.length === 0) {
+      setDoc(movieCommentRef, {comments: []});
+    }
+  }, [movieCommentsLoading])
 
 
 
@@ -249,35 +232,21 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
     imgUrl = `${IMAGE_URL}w500${movieDetails.movieImage}` 
   }
 
-  const movieCommentRef = doc(db, 'movies', movieId)
-  const userCommentRef = doc(db, 'users', localStorageUserInfo?.uid, 'movieComments', 'comments')
-
-  const getComments = async() => {
-    const commentsSnap = await getDoc(movieCommentRef);
-    const result = commentsSnap.data();
-   
-    if(result !== undefined) {
-      setComments(result.comments)
-      return true
-    }else return false
-  }
-
   const onSubmit = async() => {
-    
-   await updateDoc(movieCommentRef, 
-    {comments: arrayUnion({
-      comment: inputValue.comment,
-      nickname: currentUserInfo?.nickname,
-      rate: inputValue.rate,
-      id: currentUserInfo?.id})})
+    await updateDoc(movieCommentRef, 
+      {comments: arrayUnion({
+        comment: inputValue.comment,
+        nickname: currentUserInfo?.nickname,
+        rate: inputValue.rate,
+        id: currentUserInfo?.id})})
 
     await updateDoc(userCommentRef, 
-    {commentsArray: arrayUnion({
-      comment : inputValue.comment,
-      movieId: movieId,
-      rate: inputValue.rate})})
+      {commentsArray: arrayUnion({
+        comment : inputValue.comment,
+        movieId: movieId,
+        rate: inputValue.rate})})
 
-      getComments()
+    dispatch(fetchMovieComments(movieId));
   }
 
   const handleInput = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -305,7 +274,8 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
         comment : deleteComment.comment,
         movieId: movieId,
         rate: deleteComment.rate})});
-      getComments();
+
+      dispatch(fetchMovieComments(movieId));
       setDeleteComment(null);
     }
   }
@@ -314,7 +284,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
   if(movieDetailsLoading !== 'succeeded' || actorDetailsLoading !== 'succeeded' || 
     similarMoviesLoading !==  'succeeded' || recentRecordsLoading !==  'succeeded' || 
     likeMoviesLoading !==  'succeeded' || currentUserInfoLoading !== 'succeeded' || 
-    userCommentsLoading !==  'succeeded' || isLoading) return <div>Loading...</div>
+    userCommentsLoading !==  'succeeded') return <div>Loading...</div>
 
   return (
     <>
@@ -434,6 +404,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
           )
         )}
         </div>
+        
         <input type="checkbox" id="my-modal-6" className="modal-toggle" />
         <div className="modal modal-bottom sm:modal-middle">
           <div className="modal-box">
