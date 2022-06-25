@@ -29,7 +29,7 @@ const Carousel = ({category}:Props) => {
     }
     const getMovies = (category: keyof ICategory) => {
         const newCategory = categoryKR[category]
-        const endpoint = `${API_URL}movie/${newCategory}?api_key=${API_KEY}&language=en-US&page=1`
+        const endpoint = `${API_URL}movie/${newCategory}?api_key=${API_KEY}&language=ko&page=1`
         fetch(endpoint)
         .then(response => response.json())
         .then(response => {

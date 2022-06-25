@@ -6,14 +6,23 @@ export const fetchMovieImages = createAsyncThunk(
   async (movieId: Number) => {
     const res = await fetch(`${API_URL}/movie/${movieId}/images?api_key=${API_KEY}`);
     const data = await res.json();
-    const newImage = [{movieId: movieId, poster: data.posters[0]}];
+    console.log(data);
+
+    const isKoPoster = (datas: {iso_639_1: string}) => {
+      if(datas.iso_639_1 === 'ko') {
+        return true;
+      }
+    }
+    const koPoster = data.posters.find(isKoPoster);
+
+    const newImage = [{movieId: movieId, poster: koPoster ? koPoster.file_path : data.posters[0].file_path}];
     return newImage;
   }
 )
 
 export interface MovieImages {
   movieId: Number;
-  poster: any
+  poster: string
 }
 
 export interface MovieImagesState {

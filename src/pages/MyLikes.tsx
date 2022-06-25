@@ -42,7 +42,7 @@ const MyLikes = () => {
         {movieImages && movieImages.map(({movieId, poster}, index) => (
           <Link to={`/movies/${movieId}`} key={index} className="w-full h-full">
             <LikeGridCards 
-              image={poster.file_path ? `${IMAGE_URL}w500${poster.file_path}`: null}
+              image={poster ? `${IMAGE_URL}w500${poster}`: null}
               alt={String(movieId)}
             />
           </Link>

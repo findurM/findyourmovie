@@ -15,7 +15,7 @@ const TvshowListPage = () => {
     const selectRef = useRef<HTMLSelectElement>()
 
     useEffect(() => {
-      const endpoint = `${API_URL}tv/${category}?api_key=${API_KEY}&language=en-US&page=1`
+      const endpoint = `${API_URL}tv/${category}?api_key=${API_KEY}&language=ko&page=1`
       fetch(endpoint)
       .then(response => response.json())
       .then(response => {
@@ -24,7 +24,7 @@ const TvshowListPage = () => {
     },[category])
   
    const fetchMovies = async () => {
-     const res = await fetch(`${API_URL}tv/${category}?api_key=${API_KEY}&language=en-US&page=${page}`)
+     const res = await fetch(`${API_URL}tv/${category}?api_key=${API_KEY}&language=ko&page=${page}`)
      const data = await res.json()
      return data.results
    }
