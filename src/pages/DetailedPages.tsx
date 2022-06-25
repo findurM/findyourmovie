@@ -301,6 +301,10 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
   const removeComment = async() => {
     if(deleteComment) {
       await updateDoc(movieCommentRef, {comments: arrayRemove(deleteComment)});
+      await updateDoc(userCommentRef, {commentsArray: arrayRemove({
+        comment : deleteComment.comment,
+        movieId: movieId,
+        rate: deleteComment.rate})});
       getComments();
       setDeleteComment(null);
     }
