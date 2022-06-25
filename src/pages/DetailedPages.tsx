@@ -1,9 +1,9 @@
-import { arrayRemove, arrayUnion, collection, doc, getDoc, getDocs, setDoc, updateDoc } from "firebase/firestore";
+import { arrayRemove, arrayUnion, doc, setDoc, updateDoc } from "firebase/firestore";
 import RatingStar from '../components/RatingStar';
 import React, { useEffect, useRef, useState} from "react";
 import { useParams, Link } from "react-router-dom";
 import { db } from "../Application";
-import { API_URL,API_KEY,IMAGE_URL } from "../config/config"
+import { IMAGE_URL } from "../config/config"
 import {BsHeart,BsFillHeartFill} from 'react-icons/bs'
 import {BiXCircle} from 'react-icons/bi'
 import { useDispatch, useSelector } from "react-redux";
@@ -16,6 +16,7 @@ import { fetchLikeMovies, LikeMoviesState } from "../features/fetchLikeMoviesSli
 import { fetchUserInfo, UserInfoState } from "../features/fetchUserInfoSlice";
 import { fetchUserComments, UserCommentsState } from "../features/fetchUserCommentsSlice";
 import { fetchMovieComments, MovieCommentsState } from "../features/fetchMovieCommentsSlice";
+import { fetchTrailer, TrailerState } from "../features/fetchTrailerSlice";
 
 
 export interface MovieDetailedPages {}
@@ -39,12 +40,12 @@ interface HeightValue {
 
 const DetailedPages: React.FC<MovieDetailedPages> = () => {
   const localStorageUserInfo = JSON.parse(localStorage.getItem('user'));
-  const [trailer, setTrailer] = useState([]);
   const [moreCredits, setMoreCredits] = useState(false);
   const [inputValue, setInputValue] = useState<InputValue>();
   const [contentsHeight, setContentsHeight] = useState<HeightValue>({posterHeight: 500, trailerHeight:200});
   const [like, setLike] = useState(false);
   const [deleteComment, setDeleteComment] = useState<CommentsInput>();
+  const [movieTrailer, setMovieTrailer] = useState<string>();
 
   
   const dispatch = useDispatch<AppDispatch>();
@@ -56,6 +57,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
   const {likeMovies, loading: likeMoviesLoading} = useSelector<RootState, LikeMoviesState>((state) => state.likeMovies);
   const {userComments, loading: userCommentsLoading} = useSelector<RootState, UserCommentsState>((state) => state.userComments);
   const {movieComments: comments, loading: movieCommentsLoading} = useSelector<RootState, MovieCommentsState>((state) => state.movieComments);
+  const {trailer, loading: trailerLoading} = useSelector<RootState, TrailerState>((state) => state.trailer);
 
   const movieId = useParams().id;
   const rateInputRef = useRef(null);
@@ -63,18 +65,6 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
   const likeRef = doc(db, "users", localStorageUserInfo.uid, 'likeMovies','movies');
   const movieCommentRef = doc(db, 'movies', movieId);
   const userCommentRef = doc(db, 'users', localStorageUserInfo.uid, 'movieComments', 'comments');
-
-
-  useEffect(() => {
-    async function trailerApi(){
-      const trailerApi = `${API_URL}/movie/${movieId}/videos?api_key=${API_KEY}`
-      const res = await fetch(trailerApi)
-      const results = await res.json()
-      setTrailer(results.results)
-      return results
-    }
-    trailerApi()
-  },[])
   
   useEffect(() => {
     dispatch(fetchUserInfo());
@@ -85,6 +75,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
     dispatch(fetchLikeMovies());
     dispatch(fetchUserComments());
     dispatch(fetchMovieComments(movieId));
+    dispatch(fetchTrailer(movieId));
   },[])
 
   useEffect(() => {
@@ -123,6 +114,12 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
     }
   }, [movieCommentsLoading])
 
+  useEffect(() => {
+    if(trailerLoading === 'succeeded' && trailer.length > 0) {
+      setMovieTrailer(trailerKey());
+    }
+  }, [trailerLoading])
+
 
 
   const onLikeButtonClick = () => {
@@ -137,13 +134,11 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
 
   const trailerKey = () => {
     const result: string[] = []
-    if(trailer !== undefined) {
-      for(let i = 0; i < trailer.length; i++) {
-        trailer[i].official = true ? result.push(trailer[i].key) : ""
-      }
+    for(let i = 0; i < trailer.length; i++) {
+      if(trailer[i].official) result.push(trailer[i].key);
     }
 
-    return result[0]
+    return result.length > 0 ? result[0] : trailer[0].key;
   }
 
   const reportWindowSize = () => {
@@ -201,7 +196,6 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
   
 
 
-  const movieTrailer: string = trailerKey() 
   const movieDirector: string = director?.name;
   const fiveMovieActors: JSX.Element[] = maxFiveActors(actors).map((actor) => (
     <li className = 'w-28'  key={actor.credit_id}>
@@ -284,7 +278,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
   if(movieDetailsLoading !== 'succeeded' || actorDetailsLoading !== 'succeeded' || 
     similarMoviesLoading !==  'succeeded' || recentRecordsLoading !==  'succeeded' || 
     likeMoviesLoading !==  'succeeded' || currentUserInfoLoading !== 'succeeded' || 
-    userCommentsLoading !==  'succeeded') return <div>Loading...</div>
+    userCommentsLoading !==  'succeeded' || trailerLoading !==  'succeeded') return <div>Loading...</div>
 
   return (
     <>
