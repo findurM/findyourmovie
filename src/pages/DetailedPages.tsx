@@ -56,6 +56,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
   const [contentsHeight, setContentsHeight] = useState<HeightValue>({posterHeight: 500, trailerHeight:200})
   const [isLoading, setIsLoading] = useState(true);
   const [like, setLike] = useState(false)
+  const [deleteComment, setDeleteComment] = useState<CommentsInput>();
 
   
   const dispatch = useDispatch<AppDispatch>();
@@ -219,9 +220,28 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
 
   const movieTrailer: string = trailerKey() 
   const movieDirector: string = director?.name;
-  const fiveMovieActors: JSX.Element[] = maxFiveActors(actors).map((actor) => <li className = 'w-28'  key={actor.credit_id}><img className="w-20" src={`${IMAGE_URL}w300${actor.profile_path}`} alt='Actor Image'></img><p className = 'display whitespace-nowrap overflow-hidden text-ellipsis'>{actor.character}역</p> <p className = 'display whitespace-nowrap overflow-hidden text-ellipsis'>{actor.name}</p></li>)
-  const tenMovieActors: JSX.Element[] = maxTenActors(actors).map((actor) => <li className = 'w-28' key={actor.credit_id}><img className="w-20" src={`${IMAGE_URL}w300${actor.profile_path}`} alt='Actor Image'></img><p className = 'display whitespace-nowrap overflow-hidden text-ellipsis'>{actor.character}역</p> <p className = 'display whitespace-nowrap overflow-hidden text-ellipsis'>{actor.name}</p></li>)
-  const sevenSimilarMovies: JSX.Element[] = maxSevenMovies(similarMovies).map((movie)=> <li key={movie.id} onClick={()=> window.location.reload()}><Link to={`/movies/${movie.id}`}><img  src={movie.poster_path ? `${IMAGE_URL}w300${movie.poster_path}`: null} alt='Similar Movie Image'/></Link></li>)
+  const fiveMovieActors: JSX.Element[] = maxFiveActors(actors).map((actor) => (
+    <li className = 'w-28'  key={actor.credit_id}>
+      <img className="w-20" src={`${IMAGE_URL}w300${actor.profile_path}`} alt='Actor Image'/>
+      <p className = 'display whitespace-nowrap overflow-hidden text-ellipsis'>{actor.character}역</p> 
+      <p className = 'display whitespace-nowrap overflow-hidden text-ellipsis'>{actor.name}</p>
+    </li>
+  ))
+  const tenMovieActors: JSX.Element[] = maxTenActors(actors).map((actor) => (
+  <li className = 'w-28' key={actor.credit_id}>
+    <img className="w-20" src={`${IMAGE_URL}w300${actor.profile_path}`} alt='Actor Image'/>
+    <p className = 'display whitespace-nowrap overflow-hidden text-ellipsis'>{actor.character}역</p> 
+    <p className = 'display whitespace-nowrap overflow-hidden text-ellipsis'>{actor.name}</p>
+  </li>
+  ))
+  const sevenSimilarMovies: JSX.Element[] = maxSevenMovies(similarMovies).map((movie)=> (
+  <li key={movie.id} onClick={()=> window.location.reload()}>
+    <Link to={`/movies/${movie.id}`}>
+      <img  src={movie.poster_path ? `${IMAGE_URL}w300${movie.poster_path}`: null} alt='Similar Movie Image'/>
+    </Link>
+  </li>
+  ))
+
   const movieYear: string = movieDetails.movieRelease !== undefined ? movieDetails.movieRelease.substring(0,4) : ""
 
   let imgUrl = ""
@@ -244,40 +264,47 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
 
   const onSubmit = async() => {
     
-   updateDoc(movieCommentRef, 
-                      {comments: arrayUnion({comment: inputValue.comment,
-                                            nickname: currentUserInfo?.nickname,
-                                            rate: inputValue.rate,
-                                            id: currentUserInfo?.id})})
+   await updateDoc(movieCommentRef, 
+    {comments: arrayUnion({
+      comment: inputValue.comment,
+      nickname: currentUserInfo?.nickname,
+      rate: inputValue.rate,
+      id: currentUserInfo?.id})})
 
-    updateDoc(userCommentRef, 
-                      {commentsArray: arrayUnion({comment : inputValue.comment,
-                                                  movieId: movieId,
-                                                  rate: inputValue.rate})})
+    await updateDoc(userCommentRef, 
+    {commentsArray: arrayUnion({
+      comment : inputValue.comment,
+      movieId: movieId,
+      rate: inputValue.rate})})
+
+      getComments()
   }
 
- const handleInput = (event: React.ChangeEvent<HTMLInputElement>) => {
-  setInputValue({...inputValue, [event.target.name]: event.target.value})
- }
-
- const handleRateInput = () => {
-  let count = 0;
-  const stars = rateInputRef.current.childNodes
-  for(let i = 0; i < stars.length; i++) {
-    if(stars[i].checked) count = i;
+  const handleInput = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue({...inputValue, [event.target.name]: event.target.value})
   }
-  setInputValue({...inputValue, rate: count})
- }
 
- const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-  event.preventDefault();
-  onSubmit();
- }
+  const handleRateInput = () => {
+    let count = 0;
+    const stars = rateInputRef.current.childNodes
+    for(let i = 0; i < stars.length; i++) {
+      if(stars[i].checked) count = i;
+    }
+    setInputValue({...inputValue, rate: count})
+  }
 
- const removeComments = () => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    onSubmit();
+  }
 
- }
-
+  const removeComment = async() => {
+    if(deleteComment) {
+      await updateDoc(movieCommentRef, {comments: arrayRemove(deleteComment)});
+      getComments();
+      setDeleteComment(null);
+    }
+  }
 
 
   if(movieDetailsLoading !== 'succeeded' || actorDetailsLoading !== 'succeeded' || 
@@ -384,20 +411,36 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
         </div>
 
         <div>
-          {comments.map((comment, index)=> <div key={index}>
-                                            <div className="flex flex-row justify-between" > 
-                                              <div> 
-                                                <div className="flex flex-row my-4">{RatingStar(comment.rate)}</div>  
-                                                <span >{comment.comment}</span> 
-                                                <p className="text-gray-400">{comment.nickname}</p>
-                                              </div> 
-                                              <div>{comment.id === currentUserInfo?.id ?<button><BiXCircle className="text-gray-400 text-2xl" ></BiXCircle> </button> : ""}</div> 
-                                            </div> 
-                                            <div className="divider"></div>
-                                          </div>)}
+          {comments.map((comment, index)=> (
+          <div key={index}>
+            <div className="flex flex-row justify-between" > 
+              <div> 
+                <div className="flex flex-row my-4">{RatingStar(comment.rate)}</div>  
+                <span >{comment.comment}</span> 
+                <p className="text-gray-400">{comment.nickname}</p>
+              </div> 
+              <div>{comment.id == currentUserInfo?.id ?
+                <label htmlFor="my-modal-6" className="modal-button cursor-pointer" onClick={() => {setDeleteComment(comment)}}>
+                  <BiXCircle className="text-gray-400 text-2xl" ></BiXCircle> 
+                </label> : ""}
+              </div> 
+            </div> 
+            <div className="divider"></div>
+          </div>
+          )
+        )}
+        </div>
+        <input type="checkbox" id="my-modal-6" className="modal-toggle" />
+        <div className="modal modal-bottom sm:modal-middle">
+          <div className="modal-box">
+            <h3 className="font-bold text-lg">정말 감상평을 삭제하시겠습니까?</h3>
+            <p className="py-4">삭제 후엔 되돌릴 수 없습니다.</p>
+            <div className="modal-action">
+              <label htmlFor="my-modal-6" className="btn" onClick={removeComment}>삭제</label>
+            </div>
+          </div>
         </div>
       </section>
-
     </>
   )
 };
