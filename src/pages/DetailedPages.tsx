@@ -56,6 +56,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
   const [contentsHeight, setContentsHeight] = useState<HeightValue>({posterHeight: 500, trailerHeight:200})
   const [isLoading, setIsLoading] = useState(true);
   const [like, setLike] = useState(false)
+  const [deleteComment, setDeleteComment] = useState<CommentsInput>();
 
   
   const dispatch = useDispatch<AppDispatch>();
@@ -279,28 +280,35 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
       getComments()
   }
 
- const handleInput = (event: React.ChangeEvent<HTMLInputElement>) => {
-  setInputValue({...inputValue, [event.target.name]: event.target.value})
- }
-
- const handleRateInput = () => {
-  let count = 0;
-  const stars = rateInputRef.current.childNodes
-  for(let i = 0; i < stars.length; i++) {
-    if(stars[i].checked) count = i;
+  const handleInput = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue({...inputValue, [event.target.name]: event.target.value})
   }
-  setInputValue({...inputValue, rate: count})
- }
 
- const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-  event.preventDefault();
-  onSubmit();
- }
+  const handleRateInput = () => {
+    let count = 0;
+    const stars = rateInputRef.current.childNodes
+    for(let i = 0; i < stars.length; i++) {
+      if(stars[i].checked) count = i;
+    }
+    setInputValue({...inputValue, rate: count})
+  }
 
- const removeComments = async () => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    onSubmit();
+  }
 
- }
-
+  const removeComment = async() => {
+    if(deleteComment) {
+      await updateDoc(movieCommentRef, {comments: arrayRemove(deleteComment)});
+      await updateDoc(userCommentRef, {commentsArray: arrayRemove({
+        comment : deleteComment.comment,
+        movieId: movieId,
+        rate: deleteComment.rate})});
+      getComments();
+      setDeleteComment(null);
+    }
+  }
 
 
   if(movieDetailsLoading !== 'succeeded' || actorDetailsLoading !== 'succeeded' || 
@@ -415,15 +423,29 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
                 <span >{comment.comment}</span> 
                 <p className="text-gray-400">{comment.nickname}</p>
               </div> 
-              <div>{comment.id === currentUserInfo?.id ? (<button onClick={removeComments}><BiXCircle className="text-gray-400 text-2xl" /></button>) : ""}</div>
+              <div>{comment.id == currentUserInfo?.id ?
+                <label htmlFor="my-modal-6" className="modal-button cursor-pointer" onClick={() => {setDeleteComment(comment)}}>
+                  <BiXCircle className="text-gray-400 text-2xl" ></BiXCircle> 
+                </label> : ""}
+              </div> 
             </div> 
             <div className="divider"></div>
           </div>
           )
         )}
         </div>
+        <input type="checkbox" id="my-modal-6" className="modal-toggle" />
+        <div className="modal modal-bottom sm:modal-middle">
+          <div className="modal-box">
+            <h3 className="font-bold text-lg">정말 감상평을 삭제하시겠습니까?</h3>
+            <p className="py-4">삭제 후엔 되돌릴 수 없습니다.</p>
+            <div className="modal-action">
+              <label htmlFor="my-modal-6" className="btn" onClick={removeComment}>삭제</label>
+              <label htmlFor="my-modal-6" className="btn btn-outline">취소</label>
+            </div>
+          </div>
+        </div>
       </section>
-
     </>
   )
 };

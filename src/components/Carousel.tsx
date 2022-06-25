@@ -59,15 +59,11 @@ const Carousel = ({category}:Props) => {
 
   return (
     <div className="relative w-3/4 h-60 bg-black mx-auto mt-12 overflow-hidden">
-        <svg className="w-full h-full absolute top-0 left-0">
-            <line x1="0" y1="100%" x2="100%" y2="0" className="stroke-gray-400 stroke-2" />
-            <line x1="0" y1="0" x2="100%" y2="100%" className="stroke-gray-400 stroke-2"/>
-        </svg>
         <p className="absolute text-4xl text-primary top-16 left-12">
             <Link to='/movielist'> {category} <br/>영화</Link>
         </p>
         <div className="overflow-hidden relative top-3 left-28 md:top-3 md:left-60 w-3/4">
-            <div className={`carousel carousel-center p-4 bg-transparent rounded-box w-[${OFFSET_STEP*10}rem] md:w-[${OFFSET_STEP*15}rem] h-full
+            <div className={`carousel carousel-center p-4 bg-transparent rounded-box w-[${Number(OFFSET_STEP*10)}rem] md:w-[${Number(OFFSET_STEP*15)}rem] h-full
             transition duration-150 ease-out`} ref={movieCarouselRef}>
                 {movies && movies.map((movie,index) => (
                 <div className="carousel-item w-[10rem] md:w-[15rem] flex items-center md:items-start ">

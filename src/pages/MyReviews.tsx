@@ -38,14 +38,15 @@ const MyReviews = () => {
         {mypageUserComments.length === 0
         ? (<div>작성한 감상평이 없습니다.</div>)
         : (<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 justify-items-center gap-5 m-auto">
-          {mypageUserComments.map((comment) => (
+          {mypageUserComments.map((comment, index) => (
             <ReviewCards 
               image={comment.backdrop ? `${IMAGE_URL}w500${comment.backdrop}`: null} 
               review={comment.comment} 
               title={comment.title} 
               movieId={comment.movieId}
               rate={comment.rate}
-              key={comment.movieId}
+              index={index}
+              key={index}
             />
           ))}
         </div>)}

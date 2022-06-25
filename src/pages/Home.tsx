@@ -15,18 +15,16 @@ import { AppDispatch } from "../app/store";
 import { isExistUserInfo } from "../features/fetchUserInfoSlice";
 
 const Ranking = tw.div`
-absolute
-top-3
-right-36
 text-2xl
 bg-primary
-z-10
+z-20
 rounded-full
 p-2
 font-bold
-md:top-3
-md:right-3
-xl3:right-14
+absolute
+right-[.6em]
+top-[.6em]
+
 `
 
 export interface IHomePageProps {}
@@ -169,15 +167,17 @@ const HomePage: React.FunctionComponent<IHomePageProps> = (props) => {
               <b className="text-2xl">모든 영화를 가져왔습니다!</b>
             </p>
           }>
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 justify-items-center gap-5 m-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 justify-items-center gap-5 m-auto">
           {Movies && Movies.map((movie,index) => (
-            <Link to={`/movies/${movie.id}`} key={index} className="w-full flex justify-center h-full relative">
-              <GridCards 
-                image={movie.poster_path ? `${IMAGE_URL}w500${movie.poster_path}`: null}
-                alt={movie.original_title}
-                movie={movie}
-              />
-              {bestMovies.includes(movie.id) ? (<Ranking>{index+1}위</Ranking>): null}
+            <Link to={`/movies/${movie.id}`} key={index} className="w-full flex justify-center h-full">
+              <div className="relative">
+                <GridCards 
+                  image={movie.poster_path ? `${IMAGE_URL}w500${movie.poster_path}`: null}
+                  alt={movie.original_title}
+                  movie={movie}
+                />
+                {bestMovies.includes(movie.id) ? (<Ranking>{index+1}위</Ranking>): null}
+              </div>
             </Link>
                   ))}
           </div>

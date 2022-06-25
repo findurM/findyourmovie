@@ -8,7 +8,7 @@ import {User} from '../features/userSlice'
 import { CgProfile } from "react-icons/cg";
 import { setCategory } from '../features/mypageCategorySlice';
 import { getDownloadURL, getStorage, ref } from 'firebase/storage';
-import { fetchUserInfo, UserInfoState } from '../features/fetchUserInfoSlice';
+import { deleteCurrentUserInfo, fetchUserInfo, UserInfoState } from '../features/fetchUserInfoSlice';
 
 interface Props {}
 
@@ -69,6 +69,7 @@ const Header = () => {
               <button className='btn rounded-pill text-xl' onClick={() => {
                 localStorage.removeItem('user')
                 dispatch(deleteUserInfo())
+                dispatch(deleteCurrentUserInfo())
                 signOut(auth)
                 navigate('/')
                 }}>로그아웃</button>
