@@ -19,6 +19,7 @@ const AuthRoute: React.FunctionComponent<IAuthRouteProps> = (props) => {
             if (user) {
                 setLoading(false);
                 localStorage.setItem('user',JSON.stringify(user))
+                console.log(auth.currentUser)
                 dispatch(setUserInfo({email: user.email}))
             } else {
                 console.log('unauthorized');

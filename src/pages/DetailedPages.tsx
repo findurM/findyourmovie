@@ -1,4 +1,4 @@
-import { arrayRemove, arrayUnion, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { arrayRemove, arrayUnion, collection, doc, getDoc, getDocs, setDoc, updateDoc } from "firebase/firestore";
 import RatingStar from '../components/RatingStar';
 import React, { useEffect, useRef, useState} from "react";
 import { useParams, Link } from "react-router-dom";
@@ -297,7 +297,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
   onSubmit();
  }
 
- const removeComments = () => {
+ const removeComments = async () => {
 
  }
 
@@ -407,7 +407,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
         </div>
 
         <div>
-          {comments.map((comment, index)=> (
+          {comments && comments.map((comment, index)=> (
           <div key={index}>
             <div className="flex flex-row justify-between" > 
               <div> 
@@ -415,7 +415,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
                 <span >{comment.comment}</span> 
                 <p className="text-gray-400">{comment.nickname}</p>
               </div> 
-              <div>{comment.id == currentUserInfo?.id ?<button><BiXCircle className="text-gray-400 text-2xl" ></BiXCircle> </button> : ""}</div> 
+              <div>{comment.id === currentUserInfo?.id ? (<button onClick={removeComments}><BiXCircle className="text-gray-400 text-2xl" /></button>) : ""}</div>
             </div> 
             <div className="divider"></div>
           </div>
