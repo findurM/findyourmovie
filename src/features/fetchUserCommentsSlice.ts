@@ -16,7 +16,7 @@ export const fetchUserComments = createAsyncThunk(
 export const fetchMypageUserComments = createAsyncThunk(
   'userComments/fetchMypageUserComments',
   async (userComments: UserComment) => {
-    const res = await fetch(`${API_URL}/movie/${userComments.movieId}?api_key=${API_KEY}`);
+    const res = await fetch(`${API_URL}/movie/${userComments.movieId}?api_key=${API_KEY}&language=ko`);
     const data = await res.json();
     const mypageComment = {
       comment: userComments.comment,
