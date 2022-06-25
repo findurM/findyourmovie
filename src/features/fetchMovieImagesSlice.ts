@@ -6,7 +6,6 @@ export const fetchMovieImages = createAsyncThunk(
   async (movieId: Number) => {
     const res = await fetch(`${API_URL}/movie/${movieId}/images?api_key=${API_KEY}`);
     const data = await res.json();
-    console.log(data);
 
     const isKoPoster = (datas: {iso_639_1: string}) => {
       if(datas.iso_639_1 === 'ko') {

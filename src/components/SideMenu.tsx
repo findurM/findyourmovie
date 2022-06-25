@@ -16,7 +16,7 @@ const MypageContainer = tw.div`
 flex
 gap-5
 mx-auto
-max-w-7xl
+w-3/4
 pt-[3.75rem]
 `
 

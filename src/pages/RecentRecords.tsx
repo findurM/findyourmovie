@@ -34,7 +34,7 @@ const RecentRecords = () => {
     <>
       <section className="w-full mx-auto">
         <div className="mb-[3.75rem]">
-          <h2 className="text-5xl font-bold">{currentUserInfo?.nickname} 님의 최근 검색한 기록</h2>
+          <h2 className="text-[2rem] font-bold">{currentUserInfo?.nickname} 님의 최근 검색한 기록</h2>
           <p className="mt-4">최대 20개까지 저장</p>
         </div>
         {recentRecords.length === 0
