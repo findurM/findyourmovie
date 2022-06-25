@@ -8,7 +8,7 @@ export const fetchRecentRecords = createAsyncThunk(
     const recordRef = doc(db, "users", JSON.parse(localStorage.getItem('user')).uid, "recentRecords", "movies");
     const recordSnap = await getDoc(recordRef);
     const result = recordSnap.data();
-    return result === undefined ? [] : result.movieArray.reverse();
+    return result.movieArray.reverse() || [];
   }
 )
 
