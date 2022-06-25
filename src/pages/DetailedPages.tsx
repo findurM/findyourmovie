@@ -437,6 +437,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
             <p className="py-4">삭제 후엔 되돌릴 수 없습니다.</p>
             <div className="modal-action">
               <label htmlFor="my-modal-6" className="btn" onClick={removeComment}>삭제</label>
+              <label htmlFor="my-modal-6" className="btn btn-outline">취소</label>
             </div>
           </div>
         </div>
