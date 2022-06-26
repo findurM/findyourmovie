@@ -15,7 +15,7 @@ export default function ratingStar(rate: number , size?: string): JSX.Element[] 
         rating = 0
       } else result.push(<BiStar fill="#eab308"  size="1.5rem" key={i}></BiStar>)
     }
-  } else if (size === 'lg' || size === 'md') {
+  } else  {
     for(let i = 0; i < 5; i++){
       if(rating >= 1){
         result.push(<BsStarFill fill="#eab308" size="1.2rem" key={i}></BsStarFill>)
@@ -25,18 +25,6 @@ export default function ratingStar(rate: number , size?: string): JSX.Element[] 
         rating = 0
       } else result.push(<BiStar fill="#eab308"  size="1.2rem" key={i}></BiStar>)
     }
-  } else {
-    for(let i = 0; i < 5; i++){
-      if(rating >= 1){
-        result.push(<BsStarFill fill="#eab308" size="1rem" key={i}></BsStarFill>)
-        rating -= 1;
-      } else if(rating >= 0.25) {
-        result.push(<BsStarHalf fill="#eab308" size="1rem" key={i}></BsStarHalf>)
-        rating = 0
-      } else result.push(<BiStar fill="#eab308"  size="1rem" key={i}></BiStar>)
-    }
-  }
-
- 
+  }  
   return result
 }
