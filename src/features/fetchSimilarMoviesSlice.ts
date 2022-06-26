@@ -4,7 +4,7 @@ import { API_KEY, API_URL } from "../config/config";
 export const fetchSimilarMovies = createAsyncThunk(
   'similarMovies/fetchSimilarMovies',
   async (movieId: Number) => {
-    const res = await fetch(`${API_URL}/movie/${movieId}/similar?api_key=${API_KEY}`);
+    const res = await fetch(`${API_URL}/movie/${movieId}/similar?api_key=${API_KEY}&language=ko-KR`);
     const results = await res.json();
     return results.results;
   }
