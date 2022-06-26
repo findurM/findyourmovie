@@ -14,12 +14,12 @@ const SearchResultPage =  () => {
   return (
       <>
        <MainImage image={`/assets/FindurM_main_hero.jpg`}/>
-        <section className="w-2/3 mx-auto mt-12">
+        <section className="w-2/3 mx-auto mt-12 min-h-[70vh]">
             <div className="flex justify-between">
                 <h1 className="text-4xl mb-10">검색 결과</h1>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 justify-items-center gap-5 m-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 justify-items-center gap-5 m-auto">
             {searchResult && searchResult.map((movie,index) => (
                 <Link to={`/movies/${movie.id}`} key={index} className="w-full h-full">
                 <GridCards 

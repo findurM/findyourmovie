@@ -63,12 +63,12 @@ const Carousel = ({category}:Props) => {
             <Link to='/movielist'> {category} <br/>영화</Link>
         </p>
         <div className="overflow-hidden relative top-6 left-28 md:left-60 w-3/4">
-            <div className={`carousel carousel-center p-4 bg-transparent w-[105rem] h-full
-            transition duration-150 ease-out`} ref={movieCarouselRef}>
+            <div className='carousel carousel-center p-4 bg-transparent w-[105rem] h-full
+            transition duration-150 ease-out touch-auto' ref={movieCarouselRef}>
                 {movies && movies.map((movie,index) => (
-                <div className="carousel-item w-[7.5rem] md:w-[10.5rem] flex items-center md:items-start">
-                    <Link to={`/movies/${movie.id}`} key={index} 
-                    className=" w-[100px] md:w-[140px] flex justify-center relative hover:scale-125">
+                <div className="carousel-item w-[7.5rem] md:w-[10.5rem] flex items-center md:items-start" key={index} >
+                    <Link to={`/movies/${movie.id}`}
+                    className="w-[100px] md:w-[140px] flex justify-center relative hover:scale-125">
                     <GridCards 
                         image={movie.poster_path ? `${IMAGE_URL}w300${movie.poster_path}`: null}
                         alt={movie.original_title}

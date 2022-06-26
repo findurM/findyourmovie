@@ -208,28 +208,28 @@ const MyInfo = () => {
                   }}})}
             />
             <Warning>{errors.passwordConfirm?.message}</Warning>
-          </>)}
-          
-          <div className="flex gap-5 mt-5 items-center">
-            <InfoTitle className="shrink-0 mt-0">성별</InfoTitle>
-            <div className='w-full flex'>
-              <div className='mr-3 flex justify-between w-10'> 
-                <span>남</span>
-                <input type="radio" name="radio-3" value='남' className="radio radio-secondary" 
-                checked={currentUserInfo.sex === '남'} readOnly/>
-              </div>
-              <div className='flex justify-between w-10'>
-                <span>여</span>
-                <input type="radio" name="radio-3" value='여' className="radio radio-secondary" 
-                  checked={currentUserInfo.sex === '여'} readOnly/>
+            
+            <div className="flex gap-5 mt-5 items-center">
+              <InfoTitle className="shrink-0 mt-0">성별</InfoTitle>
+              <div className='w-full flex'>
+                <div className='mr-3 flex justify-between w-10'> 
+                  <span>남</span>
+                  <input type="radio" name="radio-3" value='남' className="radio radio-secondary" 
+                  checked={currentUserInfo.sex === '남'} readOnly/>
+                </div>
+                <div className='flex justify-between w-10'>
+                  <span>여</span>
+                  <input type="radio" name="radio-3" value='여' className="radio radio-secondary" 
+                    checked={currentUserInfo.sex === '여'} readOnly/>
+                </div>
               </div>
             </div>
-          </div>
-            
-          <div className="flex gap-5 mt-5 items-center">
-            <InfoTitle className="mt-0">나이</InfoTitle>
-            <p>{currentUserInfo.age} 세</p>
-          </div>
+              
+            <div className="flex gap-5 mt-5 items-center">
+              <InfoTitle className="mt-0">나이</InfoTitle>
+              <p>{currentUserInfo.age} 세</p>
+            </div>
+          </>)}
 
           <InfoTitle>닉네임</InfoTitle>
           <CustomInput
