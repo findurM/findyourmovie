@@ -9,6 +9,7 @@ import { db } from '../Application';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../app/store';
 import { isExistUserInfo } from '../features/fetchUserInfoSlice';
+import Footer from '../components/Footer';
 
 export interface ILoginPageProps {}
 
@@ -61,7 +62,8 @@ const LoginPage: React.FunctionComponent<ILoginPageProps> = (props) => {
   };
 
   return (
-  <div className='bg-base-300 min-h-screen flex flex-col sm:flex-row sm:justify-around pt-20' style={{backgroundImage: 'url("/assets/FindurM_login_hero.jpg")', backgroundSize: 'cover', backgroundRepeat: 'no-repeat'}}>
+    <>
+  <div className='bg-base-300 min-h-[90vh] flex flex-col sm:flex-row sm:justify-around pt-20' style={{backgroundImage: 'url("/assets/FindurM_login_hero.jpg")', backgroundSize: 'cover', backgroundRepeat: 'no-repeat'}}>
     <div className=" h-5/6 sm:w-5/12 flex items-center mx-auto w-full justify-center py-5 px-4 sm:px-3 lg:px-5 bg-base-100 rounded-lg">
       <div className="max-w-md w-2/3 space-y-8">
         <div>
@@ -143,6 +145,8 @@ const LoginPage: React.FunctionComponent<ILoginPageProps> = (props) => {
       </Link>
     </div>
   </div>
+  <Footer/>
+  </>
   );
 };
 

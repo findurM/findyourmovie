@@ -13,20 +13,19 @@ import { InputBox } from "./Register";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../app/store";
 import { isExistUserInfo } from "../features/fetchUserInfoSlice";
+import Footer from "../components/Footer";
 
 const Ranking = tw.div`
-absolute
-top-3
-right-36
 text-2xl
 bg-primary
-z-10
+z-20
 rounded-full
 p-2
 font-bold
-md:top-3
-md:right-3
-xl3:right-14
+absolute
+right-[.6em]
+top-[.6em]
+
 `
 
 export interface IHomePageProps {}
@@ -56,7 +55,7 @@ const HomePage: React.FunctionComponent<IHomePageProps> = (props) => {
   }
 
   useEffect(() => {
-    const endpoint = `${API_URL}movie/top_rated?api_key=${API_KEY}&language=en-US&page=1`
+    const endpoint = `${API_URL}movie/top_rated?api_key=${API_KEY}&language=ko&page=1`
     fetch(endpoint)
     .then(response => response.json())
     .then(response => {
@@ -82,7 +81,7 @@ const HomePage: React.FunctionComponent<IHomePageProps> = (props) => {
   }, [auth]);
 
   const fetchMovies = async () => {
-    const res = await fetch(`${API_URL}movie/top_rated?api_key=${API_KEY}&language=en-US&page=${page}`)
+    const res = await fetch(`${API_URL}movie/top_rated?api_key=${API_KEY}&language=ko&page=${page}`)
     const data = await res.json()
     return data.results
   }
@@ -165,19 +164,24 @@ const HomePage: React.FunctionComponent<IHomePageProps> = (props) => {
           hasMore={hasMore}
           loader={<h4 className="text-center">로딩중...</h4>}
           endMessage={
-            <p className="text-center py-10">
-              <b className="text-2xl">모든 영화를 가져왔습니다!</b>
-            </p>
+            <>
+              <p className="text-center py-10">
+                <b className="text-2xl">모든 영화를 가져왔습니다!</b>
+              </p>
+              <Footer/>
+            </>
           }>
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 justify-items-center gap-5 m-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 justify-items-center gap-5 m-auto">
           {Movies && Movies.map((movie,index) => (
-            <Link to={`/movies/${movie.id}`} key={index} className="w-full flex justify-center h-full relative">
-              <GridCards 
-                image={movie.poster_path ? `${IMAGE_URL}w500${movie.poster_path}`: null}
-                alt={movie.original_title}
-                movie={movie}
-              />
-              {bestMovies.includes(movie.id) ? (<Ranking>{index+1}위</Ranking>): null}
+            <Link to={`/movies/${movie.id}`} key={index} className="w-full flex justify-center h-full">
+              <div className="relative">
+                <GridCards 
+                  image={movie.poster_path ? `${IMAGE_URL}w500${movie.poster_path}`: null}
+                  alt={movie.original_title}
+                  movie={movie}
+                />
+                {bestMovies.includes(movie.id) ? (<Ranking>{index+1}위</Ranking>): null}
+              </div>
             </Link>
                   ))}
           </div>

@@ -1,9 +1,9 @@
-import { arrayRemove, arrayUnion, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { arrayRemove, arrayUnion, doc, setDoc, updateDoc } from "firebase/firestore";
 import RatingStar from '../components/RatingStar';
 import React, { useEffect, useRef, useState} from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useLocation } from "react-router-dom";
 import { db } from "../Application";
-import { API_URL,API_KEY,IMAGE_URL } from "../config/config"
+import { IMAGE_URL } from "../config/config"
 import {BsHeart,BsFillHeartFill} from 'react-icons/bs'
 import {BiXCircle} from 'react-icons/bi'
 import { useDispatch, useSelector } from "react-redux";
@@ -15,22 +15,14 @@ import { fetchRecentRecords, RecentRecordsState } from "../features/fetchRecentR
 import { fetchLikeMovies, LikeMoviesState } from "../features/fetchLikeMoviesSlice";
 import { fetchUserInfo, UserInfoState } from "../features/fetchUserInfoSlice";
 import { fetchUserComments, UserCommentsState } from "../features/fetchUserCommentsSlice";
+import { fetchMovieComments, MovieCommentsState } from "../features/fetchMovieCommentsSlice";
+import { fetchTrailer, TrailerState } from "../features/fetchTrailerSlice";
+import Footer from "../components/Footer";
 
 
 export interface MovieDetailedPages {}
 
-interface CommentsInput {
-  comment: string
-  nickname: string
-  rate: number
-}
-
-interface InputValue {
-  comment: string
-  rate: number
-}
-
-interface CommentsInput {
+export interface CommentsInput {
   comment: string
   nickname: string
   rate: number
@@ -48,15 +40,21 @@ interface HeightValue {
 }
 
 const DetailedPages: React.FC<MovieDetailedPages> = () => {
-  const localStorageUserInfo = JSON.parse(localStorage.getItem('user'))
-  const [trailer, setTrailer] = useState([])
-  const [moreCredits, setMoreCredits] = useState(false)
-  const [inputValue, setInputValue] = useState<InputValue>()
-  const [comments, setComments] = useState<CommentsInput[]>([])
-  const [isLoading, setIsLoading] = useState(true);
-  const [like, setLike] = useState(false)
-  const [deleteComment, setDeleteComment] = useState<CommentsInput>()
+
+
+
   const [windowSize, setWindowSize] = useState('')
+
+  const localStorageUserInfo = JSON.parse(localStorage.getItem('user'));
+  const location = useLocation();
+  
+  const [moreCredits, setMoreCredits] = useState(false);
+  const [inputValue, setInputValue] = useState<InputValue>();
+  const [contentsHeight, setContentsHeight] = useState<HeightValue>({posterHeight: 500, trailerHeight:200});
+  const [like, setLike] = useState(false);
+  const [deleteComment, setDeleteComment] = useState<CommentsInput>();
+  const [movieTrailer, setMovieTrailer] = useState<string>();
+
 
   
   const dispatch = useDispatch<AppDispatch>();
@@ -67,48 +65,30 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
   const {recentRecords, loading: recentRecordsLoading} = useSelector<RootState, RecentRecordsState>((state) => state.recentRecords);
   const {likeMovies, loading: likeMoviesLoading} = useSelector<RootState, LikeMoviesState>((state) => state.likeMovies);
   const {userComments, loading: userCommentsLoading} = useSelector<RootState, UserCommentsState>((state) => state.userComments);
+  const {movieComments: comments, loading: movieCommentsLoading} = useSelector<RootState, MovieCommentsState>((state) => state.movieComments);
+  const {trailer, loading: trailerLoading} = useSelector<RootState, TrailerState>((state) => state.trailer);
 
-  const movieId = useParams().id
-  const rateInputRef = useRef(null)
+  const movieId = useParams().id;
+  const rateInputRef = useRef(null);
   const recordRef = doc(db, "users", localStorageUserInfo.uid, "recentRecords", "movies");
   const likeRef = doc(db, "users", localStorageUserInfo.uid, 'likeMovies','movies');
-
-
-  useEffect(() => {
-    async function trailerApi(){
-      const trailerApi = `${API_URL}/movie/${movieId}/videos?api_key=${API_KEY}`
-      const res = await fetch(trailerApi)
-      const results = await res.json()
-      setTrailer(results.results)
-      return results
-    }
-    trailerApi()
-  },[]) 
-
-
-  useEffect(() => {
-    getComments()
-    .then(() => {
-      setIsLoading(false);
-    })
-  }, [])
-
-  useEffect(() => {
-    if(comments === undefined) {
-      const comments: Array<CommentsInput> = [];
-      setDoc(movieCommentRef,{comments});
-    }
-  }, [comments])
+  const movieCommentRef = doc(db, 'movies', movieId);
+  const userCommentRef = doc(db, 'users', localStorageUserInfo.uid, 'movieComments', 'comments');
   
   useEffect(() => {
     dispatch(fetchUserInfo());
+  }, [])
+  
+  useEffect(() => {
     dispatch(fetchMovieDetails(Number(movieId)));
     dispatch(fetchActorDetails(Number(movieId)));
     dispatch(fetchSimilarMovies(Number(movieId)));
     dispatch(fetchRecentRecords());
     dispatch(fetchLikeMovies());
     dispatch(fetchUserComments());
-  },[])
+    dispatch(fetchMovieComments(movieId));
+    dispatch(fetchTrailer(movieId));
+  }, [location.pathname])
 
   useEffect(() => {
     if(recentRecordsLoading === 'succeeded' && recentRecords.length === 0) {
@@ -140,6 +120,18 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
     }
   }, [userCommentsLoading])
 
+  useEffect(() => {
+    if(movieCommentsLoading === 'succeeded' && comments.length === 0) {
+      setDoc(movieCommentRef, {comments: []});
+    }
+  }, [movieCommentsLoading])
+
+  useEffect(() => {
+    if(trailerLoading === 'succeeded' && trailer.length > 0) {
+      setMovieTrailer(trailerKey());
+    }
+  }, [trailerLoading])
+
 
   const onLikeButtonClick = () => {
     if(like) {
@@ -153,13 +145,11 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
 
   const trailerKey = () => {
     const result: string[] = []
-    if(trailer !== undefined) {
-      for(let i = 0; i < trailer.length; i++) {
-        trailer[i].official = true ? result.push(trailer[i].key) : ""
-      }
+    for(let i = 0; i < trailer.length; i++) {
+      if(trailer[i].official) result.push(trailer[i].key);
     }
 
-    return result[0]
+    return result.length > 0 ? result[0] : trailer[0].key;
   }
 
   const windowInnerWidth = () => {
@@ -217,7 +207,6 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
     return result
   }
 
-  const movieTrailer: string = trailerKey() 
   const movieDirector: string = director?.name;
   
   const fiveMovieActors: JSX.Element[] = maxFiveActors(actors).map((actor) => (
@@ -236,7 +225,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
   </li>
   ))
   const sevenSimilarMovies: JSX.Element[] = maxSevenMovies(similarMovies).map((movie)=> (
-  <li key={movie.id} onClick={()=> window.location.reload()}>
+  <li key={movie.id}>
     <Link to={`/movies/${movie.id}`}>
       <img  src={movie.poster_path ? `${IMAGE_URL}w300${movie.poster_path}`: null} alt='Similar Movie Image'/>
     </Link>
@@ -250,35 +239,21 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
     imgUrl = `${IMAGE_URL}w500${movieDetails.movieImage}` 
   }
 
-  const movieCommentRef = doc(db, 'movies', movieId)
-  const userCommentRef = doc(db, 'users', localStorageUserInfo?.uid, 'movieComments', 'comments')
-
-  const getComments = async() => {
-    const commentsSnap = await getDoc(movieCommentRef);
-    const result = commentsSnap.data();
-   
-    if(result !== undefined) {
-      setComments(result.comments)
-      return true
-    }else return false
-  }
-
   const onSubmit = async() => {
-    
-   await updateDoc(movieCommentRef, 
-    {comments: arrayUnion({
-      comment: inputValue.comment,
-      nickname: currentUserInfo?.nickname,
-      rate: inputValue.rate,
-      id: currentUserInfo?.id})})
+    await updateDoc(movieCommentRef, 
+      {comments: arrayUnion({
+        comment: inputValue.comment,
+        nickname: currentUserInfo?.nickname,
+        rate: inputValue.rate,
+        id: currentUserInfo?.id})})
 
     await updateDoc(userCommentRef, 
-    {commentsArray: arrayUnion({
-      comment : inputValue.comment,
-      movieId: movieId,
-      rate: inputValue.rate})})
+      {commentsArray: arrayUnion({
+        comment : inputValue.comment,
+        movieId: movieId,
+        rate: inputValue.rate})})
 
-      getComments()
+    dispatch(fetchMovieComments(movieId));
   }
 
   const handleInput = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -302,7 +277,12 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
   const removeComment = async() => {
     if(deleteComment) {
       await updateDoc(movieCommentRef, {comments: arrayRemove(deleteComment)});
-      getComments();
+      await updateDoc(userCommentRef, {commentsArray: arrayRemove({
+        comment : deleteComment.comment,
+        movieId: movieId,
+        rate: deleteComment.rate})});
+
+      dispatch(fetchMovieComments(movieId));
       setDeleteComment(null);
     }
   }
@@ -311,7 +291,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
   if(movieDetailsLoading !== 'succeeded' || actorDetailsLoading !== 'succeeded' || 
     similarMoviesLoading !==  'succeeded' || recentRecordsLoading !==  'succeeded' || 
     likeMoviesLoading !==  'succeeded' || currentUserInfoLoading !== 'succeeded' || 
-    userCommentsLoading !==  'succeeded' || isLoading) return <div>Loading...</div>
+    userCommentsLoading !==  'succeeded' || trailerLoading !==  'succeeded') return <div>Loading...</div>
 
   return (
     <>
@@ -412,7 +392,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
         </div>
 
         <div>
-          {comments.map((comment, index)=> (
+          {comments && comments.map((comment, index)=> (
           <div key={index}>
             <div className="flex flex-row justify-between" > 
               <div> 
@@ -431,6 +411,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
           )
         )}
         </div>
+        
         <input type="checkbox" id="my-modal-6" className="modal-toggle" />
         <div className="modal modal-bottom sm:modal-middle">
           <div className="modal-box">
@@ -438,10 +419,12 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
             <p className="py-4">삭제 후엔 되돌릴 수 없습니다.</p>
             <div className="modal-action">
               <label htmlFor="my-modal-6" className="btn" onClick={removeComment}>삭제</label>
+              <label htmlFor="my-modal-6" className="btn btn-outline">취소</label>
             </div>
           </div>
         </div>
       </section>
+      <Footer/>
     </>
   )
 };

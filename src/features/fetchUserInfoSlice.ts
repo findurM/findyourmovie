@@ -51,23 +51,29 @@ const initialState: UserInfoState = {
 export const userInfoSlice = createSlice({
   name: 'userInfo',
   initialState,
-  reducers: {},
+  reducers: {
+    deleteCurrentUserInfo: (state) => {
+      state.userInfo = initialState.userInfo;
+    }
+  },
   extraReducers: (builder) => {
     builder
     .addCase(fetchUserInfo.pending.type, (state) => {
       state.loading = 'pending';
     })
     .addCase(fetchUserInfo.fulfilled.type, (state, action: PayloadAction<CurrentUserInfo>) => {
-      state.userInfo = action.payload
+      state.userInfo = action.payload;
       state.loading = 'succeeded';
     })
     .addCase(fetchUserInfo.rejected.type, (state) => {
       state.loading = 'failed';
     })
     .addCase(isExistUserInfo.fulfilled.type, (state, action: PayloadAction<boolean>) => {
-      state.isExist = action.payload
+      state.isExist = action.payload;
     })
   }
 })
 
-export default userInfoSlice.reducer
+export const { deleteCurrentUserInfo } = userInfoSlice.actions;
+
+export default userInfoSlice.reducer;

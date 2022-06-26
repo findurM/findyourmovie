@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 import {RootState} from '../app/store'
 import {Movie} from '../features/searchResultSlice'
 import MainImage from "../components/MainImage";
+import Footer from "../components/Footer";
 
 
 const SearchResultPage =  () => {
@@ -30,6 +31,7 @@ const SearchResultPage =  () => {
                     ))}
             </div>
         </section>
+        <Footer/>
       </>
   )
 }

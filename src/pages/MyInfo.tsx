@@ -149,7 +149,7 @@ const MyInfo = () => {
     <>
       <section className="w-full mx-auto">
         <div className="mb-10">
-          <h2 className="text-5xl font-bold"><span id="nicknameTitle">{currentUserInfo?.nickname}</span> 님의 회원정보조회</h2>
+          <h2 className="text-[2rem] font-bold"><span id="nicknameTitle">{currentUserInfo?.nickname}</span> 님의 회원정보조회</h2>
         </div>
         {localStorageUserInfo.providerData[0].providerId === "password" && !isConfirmed ?
         (<>

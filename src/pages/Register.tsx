@@ -5,6 +5,7 @@ import tw from "tailwind-styled-components"
 import {useForm,SubmitHandler } from 'react-hook-form';
 import { db } from '../Application';
 import {setDoc, doc} from 'firebase/firestore'
+import Footer from '../components/Footer';
 
 export const CustomInput = tw.input`
 appearance-none
@@ -98,7 +99,7 @@ const LoginPage: React.FunctionComponent<ILoginPageProps> = (props) => {
 
     return (
     <div>
-      <div className="min-h-full flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-[78vh] flex justify-center py-[4%] px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-1/3 space-y-8">
           <div>
             <img src="/assets/Findurm_regular_logo.png" alt="FindurM Logo"/>
@@ -216,6 +217,7 @@ const LoginPage: React.FunctionComponent<ILoginPageProps> = (props) => {
           </form>
         </div>
       </div>
+      <Footer/>
     </div>
     );
 };
