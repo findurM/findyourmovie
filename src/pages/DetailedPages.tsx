@@ -35,26 +35,27 @@ interface InputValue {
   rate: number
 }
 
-interface HeightValue {
-  posterHeight: number
-  trailerHeight: number
+interface TrailerSize {
+  width: number
+  height: number
 }
 
 const DetailedPages: React.FC<MovieDetailedPages> = () => {
 
 
 
-  const [windowSize, setWindowSize] = useState('')
 
   const localStorageUserInfo = JSON.parse(localStorage.getItem('user'));
   const location = useLocation();
-  
+  const [windowSize, setWindowSize] = useState('');
+  const [trailerSize, setTrailerSize] = useState<TrailerSize>({width: 300, height: 168.75});
+  const [movieTrailer, setMovieTrailer] = useState<string>();
+  const [heroHeight, setHeroHeight] = useState('40vw');
   const [moreCredits, setMoreCredits] = useState(false);
   const [inputValue, setInputValue] = useState<InputValue>();
-  const [contentsHeight, setContentsHeight] = useState<HeightValue>({posterHeight: 500, trailerHeight:200});
   const [like, setLike] = useState(false);
   const [deleteComment, setDeleteComment] = useState<CommentsInput>();
-  const [movieTrailer, setMovieTrailer] = useState<string>();
+
 
 
   
@@ -154,23 +155,47 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
   }
 
   const windowInnerWidth = () => {
-    if(window.innerWidth >= 1920){
+    const width = window.innerWidth;
+
+    if(width >= 1920){
       setWindowSize('xl3');
-    } else if (window.innerWidth >= 1360){
+    } else if (width >= 1360){
       setWindowSize('xl2')
-    } else if (window.innerWidth >= 1280) {
+    } else if (width >= 1280) {
       setWindowSize('xl')
-    } else if (window.innerWidth >= 1025) {
+    } else if (width >= 1025) {
       setWindowSize('lg')
-    } else if (window.innerWidth >= 768) {
+    } else if (width >= 768) {
       setWindowSize('md')
-    } else if (window.innerWidth >= 640) {
+    } else if (width >= 640) {
       setWindowSize('sm')
-    } else if (window.innerWidth < 640) {
-      setWindowSize('xs')}
+    } else if (width < 640) {
+      setWindowSize('xs')
+    }
+
+    if(windowSize === 'xs' || windowSize === 'sm') {
+      setTrailerSize({...trailerSize, width: width*0.75, height: (width*0.75)*9/16})
+      setHeroHeight('60vh')
+    } else {
+      setTrailerSize({...trailerSize, width: (width*0.75)*0.25, height: (width*0.75)*0.25*9/16})
+      setHeroHeight('40vw')
+    }
+
+
   }
 
   window.onresize = windowInnerWidth
+
+  const addGenre = () => {
+    const genres: string[] = []
+
+    if(movieDetails.movieGenres !== undefined) {
+      movieDetails.movieGenres.map((genre) => {genres.push(genre.name)})
+    }
+
+    return genres.join(',')
+
+  }
 
   function maxTenActors(actors: any[]): Array<ActorInfo> {
     const result: Array<ActorInfo> = []
@@ -211,24 +236,24 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
   const movieDirector: string = director?.name;
   
   const fiveMovieActors: JSX.Element[] = maxFiveActors(actors).map((actor) => (
-    <li className = 'w-28'  key={actor.credit_id}>
+    <li className = 'w-20 lg:col-span-2'  key={actor.credit_id}>
       <img className="w-20" src={`${IMAGE_URL}w300${actor.profile_path}`} alt='Actor Image'/>
-      <p className = 'display whitespace-nowrap overflow-hidden text-ellipsis'>{actor.character}역</p> 
-      <p className = 'display whitespace-nowrap overflow-hidden text-ellipsis'>{actor.name}</p>
+      <p className = 'display whitespace-nowrap overflow-hidden text-ellipsis text-xs'>{actor.character}역</p> 
+      <p className = 'display whitespace-nowrap overflow-hidden text-ellipsis text-xs'>{actor.name}</p>
     </li>
   ))
 
   const tenMovieActors: JSX.Element[] = maxTenActors(actors).map((actor) => (
-  <li className = 'w-28' key={actor.credit_id}>
+  <li className = 'w-20' key={actor.credit_id}>
     <img className="w-20" src={`${IMAGE_URL}w300${actor.profile_path}`} alt='Actor Image'/>
-    <p className = 'display whitespace-nowrap overflow-hidden text-ellipsis'>{actor.character}역</p> 
-    <p className = 'display whitespace-nowrap overflow-hidden text-ellipsis'>{actor.name}</p>
+    <p className = 'display whitespace-nowrap overflow-hidden text-ellipsis text-xs'>{actor.character}역</p> 
+    <p className = 'display whitespace-nowrap overflow-hidden text-ellipsis text-xs'>{actor.name}</p>
   </li>
   ))
   const sevenSimilarMovies: JSX.Element[] = maxSevenMovies(similarMovies).map((movie)=> (
-  <li key={movie.id}>
-    <Link to={`/movies/${movie.id}`}>
-      <img  src={movie.poster_path ? `${IMAGE_URL}w300${movie.poster_path}`: null} alt='Similar Movie Image'/>
+  <li className="w-28 min-w-fit ml-2" key={movie.id} >
+    <Link to={`/movies/${movie.id}`} >
+      <img className="w-28" src={movie.poster_path ? `${IMAGE_URL}w300${movie.poster_path}`: null} alt='Similar Movie Image' style={{aspectRatio: "1 / 1.5"}}/>
     </Link>
   </li>
   ))
@@ -297,67 +322,70 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
   return (
     <>
       <section className="relative">
-        <div className="opacity-50" style={{backgroundImage: `url(${imgUrl})`, backgroundRepeat: 'no-repeat', backgroundSize: 'cover', width: '100%', height: '40vw'}}></div>
+        <div className="opacity-50 bg-center" style={{backgroundImage: `url(${imgUrl})`, backgroundRepeat: 'no-repeat', backgroundSize: 'cover', width: '100%', height: heroHeight}}></div>
 
         <div className="absolute w-3/4 left-[12.5%] bottom-10 flex flex-row justify-between items-end">
-          <div className='flex flex-row '>
+          <div className='md:flex flex-row '>
 
-            <h2 className="text-xl font-bold xl2:text-3xl">{movieDetails.movieTitle}({movieYear})</h2> 
-            <div className='flex flex-row items-end ml-4'>{RatingStar(movieDetails.movieRate, windowSize)} 
-              <p className="text-lg font-bold ">({movieDetails.movieRate})</p>
+            <h2 className="text-2xl font-bold xl2:text-3xl">{movieDetails.movieTitle}({movieYear})</h2> 
+            <div className='flex flex-row items-end md:ml-4'>{RatingStar(movieDetails.movieRate, windowSize)} 
+              <p className="text-xs font-bold md:text-base">({movieDetails.movieRate})</p>
             </div>
           </div>
 
-          <button className="btn btn-accent btn-sm rounded-2xl w-28 opacity-100" onClick={onLikeButtonClick}>{like ? <BsFillHeartFill className="mr-3 text-red-600"></BsFillHeartFill> : <BsHeart className="mr-3"></BsHeart>}좋아요</button>
+          <button className="btn btn-accent btn-xs w-20 rounded-2xl opacity-100 md:w-28" onClick={onLikeButtonClick}>{like ? <BsFillHeartFill className="mr-3 text-red-600"></BsFillHeartFill> : <BsHeart className="mr-3"></BsHeart>}좋아요</button>
         </div>
       </section>
 
-      <section className="w-3/4 mt-14 mx-auto grid md:grid-cols-4 sm:grid-cols-2 xs:grid-cols-1">  
+      <section className="w-3/4 mt-14 mx-auto grid grid-cols-2 md:grid-cols-4 ">  
         <div className="basis-1/4 mr-4 shrink-0" style={{backgroundImage: `url(${IMAGE_URL}w300${movieDetails.moviePoster})`, backgroundRepeat: 'no-repeat', backgroundSize: 'contain', aspectRatio: '1/1.5'}}></div>
         
-        <div className="basis-2/4 md:col-span-2">
+        <div className="basis-2/4 col-span-1 md:col-span-2 ">
           <h3 className="text-2xl font-bold mb-4">기본정보</h3>
-          <ul className="mr-4 text-lg">
+          <ul className="mr-4 text-xs lg:text-lg xs:text-base">
             <li className="flex flex-row">
-              장르
-              <ul className='grid grid-cols-3'>
-              {movieDetails.movieGenres&&movieDetails.movieGenres.map((genre) => <li key={genre.id} className="pl-2 "><p className="text-ellipsis">{genre.name}</p></li>)}
-              </ul>
+              장르 : {addGenre()}
             </li>
-            <li>개봉날짜 {movieDetails.movieRelease&&movieDetails.movieRelease}</li>
-            <li>언어 {movieDetails.movieLanguage&&movieDetails.movieLanguage}</li>
-            <li>러닝타임 {movieDetails.movieRuntime&&movieDetails.movieRuntime}분</li>
-            <li>감독 {movieDirector&&movieDirector}</li>
+            <li>개봉날짜 : {movieDetails.movieRelease&&movieDetails.movieRelease}</li>
+            <li>언어 : {movieDetails.movieLanguage&&movieDetails.movieLanguage}</li>
+            <li>러닝타임 : {movieDetails.movieRuntime&&movieDetails.movieRuntime}분</li>
+            <li>감독 : {movieDirector&&movieDirector}</li>
           </ul>
         </div>
         
         <div className="basis-1/4 md:col-span-1 sm:col-span-2">
-          <h3 className="text-2xl font-bold mb-4">트레일러</h3>
-          {movieTrailer&& <iframe src={`https://www.youtube.com/embed/${movieTrailer}`} title="YouTube video player" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>}
+          <h3 className="text-2xl font-bold mb-4 mt-4 md:mt-0">트레일러</h3>
+          {movieTrailer&& <iframe width={`${trailerSize.width}px`} height={`${trailerSize.height}px`} src={`https://www.youtube.com/embed/${movieTrailer}`} title="YouTube video player" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>}
         </div>
         
       </section>
 
       <section className="w-3/4  mx-auto ">
         <div className='divider'></div>
+
         <div>
           <h3 className="text-2xl font-bold mb-4">출연진</h3>
-          <ul className='flex flex-row overflow-auto'>
+          <ul className='grid grid-cols-3 md:grid-cols-5 lg:flex flex-row justify-between overflow-auto'>
             {moreCredits ? tenMovieActors : fiveMovieActors}
             <li><button className='btn btn-primary btn-sm' onClick={()=>moreCredits ? setMoreCredits(false) :setMoreCredits(true)}>{moreCredits ? `접기` : `더보기`}</button></li>
           </ul>
         </div>
         <div className='divider'></div>
+
         <div>
           <h3 className="text-2xl font-bold mb-4">줄거리</h3>
           <p>{movieDetails.movieOverview&&movieDetails.movieOverview}</p>
         </div>
-        <div className='divider'></div>
-        <h3 className="text-2xl font-bold mb-4">비슷한 영화</h3>
 
-        <ul className='flex flex-row justify-between'>
+        <div className='divider'></div>
+
+        <div>
+        <h3 className="text-2xl font-bold mb-4">비슷한 영화</h3>
+        <ul className='flex flex-row justify-between overflow-auto'>
           {sevenSimilarMovies}
         </ul>
+        </div>
+
         <div className='divider'></div>
       </section>
 
