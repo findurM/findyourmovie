@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { AppDispatch, RootState } from "../app/store";
 import { LikeGridCards } from "../components/GridCards";
 import { IMAGE_URL } from "../config/config";
-import { fetchLikeMovies, LikeMoviesState } from "../features/fetchLikeMoviesSlice";
+import { fetchLikeMovies, LikeMoviesState, resetLikeMovies } from "../features/fetchLikeMoviesSlice";
 import { fetchMovieImages, MovieImagesState, resetMovieImages } from "../features/fetchMovieImagesSlice";
 import { fetchUserInfo, UserInfoState } from "../features/fetchUserInfoSlice";
 
@@ -16,11 +16,13 @@ const MyLikes = () => {
 
   useEffect(() => {
     dispatch(fetchUserInfo());
-    dispatch(fetchLikeMovies());
+    dispatch(resetLikeMovies());
   }, []);
 
   useEffect(() => {
-    if(likeMoviesLoading === 'succeeded' && likeMovies.length > 0) {
+    if(likeMoviesLoading === 'idle') {
+      dispatch(fetchLikeMovies());
+    } else if(likeMoviesLoading === 'succeeded' && likeMovies.length > 0) {
       dispatch(resetMovieImages());
       likeMovies.forEach((movieId: Number) => {
         dispatch(fetchMovieImages(movieId));
