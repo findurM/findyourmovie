@@ -401,13 +401,13 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
           <div className="rating rating-md rating-half mb-4" ref={rateInputRef}>
             <input type="radio" name="rating-10" className="rating-hidden" />
             <input type="radio" name="rating-10" className="bg-yellow-500 mask mask-star-2 mask-half-1" />
-            <input type="radio" name="rating-10" className="bg-yellow-500 mask mask-star-2 mask-half-2" />
+            <input type="radio" name="rating-10" className="bg-yellow-500 mask mask-star-2 mask-half-2 mr-2" />
             <input type="radio" name="rating-10" className="bg-yellow-500 mask mask-star-2 mask-half-1" />
-            <input type="radio" name="rating-10" className="bg-yellow-500 mask mask-star-2 mask-half-2" />
+            <input type="radio" name="rating-10" className="bg-yellow-500 mask mask-star-2 mask-half-2 mr-2" />
             <input type="radio" name="rating-10" className="bg-yellow-500 mask mask-star-2 mask-half-1" />
-            <input type="radio" name="rating-10" className="bg-yellow-500 mask mask-star-2 mask-half-2" />
+            <input type="radio" name="rating-10" className="bg-yellow-500 mask mask-star-2 mask-half-2 mr-2" />
             <input type="radio" name="rating-10" className="bg-yellow-500 mask mask-star-2 mask-half-1" />
-            <input type="radio" name="rating-10" className="bg-yellow-500 mask mask-star-2 mask-half-2" />
+            <input type="radio" name="rating-10" className="bg-yellow-500 mask mask-star-2 mask-half-2 mr-2" />
             <input type="radio" name="rating-10" className="bg-yellow-500 mask mask-star-2 mask-half-1" />
             <input type="radio" name="rating-10" className="bg-yellow-500 mask mask-star-2 mask-half-2" />
           </div>
