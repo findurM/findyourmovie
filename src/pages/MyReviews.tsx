@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../app/store";
 import ReviewCards from "../components/ReviewCards";
@@ -8,6 +8,8 @@ import { fetchUserInfo, UserInfoState } from "../features/fetchUserInfoSlice";
 
 const MyReviews = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const [total, setTotal] = useState(6);
+  const [isFinish, setIsFinish] = useState(false);
   const {userInfo: currentUserInfo, loading: currentUserInfoLoading} = useSelector<RootState, UserInfoState>((state) => state.userInfo);
   const {userComments, mypageUserComments, loading: userCommentsLoading} = useSelector<RootState, UserCommentsState>((state) => state.userComments);
 
@@ -20,16 +22,27 @@ const MyReviews = () => {
   useEffect(() => {
     if(userCommentsLoading === 'idle') {
       dispatch(fetchUserComments());
-    } else if(userCommentsLoading === 'succeeded') {
-      if(userComments.length > 0) {
-        userComments.forEach((comment) => {
-          dispatch(fetchMypageUserComments(comment));
-        })
-      } else {
-        dispatch(resetMypageUserComments());
+    } else if(userCommentsLoading === 'succeeded' && userComments.length > 0) {
+      if(total >= userComments.length) {
+        setTotal(() => userComments.length);
+        setIsFinish(true);
       }
+      dispatch(resetMypageUserComments());
+      userComments.slice(0, total).forEach((comment) => {
+        dispatch(fetchMypageUserComments(comment));
+      })
     }
   }, [userCommentsLoading]);
+
+  const moreReviews = () => {
+    if(total + 6 >= userComments.length) setIsFinish(() => true);
+
+    userComments.slice(total, isFinish ? userComments.length : (total + 6)).forEach((comment) => {
+      dispatch(fetchMypageUserComments(comment));
+    })
+
+    setTotal(() => {return isFinish ? userComments.length : (total + 6)});
+  }
 
   if(currentUserInfoLoading !== 'succeeded' || userCommentsLoading !== 'succeeded') return <div>Loading...</div>
   
@@ -43,19 +56,25 @@ const MyReviews = () => {
 
         {mypageUserComments.length === 0
         ? (<div>작성한 감상평이 없습니다.</div>)
-        : (<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 justify-items-center gap-5 m-auto">
-          {mypageUserComments.map((comment, index) => (
-            <ReviewCards 
-              image={comment.backdrop ? `${IMAGE_URL}w500${comment.backdrop}`: null} 
-              review={comment.comment} 
-              title={comment.title} 
-              movieId={comment.movieId}
-              rate={comment.rate}
-              index={index}
-              key={index}
-            />
-          ))}
-        </div>)}
+        : (<>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 justify-items-center gap-5 m-auto">
+            {mypageUserComments.map((comment, index) => (
+              <ReviewCards 
+                image={comment.backdrop ? `${IMAGE_URL}w500${comment.backdrop}`: null} 
+                review={comment.comment} 
+                title={comment.title} 
+                movieId={comment.movieId}
+                rate={comment.rate}
+                index={index}
+                key={index}
+              />
+            ))}
+          </div>
+          {isFinish ? "" :
+          <button className="btn btn-active btn-secondary rounded-full block mt-10 mx-auto" onClick={moreReviews}>더 불러오기</button>
+          }
+        </>
+        )}
       </section>
     </>
   )
