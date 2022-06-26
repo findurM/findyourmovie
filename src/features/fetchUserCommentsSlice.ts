@@ -50,7 +50,7 @@ export interface UserCommentsState {
 }
 
 const initialState: UserCommentsState = {
-  userComments : [],
+  userComments: [],
   mypageUserComments: [],
   loading: 'idle',
 }
@@ -59,6 +59,11 @@ export const userCommentsSlice = createSlice({
   name: 'userComments',
   initialState,
   reducers: {
+    resetUserComments: (state) => {
+      state.userComments = [];
+      state.mypageUserComments = [];
+      state.loading = 'idle';
+    },
     resetMypageUserComments: (state) => {
       state.mypageUserComments = [];
     }
@@ -81,6 +86,6 @@ export const userCommentsSlice = createSlice({
   }
 })
 
-export const { resetMypageUserComments } = userCommentsSlice.actions;
+export const { resetUserComments, resetMypageUserComments } = userCommentsSlice.actions;
 
 export default userCommentsSlice.reducer;

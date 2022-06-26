@@ -25,7 +25,12 @@ const initialState: LikeMoviesState = {
 export const likeMoviesSlice = createSlice({
   name: 'likeMovies',
   initialState,
-  reducers: {},
+  reducers: {
+    resetLikeMovies: (state) => {
+      state.likeMovies = [];
+      state.loading = 'idle';
+    }
+  },
   extraReducers: (builder) => {
     builder
     .addCase(fetchLikeMovies.pending.type, (state) => {
@@ -40,5 +45,7 @@ export const likeMoviesSlice = createSlice({
     })
   }
 })
+
+export const { resetLikeMovies } = likeMoviesSlice.actions;
 
 export default likeMoviesSlice.reducer;
