@@ -41,6 +41,11 @@ interface HeightValue {
 }
 
 const DetailedPages: React.FC<MovieDetailedPages> = () => {
+
+
+
+  const [windowSize, setWindowSize] = useState('')
+
   const localStorageUserInfo = JSON.parse(localStorage.getItem('user'));
   const location = useLocation();
   
@@ -50,6 +55,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
   const [like, setLike] = useState(false);
   const [deleteComment, setDeleteComment] = useState<CommentsInput>();
   const [movieTrailer, setMovieTrailer] = useState<string>();
+
 
   
   const dispatch = useDispatch<AppDispatch>();
@@ -128,7 +134,6 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
   }, [trailerLoading])
 
 
-
   const onLikeButtonClick = () => {
     if(like) {
       updateDoc(likeRef, {moviesArray: arrayRemove(Number(movieId))});
@@ -148,22 +153,24 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
     return result.length > 0 ? result[0] : trailer[0].key;
   }
 
-  const reportWindowSize = () => {
-    let contentsWidth = (window.innerWidth * 0.75) * 0.25;
-    let posterHeight = contentsWidth * 1.5;
-    let trailerHeight = contentsWidth * 0.7;
-   
-    if(window.innerWidth <= 320){
-      contentsWidth = 300;
-    } else if (window.innerWidth <= 640) {
-      posterHeight = (contentsWidth * 2) * 1.5;
-      trailerHeight = (contentsWidth * 4) * 0.7
-    }
-
-    setContentsHeight({...contentsHeight, posterHeight: posterHeight, trailerHeight: trailerHeight})
+  const windowInnerWidth = () => {
+    if(window.innerWidth >= 1920){
+      setWindowSize('xl3');
+    } else if (window.innerWidth >= 1360){
+      setWindowSize('xl2')
+    } else if (window.innerWidth >= 1280) {
+      setWindowSize('xl')
+    } else if (window.innerWidth >= 1025) {
+      setWindowSize('lg')
+    } else if (window.innerWidth >= 768) {
+      setWindowSize('md')
+    } else if (window.innerWidth >= 640) {
+      setWindowSize('sm')
+    } else if (window.innerWidth < 640) {
+      setWindowSize('xs')}
   }
-  
-  window.onresize = reportWindowSize;
+
+  window.onresize = windowInnerWidth
 
   function maxTenActors(actors: any[]): Array<ActorInfo> {
     const result: Array<ActorInfo> = []
@@ -200,10 +207,9 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
     }
     return result
   }
-  
-
 
   const movieDirector: string = director?.name;
+  
   const fiveMovieActors: JSX.Element[] = maxFiveActors(actors).map((actor) => (
     <li className = 'w-28'  key={actor.credit_id}>
       <img className="w-20" src={`${IMAGE_URL}w300${actor.profile_path}`} alt='Actor Image'/>
@@ -211,6 +217,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
       <p className = 'display whitespace-nowrap overflow-hidden text-ellipsis'>{actor.name}</p>
     </li>
   ))
+
   const tenMovieActors: JSX.Element[] = maxTenActors(actors).map((actor) => (
   <li className = 'w-28' key={actor.credit_id}>
     <img className="w-20" src={`${IMAGE_URL}w300${actor.profile_path}`} alt='Actor Image'/>
@@ -292,11 +299,11 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
       <section className="relative">
         <div className="opacity-50" style={{backgroundImage: `url(${imgUrl})`, backgroundRepeat: 'no-repeat', backgroundSize: 'cover', width: '100%', height: '40vw'}}></div>
 
-        <div className="absolute w-3/4 left-[12.5%] bottom-10 flex flex-row justify-between">
+        <div className="absolute w-3/4 left-[12.5%] bottom-10 flex flex-row justify-between items-end">
           <div className='flex flex-row '>
 
-            <h2 className="text-3xl font-bold">{movieDetails.movieTitle}({movieYear})</h2> 
-            <div className='flex flex-row items-end ml-4'>{RatingStar(movieDetails.movieRate)} 
+            <h2 className="text-xl font-bold xl2:text-3xl">{movieDetails.movieTitle}({movieYear})</h2> 
+            <div className='flex flex-row items-end ml-4'>{RatingStar(movieDetails.movieRate, windowSize)} 
               <p className="text-lg font-bold ">({movieDetails.movieRate})</p>
             </div>
           </div>
@@ -305,16 +312,16 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
         </div>
       </section>
 
-      <section className="w-3/4 mt-14 mx-auto flex">  
-        <div className="basis-1/4 mr-4 shrink-0" style={{backgroundImage: `url(${IMAGE_URL}w300${movieDetails.moviePoster})`, backgroundRepeat: 'no-repeat', backgroundSize: 'contain', height: `${contentsHeight.posterHeight}px`}}></div>
+      <section className="w-3/4 mt-14 mx-auto grid md:grid-cols-4 sm:grid-cols-2 xs:grid-cols-1">  
+        <div className="basis-1/4 mr-4 shrink-0" style={{backgroundImage: `url(${IMAGE_URL}w300${movieDetails.moviePoster})`, backgroundRepeat: 'no-repeat', backgroundSize: 'contain', aspectRatio: '1/1.5'}}></div>
         
-        <div className="basis-2/4 ">
+        <div className="basis-2/4 md:col-span-2">
           <h3 className="text-2xl font-bold mb-4">기본정보</h3>
           <ul className="mr-4 text-lg">
-            <li>
-              <ul className='flex flex-row'>
+            <li className="flex flex-row">
               장르
-              {movieDetails.movieGenres&&movieDetails.movieGenres.map((genre) => <li key={genre.id} className="pl-2 display whitespace-nowrap overflow-hidden text-ellipsis">{genre.name}</li>)}
+              <ul className='grid grid-cols-3'>
+              {movieDetails.movieGenres&&movieDetails.movieGenres.map((genre) => <li key={genre.id} className="pl-2 "><p className="text-ellipsis">{genre.name}</p></li>)}
               </ul>
             </li>
             <li>개봉날짜 {movieDetails.movieRelease&&movieDetails.movieRelease}</li>
@@ -324,9 +331,9 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
           </ul>
         </div>
         
-        <div className="basis-1/4">
+        <div className="basis-1/4 md:col-span-1 sm:col-span-2">
           <h3 className="text-2xl font-bold mb-4">트레일러</h3>
-          {movieTrailer&& <iframe  height={contentsHeight.trailerHeight} src={`https://www.youtube.com/embed/${movieTrailer}`} title="YouTube video player" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>}
+          {movieTrailer&& <iframe src={`https://www.youtube.com/embed/${movieTrailer}`} title="YouTube video player" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>}
         </div>
         
       </section>
@@ -390,7 +397,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
           <div key={index}>
             <div className="flex flex-row justify-between" > 
               <div> 
-                <div className="flex flex-row my-4">{RatingStar(comment.rate)}</div>  
+                <div className="flex flex-row my-4">{RatingStar(comment.rate, windowSize)}</div>  
                 <span >{comment.comment}</span> 
                 <p className="text-gray-400">{comment.nickname}</p>
               </div> 

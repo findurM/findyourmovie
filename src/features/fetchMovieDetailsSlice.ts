@@ -4,6 +4,7 @@ import { API_KEY, API_URL } from "../config/config";
 export const fetchMovieDetails = createAsyncThunk(
   'movieDetails/fetchMovieDetails',
   async (movieId: Number) =>{
+
     const res = await fetch(`${API_URL}/movie/${movieId}?api_key=${API_KEY}&language=ko`);
     const results = await res.json();
     const details = {
