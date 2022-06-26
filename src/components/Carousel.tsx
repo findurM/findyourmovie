@@ -13,8 +13,8 @@ const Carousel = ({category}:Props) => {
     const [offset, setOffset] = useState(0)
     const [movies, setMovies] = useState([])
 
-    const MAX_OFFSET = 100
-    const OFFSET_STEP = MAX_OFFSET/10
+    const MAX_OFFSET = 70
+    const OFFSET_STEP = MAX_OFFSET / 10
 
     const movieCarouselRef = useRef<HTMLDivElement>()
 
@@ -58,31 +58,31 @@ const Carousel = ({category}:Props) => {
     }
 
   return (
-    <div className="relative w-3/4 h-60 bg-black mx-auto mt-12 overflow-hidden">
+    <div className="relative w-3/4 h-60 md:h-72 bg-black mx-auto mt-12 overflow-hidden">
         <p className="absolute text-4xl text-primary top-16 left-12">
             <Link to='/movielist'> {category} <br/>영화</Link>
         </p>
-        <div className="overflow-hidden relative top-3 left-28 md:top-3 md:left-60 w-3/4">
-            <div className={`carousel carousel-center p-4 bg-transparent rounded-box w-[${Number(OFFSET_STEP*10)}rem] md:w-[${Number(OFFSET_STEP*15)}rem] h-full
+        <div className="overflow-hidden relative top-6 left-28 md:left-60 w-3/4">
+            <div className={`carousel carousel-center p-4 bg-transparent w-[105rem] h-full
             transition duration-150 ease-out`} ref={movieCarouselRef}>
                 {movies && movies.map((movie,index) => (
-                <div className="carousel-item w-[10rem] md:w-[15rem] flex items-center md:items-start ">
+                <div className="carousel-item w-[7.5rem] md:w-[10.5rem] flex items-center md:items-start">
                     <Link to={`/movies/${movie.id}`} key={index} 
-                    className="w-5/6 flex justify-center h-3/5 relative hover:scale-125">
-                    <GridCards
+                    className=" w-[100px] md:w-[140px] flex justify-center relative hover:scale-125">
+                    <GridCards 
                         image={movie.poster_path ? `${IMAGE_URL}w300${movie.poster_path}`: null}
                         alt={movie.original_title}
                         movie={movie}
                     />
                     </Link>
                 </div> ))}
-                <Link to='/movielist'><button className="btn p-5 btn-lg bg-primary rounded-full text-white mt-14 ml-8">더 보기</button></Link>
+                <Link to='/movielist'><button className="btn p-5 btn-lg bg-primary rounded-full text-white mt-[4rem] ml-8">더 보기</button></Link>
             </div>
         </div>
-        <button className="absolute top-36 left-28 md:top-24 md:left-52 text-primary" onClick={leftShift}>
+        <button className="absolute top-36 left-28 md:top-30 md:left-52 text-primary" onClick={leftShift}>
             <BsFillArrowLeftCircleFill size={36}/>
         </button>
-        <button className="absolute top-36 md:top-24 right-2 text-primary" onClick={rightShift}>
+        <button className="absolute top-36 md:top-30 right-2 text-primary" onClick={rightShift}>
             <BsFillArrowRightCircleFill size={36}/>
         </button>
     </div>
