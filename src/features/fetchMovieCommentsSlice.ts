@@ -9,7 +9,7 @@ export const fetchMovieComments = createAsyncThunk(
     const movieCommentRef = doc(db, 'movies', movieId)
     const movieCommentsSnap = await getDoc(movieCommentRef);
     const result = movieCommentsSnap.data();
-    return result.comments.reverse() || [];
+    return result ? result.comments.reverse() : [];
   }
 )
 

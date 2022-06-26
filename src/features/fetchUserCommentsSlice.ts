@@ -9,7 +9,7 @@ export const fetchUserComments = createAsyncThunk(
     const userCommentRef = doc(db, 'users', JSON.parse(localStorage.getItem('user')).uid, 'movieComments', 'comments')
     const userCommentSnap = await getDoc(userCommentRef);
     const result = userCommentSnap.data();
-    return result.commentsArray.reverse() || [];
+    return result ? result.commentsArray.reverse() : [];
   }
 )
 

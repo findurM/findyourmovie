@@ -8,7 +8,7 @@ export const fetchLikeMovies = createAsyncThunk(
     const likeRef = doc(db, "users", JSON.parse(localStorage.getItem('user')).uid, "likeMovies", "movies");
     const likeSnap = await getDoc(likeRef);
     const result = likeSnap.data();
-    return result.moviesArray.reverse() || [];
+    return result ? result.moviesArray.reverse() : [];
   }
 )
 

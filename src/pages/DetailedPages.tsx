@@ -1,7 +1,7 @@
 import { arrayRemove, arrayUnion, doc, setDoc, updateDoc } from "firebase/firestore";
 import RatingStar from '../components/RatingStar';
 import React, { useEffect, useRef, useState} from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useLocation } from "react-router-dom";
 import { db } from "../Application";
 import { IMAGE_URL } from "../config/config"
 import {BsHeart,BsFillHeartFill} from 'react-icons/bs'
@@ -40,6 +40,8 @@ interface HeightValue {
 
 const DetailedPages: React.FC<MovieDetailedPages> = () => {
   const localStorageUserInfo = JSON.parse(localStorage.getItem('user'));
+  const location = useLocation();
+  
   const [moreCredits, setMoreCredits] = useState(false);
   const [inputValue, setInputValue] = useState<InputValue>();
   const [contentsHeight, setContentsHeight] = useState<HeightValue>({posterHeight: 500, trailerHeight:200});
@@ -68,6 +70,9 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
   
   useEffect(() => {
     dispatch(fetchUserInfo());
+  }, [])
+  
+  useEffect(() => {
     dispatch(fetchMovieDetails(Number(movieId)));
     dispatch(fetchActorDetails(Number(movieId)));
     dispatch(fetchSimilarMovies(Number(movieId)));
@@ -76,7 +81,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
     dispatch(fetchUserComments());
     dispatch(fetchMovieComments(movieId));
     dispatch(fetchTrailer(movieId));
-  },[])
+  }, [location.pathname])
 
   useEffect(() => {
     if(recentRecordsLoading === 'succeeded' && recentRecords.length === 0) {
@@ -212,7 +217,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
   </li>
   ))
   const sevenSimilarMovies: JSX.Element[] = maxSevenMovies(similarMovies).map((movie)=> (
-  <li key={movie.id} onClick={()=> window.location.reload()}>
+  <li key={movie.id}>
     <Link to={`/movies/${movie.id}`}>
       <img  src={movie.poster_path ? `${IMAGE_URL}w300${movie.poster_path}`: null} alt='Similar Movie Image'/>
     </Link>
