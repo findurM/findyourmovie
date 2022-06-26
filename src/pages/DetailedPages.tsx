@@ -17,6 +17,7 @@ import { fetchUserInfo, UserInfoState } from "../features/fetchUserInfoSlice";
 import { fetchUserComments, UserCommentsState } from "../features/fetchUserCommentsSlice";
 import { fetchMovieComments, MovieCommentsState } from "../features/fetchMovieCommentsSlice";
 import { fetchTrailer, TrailerState } from "../features/fetchTrailerSlice";
+import Spinner from "../components/Spinner";
 import Footer from "../components/Footer";
 
 
@@ -284,7 +285,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
   if(movieDetailsLoading !== 'succeeded' || actorDetailsLoading !== 'succeeded' || 
     similarMoviesLoading !==  'succeeded' || recentRecordsLoading !==  'succeeded' || 
     likeMoviesLoading !==  'succeeded' || currentUserInfoLoading !== 'succeeded' || 
-    userCommentsLoading !==  'succeeded' || trailerLoading !==  'succeeded') return <div>Loading...</div>
+    userCommentsLoading !==  'succeeded' || trailerLoading !==  'succeeded') return <Spinner/>
 
   return (
     <>
