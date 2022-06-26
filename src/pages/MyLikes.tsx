@@ -34,7 +34,7 @@ const MyLikes = () => {
     <>
       <section className="w-full mx-auto">
         <div className="mb-[3.75rem]">
-          <h2 className="text-5xl font-bold">{currentUserInfo?.nickname} 님의 좋아요</h2>
+          <h2 className="text-[2rem] font-bold">{currentUserInfo?.nickname} 님의 좋아요</h2>
         </div>
         {likeMovies.length === 0
         ? (<div>좋아요한 영화가 없습니다.</div>)
@@ -42,7 +42,7 @@ const MyLikes = () => {
         {movieImages && movieImages.map(({movieId, poster}, index) => (
           <Link to={`/movies/${movieId}`} key={index} className="w-full h-full">
             <LikeGridCards 
-              image={poster.file_path ? `${IMAGE_URL}w500${poster.file_path}`: null}
+              image={poster ? `${IMAGE_URL}w500${poster}`: null}
               alt={String(movieId)}
             />
           </Link>

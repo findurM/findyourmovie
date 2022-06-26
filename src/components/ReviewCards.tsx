@@ -18,13 +18,15 @@ return(
         <img src={image} alt={title} className="w-full h-full object-cover hover:scale-125 duration-100" />
       </figure>
     </Link>
-    <div className="card-body basis-1/2">
-    <div className="flex flex-row">{RatingStar(rate)}</div>
-      <p className="text-base ellipsis-box-3">{review}</p>
+    <div className="flex flex-col justify-between p-5 basis-1/2">
+      <div className="flex flex-col gap-2">
+        <div className="flex flex-row">{RatingStar(rate)}</div>
+        <p className="text-base ellipsis-box-3">{review}</p>
+      </div>
       <div className="card-actions justify-end items-center">
         <h2 className="flex-1 text-lg font-bold truncate">{title}</h2>
         <Link to={`/movies/${movieId}`} key={index}>
-          <button className="btn btn-accent btn-outline rounded-[1.125rem] text-lg px-[18px] min-h-fit h-9">더보기</button>
+          <button className="btn btn-accent btn-outline rounded-[1.125rem] text-lg px-3 min-h-fit h-9">더보기</button>
         </Link>
       </div>
     </div>

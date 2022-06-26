@@ -9,14 +9,14 @@ export const fetchUserComments = createAsyncThunk(
     const userCommentRef = doc(db, 'users', JSON.parse(localStorage.getItem('user')).uid, 'movieComments', 'comments')
     const userCommentSnap = await getDoc(userCommentRef);
     const result = userCommentSnap.data();
-    return result === undefined ? [] : result.commentsArray.reverse();
+    return result ? result.commentsArray.reverse() : [];
   }
 )
 
 export const fetchMypageUserComments = createAsyncThunk(
   'userComments/fetchMypageUserComments',
   async (userComments: UserComment) => {
-    const res = await fetch(`${API_URL}/movie/${userComments.movieId}?api_key=${API_KEY}`);
+    const res = await fetch(`${API_URL}/movie/${userComments.movieId}?api_key=${API_KEY}&language=ko`);
     const data = await res.json();
     const mypageComment = {
       comment: userComments.comment,
