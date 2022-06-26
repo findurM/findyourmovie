@@ -59,7 +59,7 @@ const Carousel = ({category}:Props) => {
 
   return (
     <div className="relative w-3/4 h-60 md:h-72 bg-black mx-auto mt-12 overflow-hidden">
-        <p className="absolute text-4xl text-primary top-16 left-12">
+        <p className="absolute text-4xl text-primary top-12 left-12 w-[80px] md:w-full">
             <Link to='/movielist'> {category} <br/>영화</Link>
         </p>
         <div className="overflow-hidden relative top-6 left-28 md:left-60 w-3/4">
@@ -76,7 +76,7 @@ const Carousel = ({category}:Props) => {
                     />
                     </Link>
                 </div> ))}
-                <Link to='/movielist'><button className="btn p-5 btn-lg bg-primary rounded-full text-white mt-[4rem] ml-8">더 보기</button></Link>
+                <Link to='/movielist'><button className="btn p-5 btn-lg bg-primary rounded-full text-white mt-[4rem] -ml-2 sm:ml-8">더 보기</button></Link>
             </div>
         </div>
         <button className="absolute top-36 left-28 md:top-30 md:left-52 text-primary" onClick={leftShift}>

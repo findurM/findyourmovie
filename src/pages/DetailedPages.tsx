@@ -17,6 +17,7 @@ import { fetchUserInfo, UserInfoState } from "../features/fetchUserInfoSlice";
 import { fetchUserComments, UserCommentsState } from "../features/fetchUserCommentsSlice";
 import { fetchMovieComments, MovieCommentsState } from "../features/fetchMovieCommentsSlice";
 import { fetchTrailer, TrailerState } from "../features/fetchTrailerSlice";
+import Footer from "../components/Footer";
 
 
 export interface MovieDetailedPages {}
@@ -416,6 +417,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
           </div>
         </div>
       </section>
+      <Footer/>
     </>
   )
 };

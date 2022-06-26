@@ -4,7 +4,7 @@ interface Props {}
 
 const Footer = () => {
   return (
-    <footer className="footer p-14 bg-primary">
+    <footer className="footer p-14 bg-transparent flex justify-around mx-auto w-[80%]">
     <div>
       <img src="/assets/FindurM_big_logo.png" alt="findurm" className='mb-5' />
       <p>Zerobase Industries Ltd.<br/>Providing reliable tech since 2022</p>

@@ -4,6 +4,7 @@ import tw from "tailwind-styled-components";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../app/store";
 import { MypageCategory, setCategory } from "../features/mypageCategorySlice";
+import Footer from "./Footer";
 
 const categoryList = {
   "recent-records": "최근 기록",
@@ -20,6 +21,7 @@ gap-5
 mx-auto
 w-3/4
 pt-[3.75rem]
+min-h-[90vh]
 `
 
 const SideMenuBox = tw.div`
@@ -40,6 +42,7 @@ const SideMenu = () => {
   }, [categoryInfo]);
   
   return (
+    <>
     <MypageContainer>
       <SideMenuBox>
         <h2 className="text-[2rem] mb-5">마이 페이지</h2>
@@ -62,6 +65,8 @@ const SideMenu = () => {
       </SideMenuBox>
       <Outlet/>
     </MypageContainer>
+    <Footer/>
+    </>
   )
 };
 

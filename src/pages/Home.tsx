@@ -13,6 +13,7 @@ import { InputBox } from "./Register";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../app/store";
 import { isExistUserInfo } from "../features/fetchUserInfoSlice";
+import Footer from "../components/Footer";
 
 const Ranking = tw.div`
 text-2xl
@@ -163,9 +164,12 @@ const HomePage: React.FunctionComponent<IHomePageProps> = (props) => {
           hasMore={hasMore}
           loader={<h4 className="text-center">로딩중...</h4>}
           endMessage={
-            <p className="text-center py-10">
-              <b className="text-2xl">모든 영화를 가져왔습니다!</b>
-            </p>
+            <>
+              <p className="text-center py-10">
+                <b className="text-2xl">모든 영화를 가져왔습니다!</b>
+              </p>
+              <Footer/>
+            </>
           }>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 justify-items-center gap-5 m-auto">
           {Movies && Movies.map((movie,index) => (
