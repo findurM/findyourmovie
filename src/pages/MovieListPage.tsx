@@ -3,6 +3,7 @@ import { API_URL,API_KEY,IMAGE_URL } from "../config/config"
 import GridCards from "../components/GridCards";
 import { Link } from "react-router-dom";
 import InfiniteScroll from 'react-infinite-scroll-component'
+import Footer from "../components/Footer";
 
 
 interface Props {}
@@ -57,9 +58,9 @@ const MovieListPage = () => {
   return (
       <>
         <section className="w-2/3 mx-auto mt-12">
-            <div className="flex justify-between">
-                <h1 className="text-4xl mb-10">{categoryKR[category]} 영화</h1>
-                <select className="select select-primary w-full max-w-xs" onChange={changeCategory} ref={selectRef}>
+            <div className="flex flex-col items-center sm:flex-row sm:items-start sm:justify-between">
+                <h1 className="text-4xl mb-5 sm:mb-10 text-center">{categoryKR[category]} 영화</h1>
+                <select className="select select-primary w-full max-w-xs mb-5" onChange={changeCategory} ref={selectRef}>
                     <option selected value='popular'>인기순으로 정렬</option>
                     <option value='top_rated'>평점순으로 정렬</option>
                     <option value='upcoming'>개봉 예정작</option>
@@ -72,13 +73,16 @@ const MovieListPage = () => {
             hasMore={hasMore}
             loader={<h4 className="text-center">로딩중...</h4>}
             endMessage={
-                <p className="text-center py-10">
+              <>
+              <p className="text-center py-10">
                 <b className="text-2xl">모든 영화를 가져왔습니다!</b>
-                </p>
+              </p>
+              <Footer/>
+            </>
             }>
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 justify-items-center gap-5 m-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 justify-items-center gap-5 m-auto">
             {Movies && Movies.map((movie,index) => (
-                <Link to={`/movies/${movie.id}`} key={index} className="w-full h-full">
+                <Link to={`/movies/${movie.id}`} key={index} className="w-full h-full flex justify-center">
                 <GridCards 
                     image={movie.poster_path ? `${IMAGE_URL}w500${movie.poster_path}`: null}
                     alt={movie.original_title}
