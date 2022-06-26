@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../app/store";
 import ReviewCards from "../components/ReviewCards";
 import { IMAGE_URL } from "../config/config";
-import { fetchMypageUserComments, fetchUserComments, resetMypageUserComments, UserCommentsState } from "../features/fetchUserCommentsSlice";
+import { fetchMypageUserComments, fetchUserComments, resetMypageUserComments, resetUserComments, UserCommentsState } from "../features/fetchUserCommentsSlice";
 import { fetchUserInfo, UserInfoState } from "../features/fetchUserInfoSlice";
 
 const MyReviews = () => {
@@ -13,18 +13,22 @@ const MyReviews = () => {
 
   useEffect(() => {
     dispatch(fetchUserInfo());
-    dispatch(fetchUserComments());
+    dispatch(resetUserComments());
   }, []);
 
   useEffect(() => {
-    if(userCommentsLoading === 'succeeded' && userComments.length > 0) {
-      dispatch(resetMypageUserComments());
-      userComments.forEach((comment) => {
-        dispatch(fetchMypageUserComments(comment));
-      })
+    if(userCommentsLoading === 'idle') {
+      dispatch(fetchUserComments());
+    } else if(userCommentsLoading === 'succeeded') {
+      if(userComments.length > 0) {
+        userComments.forEach((comment) => {
+          dispatch(fetchMypageUserComments(comment));
+        })
+      } else {
+        dispatch(resetMypageUserComments());
+      }
     }
   }, [userCommentsLoading]);
-
 
   if(currentUserInfoLoading !== 'succeeded' || userCommentsLoading !== 'succeeded') return <div>Loading...</div>
 
