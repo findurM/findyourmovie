@@ -24,15 +24,17 @@ const MyLikes = () => {
   useEffect(() => {
     if(likeMoviesLoading === 'idle') {
       dispatch(fetchLikeMovies());
-    } else if(likeMoviesLoading === 'succeeded' && likeMovies.length > 0) {
-      if(total >= likeMovies.length) {
-        setTotal(() => likeMovies.length);
-        setIsFinish(true);
-      }
+    } else if(likeMoviesLoading === 'succeeded') {
       dispatch(resetMovieImages());
-      likeMovies.slice(0, total).forEach((movieId: Number) => {
-        dispatch(fetchMovieImages(movieId));
-      })
+      if(likeMovies.length > 0) {
+        if(total >= likeMovies.length) {
+          setTotal(() => likeMovies.length);
+          setIsFinish(true);
+        }
+        likeMovies.slice(0, total).forEach((movieId: Number) => {
+          dispatch(fetchMovieImages(movieId));
+        })
+      }
     }
   }, [likeMoviesLoading]);
 

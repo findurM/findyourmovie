@@ -20,11 +20,13 @@ const RecentRecords = () => {
   }, []);
 
   useEffect(() => {
-    if(recentRecordsLoading === 'succeeded' && recentRecords.length > 0) {
+    if(recentRecordsLoading === 'succeeded') {
       dispatch(resetMovieImages());
-      recentRecords.forEach((movieId: Number) => {
-        dispatch(fetchMovieImages(movieId));
-      })
+      if(recentRecords.length > 0) {
+        recentRecords.forEach((movieId: Number) => {
+          dispatch(fetchMovieImages(movieId));
+        })
+      }
     }
   }, [recentRecordsLoading])
 

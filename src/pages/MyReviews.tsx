@@ -22,15 +22,17 @@ const MyReviews = () => {
   useEffect(() => {
     if(userCommentsLoading === 'idle') {
       dispatch(fetchUserComments());
-    } else if(userCommentsLoading === 'succeeded' && userComments.length > 0) {
-      if(total >= userComments.length) {
-        setTotal(() => userComments.length);
-        setIsFinish(true);
-      }
+    } else if(userCommentsLoading === 'succeeded') {
       dispatch(resetMypageUserComments());
-      userComments.slice(0, total).forEach((comment) => {
-        dispatch(fetchMypageUserComments(comment));
-      })
+      if(userComments.length > 0) {
+        if(total >= userComments.length) {
+          setTotal(() => userComments.length);
+          setIsFinish(true);
+        }
+        userComments.slice(0, total).forEach((comment) => {
+          dispatch(fetchMypageUserComments(comment));
+        })
+      }
     }
   }, [userCommentsLoading]);
 
