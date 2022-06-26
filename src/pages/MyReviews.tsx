@@ -11,6 +11,7 @@ const MyReviews = () => {
   const {userInfo: currentUserInfo, loading: currentUserInfoLoading} = useSelector<RootState, UserInfoState>((state) => state.userInfo);
   const {userComments, mypageUserComments, loading: userCommentsLoading} = useSelector<RootState, UserCommentsState>((state) => state.userComments);
 
+
   useEffect(() => {
     dispatch(fetchUserInfo());
     dispatch(fetchUserComments());
@@ -27,6 +28,7 @@ const MyReviews = () => {
 
 
   if(currentUserInfoLoading !== 'succeeded' || userCommentsLoading !== 'succeeded') return <div>Loading...</div>
+  
 
   return (
     <>

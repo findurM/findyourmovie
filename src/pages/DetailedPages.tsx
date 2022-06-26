@@ -227,6 +227,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
       <p className = 'display whitespace-nowrap overflow-hidden text-ellipsis'>{actor.name}</p>
     </li>
   ))
+
   const tenMovieActors: JSX.Element[] = maxTenActors(actors).map((actor) => (
   <li className = 'w-28' key={actor.credit_id}>
     <img className="w-20" src={`${IMAGE_URL}w300${actor.profile_path}`} alt='Actor Image'/>
