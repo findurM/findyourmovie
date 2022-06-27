@@ -10,9 +10,15 @@ import { fetchUserInfo, UserInfoState } from "../features/fetchUserInfoSlice";
 
 const RecentRecords = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const {userInfo: currentUserInfo, loading: currentUserInfoLoading} = useSelector<RootState, UserInfoState>((state) => state.userInfo);
-  const {movieImages, loading: movieImagesLoading} = useSelector<RootState, MovieImagesState>((state) => state.movieImages);
-  const {recentRecords, loading: recentRecordsLoading} = useSelector<RootState, RecentRecordsState>((state) => state.recentRecords);
+  const { userInfo: currentUserInfo, loading: currentUserInfoLoading } = useSelector<RootState, UserInfoState>(
+    (state) => state.userInfo,
+  );
+  const { movieImages, loading: movieImagesLoading } = useSelector<RootState, MovieImagesState>(
+    (state) => state.movieImages,
+  );
+  const { recentRecords, loading: recentRecordsLoading } = useSelector<RootState, RecentRecordsState>(
+    (state) => state.recentRecords,
+  );
 
   useEffect(() => {
     dispatch(fetchUserInfo());
@@ -20,17 +26,22 @@ const RecentRecords = () => {
   }, []);
 
   useEffect(() => {
-    if(recentRecordsLoading === 'succeeded') {
+    if (recentRecordsLoading === "succeeded") {
       dispatch(resetMovieImages());
-      if(recentRecords.length > 0) {
+      if (recentRecords.length > 0) {
         recentRecords.forEach((movieId: Number) => {
           dispatch(fetchMovieImages(movieId));
-        })
+        });
       }
     }
-  }, [recentRecordsLoading])
+  }, [recentRecordsLoading]);
 
-  if(currentUserInfoLoading !== 'succeeded' || movieImagesLoading !== 'succeeded' || recentRecordsLoading !== 'succeeded') return <div>Loading...</div>
+  if (
+    currentUserInfoLoading !== "succeeded" ||
+    movieImagesLoading !== "succeeded" ||
+    recentRecordsLoading !== "succeeded"
+  )
+    return <div>Loading...</div>;
 
   return (
     <>
@@ -39,21 +50,21 @@ const RecentRecords = () => {
           <h2 className="text-[2rem] font-bold">{currentUserInfo?.nickname} 님의 최근 검색한 기록</h2>
           <p className="mt-4">최대 20개까지 저장</p>
         </div>
-        {recentRecords.length === 0
-        ? (<div>최근 검색한 영화가 없습니다.</div>)
-        : (<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 justify-items-center gap-5 m-auto">
-        {movieImages && movieImages.map(({movieId, poster}, index) => (
-          <Link to={`/movies/${movieId}`} key={index} className="w-full h-full">
-            <GridCards 
-              image={poster ? `${IMAGE_URL}w500${poster}`: null}
-              alt={String(movieId)}
-            />
-          </Link>
-                ))}
-        </div>)}
+        {recentRecords.length === 0 ? (
+          <div>최근 검색한 영화가 없습니다.</div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 justify-items-center gap-5 m-auto">
+            {movieImages &&
+              movieImages.map(({ movieId, poster }, index) => (
+                <Link to={`/movies/${movieId}`} key={index} className="w-full h-full">
+                  <GridCards image={poster ? `${IMAGE_URL}w500${poster}` : null} alt={String(movieId)} />
+                </Link>
+              ))}
+          </div>
+        )}
       </section>
     </>
-  )
+  );
 };
 
 export default RecentRecords;
