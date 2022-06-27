@@ -108,8 +108,9 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
   
   useEffect(() => {
     if(likeMoviesLoading === 'succeeded') {
-      if(likeMovies.length > 0 && likeMovies.includes(Number(movieId))) {
-        setLike(true);
+      if(likeMovies.length > 0) {
+        if(likeMovies.includes(Number(movieId))) setLike(true);
+        else setLike(false);
       } else if(likeMovies.length === 0) {
         setDoc(likeRef, {moviesArray: []});
       }
