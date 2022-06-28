@@ -183,7 +183,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
       setWindowSize("xs");
     }
 
-    if (windowSize === "xs" || windowSize === "sm") {
+    if (windowSize === "xs2" || windowSize === "xs" || windowSize === "sm") {
       setTrailerSize({ ...trailerSize, width: width * 0.75, height: (width * 0.75 * 9) / 16 });
       setHeroHeight("60vh");
     } else {

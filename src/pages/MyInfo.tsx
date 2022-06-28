@@ -252,9 +252,9 @@ const MyInfo = () => {
             <InfoTitle>닉네임</InfoTitle>
             <CustomInput type="text" id="nickname" name="nickname" value={nicknameInputValue} onChange={inputChange} />
 
-            <div className="flex gap-5 items-end my-5">
-              <img id="previewImg" src={url} alt="" className="w-60 h-60 object-contain border" />
-              <label htmlFor="selectImg" className="btn btn-secondary min-h-fit h-8">
+            <div className="flex flex-col xs:flex-row gap-5 items-start xs:items-end my-5">
+              <img id="previewImg" src={url} alt="" className="max-w-[15rem] aspect-square object-contain border" />
+              <label htmlFor="selectImg" className="btn btn-secondary min-h-fit h-8 self-center xs:self-auto">
                 사진 선택
               </label>
               <input type="file" id="selectImg" accept="image/*" style={{ display: "none" }} onChange={imagePreview} />
