@@ -63,7 +63,7 @@ const SideMenu = () => {
     <>
       <MypageContainer>
         <SideMenuBox>
-          <h2 className="text-2xl mb-5">마이 페이지</h2>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-5">마이 페이지</h2>
           <div className="pt-4 overflow-x-auto">
             <ul className="menu menu-horizontal lg:menu-vertical bg-base-100 w-full p-2">
               {Object.entries(categoryList).map((category) => (

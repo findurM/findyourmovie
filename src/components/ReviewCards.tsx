@@ -24,7 +24,7 @@ const ReviewCards = ({ image, review, title, movieId, rate, index }: Props) => {
       <div className="flex flex-col justify-between p-5 basis-1/2">
         <div className="flex flex-col gap-2">
           <div className="flex flex-row">{RatingStar(rate)}</div>
-          <p className="text-sm ellipsis-box-3">{review}</p>
+          <p className="text-sm ellipsis-box-3-sm">{review}</p>
         </div>
         <div className="card-actions justify-end items-center">
           <h2 className="flex-1 text-base font-bold truncate">{title}</h2>
