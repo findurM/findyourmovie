@@ -16,10 +16,13 @@ const categoryList = {
 const MypageContainer = tw.div`
 flex
 flex-col
-xl:flex-row
+lg:flex-row
 gap-5
-mx-auto
-w-3/4
+mx-2.5
+xs:mx-auto
+max-w-[calc(100vw-20px)]
+w-full
+xs:w-3/4
 pt-[3.75rem]
 min-h-[90vh]
 `;
@@ -30,7 +33,24 @@ flex-col
 divide-y-[3px]
 divide-current
 w-full
-xl:max-w-[305px]
+lg:max-w-[305px]
+`;
+
+export const MypageTitle = tw.h2`
+text-2xl
+font-bold
+`;
+
+export const MypageGridArea = tw.div`
+grid
+grid-cols-1
+xs2:grid-cols-2
+md:grid-cols-3
+lg:grid-cols-2
+xl2:grid-cols-3
+justify-items-center
+gap-5
+mx-auto
 `;
 
 const SideMenu = () => {
@@ -43,9 +63,9 @@ const SideMenu = () => {
     <>
       <MypageContainer>
         <SideMenuBox>
-          <h2 className="text-[2rem] mb-5">마이 페이지</h2>
+          <h2 className="text-2xl mb-5">마이 페이지</h2>
           <div className="pt-4 overflow-x-auto">
-            <ul className="menu menu-horizontal xl:menu-vertical bg-base-100 w-full p-2">
+            <ul className="menu menu-horizontal lg:menu-vertical bg-base-100 w-full p-2">
               {Object.entries(categoryList).map((category) => (
                 <li key={category[0]}>
                   <Link
@@ -53,7 +73,7 @@ const SideMenu = () => {
                     key={category[0]}
                     className={
                       (categoryInfo.category === category[0] ? "active font-bold " : "") +
-                      "text-2xl py-3.5 shrink-0 w-max xl:w-full"
+                      "text-lg lg:text-xl py-[7px] lg:py-3.5 shrink-0 w-max lg:w-full"
                     }
                     onClick={() => {
                       localStorage.setItem("mypageCategory", category[0]);

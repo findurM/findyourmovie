@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../app/store";
 import ReviewCards from "../components/ReviewCards";
+import { MypageGridArea, MypageTitle } from "../components/SideMenu";
 import { IMAGE_URL } from "../config/config";
 import {
   fetchMypageUserComments,
@@ -65,14 +66,14 @@ const MyReviews = () => {
     <>
       <section className="w-full mx-auto">
         <div className="mb-[3.75rem]">
-          <h2 className="text-[2rem] font-bold">{currentUserInfo?.nickname} 님의 감상평</h2>
+          <MypageTitle>{currentUserInfo?.nickname} 님의 감상평</MypageTitle>
         </div>
 
         {mypageUserComments.length === 0 ? (
           <div>작성한 감상평이 없습니다.</div>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 justify-items-center gap-5 m-auto">
+            <MypageGridArea>
               {mypageUserComments.map((comment, index) => (
                 <ReviewCards
                   image={comment.backdrop ? `${IMAGE_URL}w500${comment.backdrop}` : null}
@@ -84,7 +85,7 @@ const MyReviews = () => {
                   key={index}
                 />
               ))}
-            </div>
+            </MypageGridArea>
             {isFinish ? (
               ""
             ) : (

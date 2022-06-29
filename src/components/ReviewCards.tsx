@@ -13,7 +13,7 @@ interface Props {
 const ReviewCards = ({ image, review, title, movieId, rate, index }: Props) => {
   return (
     <div
-      className="card card-compact bg-base-100 shadow-xl w-full h-full max-w-[305px]"
+      className="card card-compact bg-base-100 shadow-xl w-full h-full max-w-[305px] min-h-[260px]"
       style={{ aspectRatio: "305 / 440" }}
     >
       <Link to={`/movies/${movieId}`} key={index} className={"basis-1/2"}>
@@ -24,12 +24,12 @@ const ReviewCards = ({ image, review, title, movieId, rate, index }: Props) => {
       <div className="flex flex-col justify-between p-5 basis-1/2">
         <div className="flex flex-col gap-2">
           <div className="flex flex-row">{RatingStar(rate)}</div>
-          <p className="text-base ellipsis-box-3">{review}</p>
+          <p className="text-sm ellipsis-box-3">{review}</p>
         </div>
         <div className="card-actions justify-end items-center">
-          <h2 className="flex-1 text-lg font-bold truncate">{title}</h2>
+          <h2 className="flex-1 text-base font-bold truncate">{title}</h2>
           <Link to={`/movies/${movieId}`} key={index}>
-            <button className="btn btn-accent btn-outline rounded-[1.125rem] text-lg px-3 min-h-fit h-9">더보기</button>
+            <button className="btn btn-accent btn-outline rounded-[1.125rem] text-sm px-3 min-h-fit h-8">더보기</button>
           </Link>
         </div>
       </div>

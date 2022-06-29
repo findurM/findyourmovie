@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { AppDispatch, RootState } from "../app/store";
 import GridCards from "../components/GridCards";
+import { MypageGridArea, MypageTitle } from "../components/SideMenu";
 import { IMAGE_URL } from "../config/config";
 import { fetchMovieImages, MovieImagesState, resetMovieImages } from "../features/fetchMovieImagesSlice";
 import { fetchRecentRecords, RecentRecordsState } from "../features/fetchRecentRecordsSlice";
@@ -47,20 +48,20 @@ const RecentRecords = () => {
     <>
       <section className="w-full mx-auto">
         <div className="mb-[3.75rem]">
-          <h2 className="text-[2rem] font-bold">{currentUserInfo?.nickname} 님의 최근 검색한 기록</h2>
-          <p className="mt-4">최대 20개까지 저장</p>
+          <MypageTitle>{currentUserInfo?.nickname} 님의 최근 검색한 기록</MypageTitle>
+          <p className="text-base mt-4">최대 20개까지 저장</p>
         </div>
         {recentRecords.length === 0 ? (
           <div>최근 검색한 영화가 없습니다.</div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 justify-items-center gap-5 m-auto">
+          <MypageGridArea>
             {movieImages &&
               movieImages.map(({ movieId, poster }, index) => (
                 <Link to={`/movies/${movieId}`} key={index} className="w-full h-full">
                   <GridCards image={poster ? `${IMAGE_URL}w500${poster}` : null} alt={String(movieId)} />
                 </Link>
               ))}
-          </div>
+          </MypageGridArea>
         )}
       </section>
     </>
