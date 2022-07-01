@@ -333,14 +333,14 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
             </div>
           </div>
 
-          <button className="btn btn-accent btn-xs w-20 rounded-2xl opacity-100 md:w-28" onClick={onLikeButtonClick}>{like ? <BsFillHeartFill className="mr-3 text-red-600"></BsFillHeartFill> : <BsHeart className="mr-3"></BsHeart>}좋아요</button>
+          <button className="btn btn-accent btn-xs w-20 rounded-2xl opacity-100 md:w-28 md:btn-sm" onClick={onLikeButtonClick}>{like ? <BsFillHeartFill className="mr-3 text-red-600"></BsFillHeartFill> : <BsHeart className="mr-3"></BsHeart>}좋아요</button>
         </div>
       </section>
 
       <section className="w-3/4 mt-14 mx-auto grid grid-cols-2 md:grid-cols-4 ">  
         <div className="basis-1/4 mr-4 shrink-0" style={{backgroundImage: `url(${IMAGE_URL}w300${movieDetails.moviePoster})`, backgroundRepeat: 'no-repeat', backgroundSize: 'contain', aspectRatio: '1/1.5'}}></div>
         
-        <div className="basis-2/4 col-span-1 md:col-span-2 ">
+        <div className="basis-2/4 col-span-1 ml-4 md:col-span-2 ">
           <h3 className="text-2xl font-bold mb-4">기본정보</h3>
           <ul className="mr-4 text-xs lg:text-lg xs:text-base">
             <li className="flex flex-row">
@@ -367,7 +367,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
           <h3 className="text-2xl font-bold mb-4">출연진</h3>
           <ul className='grid grid-cols-3 md:grid-cols-5 lg:flex flex-row justify-between overflow-auto'>
             {moreCredits ? tenMovieActors : fiveMovieActors}
-            <li><button className='btn btn-primary btn-sm' onClick={()=>moreCredits ? setMoreCredits(false) :setMoreCredits(true)}>{moreCredits ? `접기` : `더보기`}</button></li>
+            <li className='my-auto'><button className='btn btn-primary btn-sm' onClick={()=>moreCredits ? setMoreCredits(false) :setMoreCredits(true)}>{moreCredits ? `접기` : `더보기`}</button></li>
           </ul>
         </div>
         <div className='divider'></div>
