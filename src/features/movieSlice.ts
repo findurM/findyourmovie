@@ -1,26 +1,24 @@
-import { createSlice,PayloadAction } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
 import { Movie } from "./searchResultSlice";
 
-
 interface InitialState {
-    value: Movie[]
+  value: Movie[];
 }
 
-const initialState:InitialState = {
-    value: []
-}
+const initialState: InitialState = {
+  value: [],
+};
 
 export const movieSlice = createSlice({
-  name: 'movie',
+  name: "movie",
   initialState,
   reducers: {
-    setCurrentMovie: (state,action) => {
-        state.value = action.payload
-    }
-  }
+    setCurrentMovie: (state, action) => {
+      state.value = action.payload;
+    },
+  },
+});
 
-})
+export const { setCurrentMovie } = movieSlice.actions;
 
-export const { setCurrentMovie } = movieSlice.actions
-
-export default movieSlice.reducer
+export default movieSlice.reducer;
