@@ -4,7 +4,9 @@ import { API_KEY, API_URL } from "../config/config";
 export const fetchWatchProviders = createAsyncThunk("watchProviders/watchProvidersSlice", async (movieId: Number) => {
   const res = await fetch(`${API_URL}/movie/${movieId}/watch/providers?api_key=${API_KEY}`);
   const results = await res.json();
-  return results.results["KR"]["rent"];
+  const providers = results.results["KR"]["rent"].concat(results.results["KR"]["flatrate"]);
+
+  return providers
 });
 
 export interface WatchProviders {

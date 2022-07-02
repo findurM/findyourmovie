@@ -19,7 +19,7 @@ import { fetchMovieComments, MovieCommentsState } from "../features/fetchMovieCo
 import { fetchTrailer, TrailerState } from "../features/fetchTrailerSlice";
 import Spinner from "../components/Spinner";
 import Footer from "../components/Footer";
-import { fetchWatchProviders, WatchProvidersState } from "../features/fetchWatchProvidersSlice";
+import { fetchWatchProviders, WatchProvidersState, WatchProviders } from "../features/fetchWatchProvidersSlice";
 
 export interface MovieDetailedPages {}
 
@@ -252,6 +252,17 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
     return result;
   }
 
+  const watchOTT: WatchProviders[] = []
+
+  if(watchProviders.length > 0) {
+    watchOTT.push(watchProviders[0])
+    for(let i = 0; i < watchProviders.length; i++){
+      if(!JSON.stringify(watchOTT).includes(JSON.stringify(watchProviders[i]))) {
+          watchOTT.push(watchProviders[i])
+        } 
+      }
+  }
+  
   const movieDirector: string = director?.name;
 
   const fiveMovieActors: JSX.Element[] = maxFiveActors(actors).map((actor) => (
@@ -394,7 +405,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
 
       <section className="max-w-[calc(100vw-20px)] mx-2.5 mt-14 grid grid-cols-2 md:grid-cols-4 xs:w-3/4 xs:mx-auto">
         <div
-          className="basis-1/4 mr-4 shrink-0"
+          className="basis-1/4 mr-4 shrink-0" title="OTT 로고"
           style={{
             backgroundImage: `url(${IMAGE_URL}w300${movieDetails.moviePoster})`,
             backgroundRepeat: "no-repeat",
@@ -429,13 +440,13 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
           )}
           <h3 className="text-2xl font-bold mb-4 mt-4 ">볼 수 있는 곳</h3>
           <div className="flex flex-row">
-            {watchProviders && watchProviders.map((provider) => (
-               <div className='w-12 rounded mr-4 md:w-6 lg:w-10' style={{ 
+            {watchOTT && watchOTT.map((provider) => {
+               <div className='w-12 rounded mr-4 md:w-6 lg:w-10' key={provider.provider_id} style={{ 
                 backgroundImage: `url(${IMAGE_URL}w300${provider.logo_path})`,
                 backgroundRepeat: "no-repeat",
                 backgroundSize: "contain",
                 aspectRatio: "1/1",}}></div>
-            )
+               }
              )}
           </div>
         </div>
@@ -521,7 +532,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
                     <p className="text-gray-400">{comment.nickname}</p>
                   </div>
                   <div>
-                    {comment.id == currentUserInfo?.id ? (
+                    {comment.id === currentUserInfo?.id ? (
                       <label
                         htmlFor="my-modal-6"
                         className="modal-button cursor-pointer"
