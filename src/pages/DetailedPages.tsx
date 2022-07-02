@@ -179,14 +179,19 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
       setWindowSize("md");
     } else if (width >= 640) {
       setWindowSize("sm");
-    } else if (width < 640) {
+    } else if (width >= 480) {
       setWindowSize("xs");
+    } else if ( width < 479) {
+      setWindowSize("xs2");
     }
 
-    if (windowSize === "xs2" || windowSize === "xs" || windowSize === "sm") {
+    if (windowSize === "xs2") {
+      setTrailerSize({ ...trailerSize, width: width-20, height: ((width-20) * 9) / 16 });
+      setHeroHeight("60vh");
+    } else if (windowSize === "xs" || windowSize === "sm"){
       setTrailerSize({ ...trailerSize, width: width * 0.75, height: (width * 0.75 * 9) / 16 });
       setHeroHeight("60vh");
-    } else {
+    }else {
       setTrailerSize({ ...trailerSize, width: width * 0.75 * 0.25, height: (width * 0.75 * 0.25 * 9) / 16 });
       setHeroHeight("40vw");
     }
@@ -360,7 +365,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
           }}
         ></div>
 
-        <div className="absolute max-w-[calc(100vw-20px)]] mx-auto  bottom-10 flex flex-row justify-between items-end md:w-3/4 md:left-[12.5%]">
+        <div className="absolute max-w-[calc(100vw-20px)] mx-2.5  bottom-10 flex flex-row justify-between items-end xs:w-3/4 xs:left-[12.5%]">
           <div className="md:flex flex-row ">
             <h2 className="text-2xl font-bold md:text-3xl xl2:text-4xl">
               {movieDetails.movieTitle}({movieYear})
@@ -381,7 +386,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
         </div>
       </section>
 
-      <section className="w-3/4 mt-14 mx-auto grid grid-cols-2 md:grid-cols-4 ">
+      <section className="max-w-[calc(100vw-20px)] mx-2.5 mt-14 grid grid-cols-2 md:grid-cols-4 xs:w-3/4 xs:mx-auto">
         <div
           className="basis-1/4 mr-4 shrink-0"
           style={{
@@ -419,14 +424,13 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
         </div>
       </section>
 
-      <section className="w-3/4  mx-auto ">
+      <section className="max-w-[calc(100vw-20px)] mx-2.5 xs:w-3/4 xs:mx-auto">
         <div className="divider"></div>
 
         <div>
           <h3 className="text-2xl font-bold mb-4">출연진</h3>
           <ul className="grid grid-cols-3 md:grid-cols-5 lg:flex flex-row justify-between overflow-auto">
             {moreCredits ? tenMovieActors : fiveMovieActors}
-
             <li>
               <button
                 className="btn btn-primary btn-sm"
@@ -435,7 +439,6 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
                 {moreCredits ? `접기` : `더보기`}
               </button>
             </li>
-
           </ul>
         </div>
         <div className="divider"></div>
@@ -455,7 +458,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
         <div className="divider"></div>
       </section>
 
-      <section className="w-3/4  mx-auto flex flex-col mb-8">
+      <section className="max-w-[calc(100vw-20px)] mx-2.5 xs:w-3/4 xs:mx-auto flex flex-col mb-8">
         <h3 className="text-2xl font-bold mb-4">감상평</h3>
         <div className="bg-gray-300 flex flex-col items-center py-8">
           <p className="mb-4">별점을 선택해주세요</p>

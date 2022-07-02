@@ -108,7 +108,7 @@ const LoginPage: React.FunctionComponent<ILoginPageProps> = (props) => {
       <div className="min-h-[78vh] flex justify-center py-[4%] px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-1/3 space-y-8">
           <div>
-            <img src="/assets/Findurm_regular_logo.png" alt="FindurM Logo" />
+            <img src="/assets/FindurM_regular_logo.png" alt="FindurM Logo" />
           </div>
           <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
             <input type="hidden" name="remember" defaultValue="true" />

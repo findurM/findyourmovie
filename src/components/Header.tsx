@@ -82,7 +82,7 @@ const Header = () => {
     <div className="navbar bg-base-100 h-20 sticky top-0 z-[1000]">
       <div className="flex-1">
         <Link to="/" className="btn btn-ghost normal-case text-xl">
-          <img src="/assets/Findurm_regular_logo.png" alt="FindurM Logo" />
+          <img src="/assets/FindurM_regular_logo.png" alt="FindurM Logo" />
         </Link>
         <form className="flex focus:outline-primary" onSubmit={onSubmit}>
           <div className="btn bg-transparent border-0 text-black hover:bg-primary" onClick={openSearch}>
@@ -105,7 +105,7 @@ const Header = () => {
               {currentUserInfo?.profileImg !== "" ? (
                 <img
                   src={url}
-                  className="w-9 h-9 mr-2.5 object-cover cursor-pointer rounded-full"
+                  className="w-9 h-9 mr-2.5 object-cover cursor-pointer rounded-full border border-black"
                   onClick={profileClick}
                 />
               ) : (

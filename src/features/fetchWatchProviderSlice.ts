@@ -10,23 +10,51 @@ export const fetchWathProvider = createAsyncThunk(
   }
 )
 
-interface WatchProviders {
-  // id: number,
+export interface ProviderInfo {
+  display_priority?: number,
+  logo_path?: string,
+  provider_id?: number,
+  provider_name?: string
+}
 
+export interface WatchProviders {
+  id: number,
+  results: {link: number,
+            flatrate?: ProviderInfo[],
+            rent?: ProviderInfo[],
+            buy?: ProviderInfo[]
+          }
 }
 
 export interface WatchProvidersState {
-  wathProvider: WatchProviders[],
+  wathProvider: WatchProviders,
   loading: 'idle' | 'pending' | 'succeeded' | 'failed',
 }
 
 const initialState: WatchProvidersState = {
-  wathProvider : [],
+  wathProvider: {
+    id: 0,
+    results: {
+      link: 0,
+      flatrate: [{display_priority: 0,
+                  logo_path: "",
+                  provider_id: 0,
+                  provider_name: ""}],
+      rent: [{display_priority: 0,
+              logo_path: "",
+              provider_id: 0,
+              provider_name: ""}],
+      buy: [{display_priority: 0,
+            logo_path: "",
+            provider_id: 0,
+            provider_name: ""}],
+    }
+  },
   loading: 'idle',
 }
 
-export const trailerSlice = createSlice({
-  name: 'trailer',
+export const watchProviderSlice = createSlice({
+  name: 'watchProvider',
   initialState,
   reducers: {},
   extraReducers: (builder) => {
@@ -44,4 +72,4 @@ export const trailerSlice = createSlice({
   }
 })
 
-export default trailerSlice.reducer;
+export default watchProviderSlice.reducer;

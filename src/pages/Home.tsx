@@ -16,7 +16,9 @@ import { isExistUserInfo } from "../features/fetchUserInfoSlice";
 import Footer from "../components/Footer";
 
 const Ranking = tw.div`
-text-2xl
+text-[1.3em]
+lg:text-xl
+xl:text-2xl
 bg-primary
 z-20
 rounded-full
