@@ -19,6 +19,7 @@ import { fetchMovieComments, MovieCommentsState } from "../features/fetchMovieCo
 import { fetchTrailer, TrailerState } from "../features/fetchTrailerSlice";
 import Spinner from "../components/Spinner";
 import Footer from "../components/Footer";
+import { fetchWatchProviders, WatchProvidersState } from "../features/fetchWatchProvidersSlice";
 
 export interface MovieDetailedPages {}
 
@@ -79,6 +80,9 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
     (state) => state.movieComments,
   );
   const { trailer, loading: trailerLoading } = useSelector<RootState, TrailerState>((state) => state.trailer);
+  const { watchProviders, loading: watchProvidersLoading } = useSelector<RootState, WatchProvidersState>(
+    (state) => state.watchProviders,
+  );
 
   const movieId = useParams().id;
   const rateInputRef = useRef(null);
@@ -100,6 +104,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
     dispatch(fetchUserComments());
     dispatch(fetchMovieComments(movieId));
     dispatch(fetchTrailer(movieId));
+    dispatch(fetchWatchProviders(Number(movieId)));
   }, [location.pathname]);
 
   useEffect(() => {
@@ -348,6 +353,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
     currentUserInfoLoading !== "succeeded" ||
     userCommentsLoading !== "succeeded" ||
     trailerLoading !== "succeeded"
+    
   )
     return <Spinner />;
 
@@ -365,7 +371,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
           }}
         ></div>
 
-        <div className="absolute max-w-[calc(100vw-20px)] mx-2.5  bottom-10 flex flex-row justify-between items-end xs:w-3/4 xs:left-[12.5%]">
+        <div className="absolute w-[calc(100vw-30px)] mx-2.5  bottom-10 flex flex-row justify-between items-end xs:w-3/4 xs:left-[12.5%]">
           <div className="md:flex flex-row ">
             <h2 className="text-2xl font-bold md:text-3xl xl2:text-4xl">
               {movieDetails.movieTitle}({movieYear})
@@ -399,7 +405,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
 
         <div className="basis-2/4 col-span-1 md:col-span-2 ">
           <h3 className="text-2xl font-bold mb-4">기본정보</h3>
-          <ul className="mr-4 text-xs lg:text-lg xs:text-base">
+          <ul className="mr-4 text-base lg:text-lg ">
             <li className="flex flex-row">장르 : {addGenre()}</li>
             <li>개봉날짜 : {movieDetails.movieRelease && movieDetails.movieRelease}</li>
             <li>언어 : {movieDetails.movieLanguage && movieDetails.movieLanguage}</li>
@@ -421,6 +427,17 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
               allowFullScreen
             ></iframe>
           )}
+          <h3 className="text-2xl font-bold mb-4 mt-4 ">볼 수 있는 곳</h3>
+          <div className="flex flex-row">
+            {watchProviders && watchProviders.map((provider) => (
+               <div className='w-12 rounded mr-4 md:w-6 lg:w-10' style={{ 
+                backgroundImage: `url(${IMAGE_URL}w300${provider.logo_path})`,
+                backgroundRepeat: "no-repeat",
+                backgroundSize: "contain",
+                aspectRatio: "1/1",}}></div>
+            )
+             )}
+          </div>
         </div>
       </section>
 

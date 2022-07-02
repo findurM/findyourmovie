@@ -13,6 +13,7 @@ import likeMoviesSlice from "../features/fetchLikeMoviesSlice";
 import userCommentsSlice from "../features/fetchUserCommentsSlice";
 import movieCommentsSlice from "../features/fetchMovieCommentsSlice";
 import trailerSlice from "../features/fetchTrailerSlice";
+import watchProvidersSlice from "../features/fetchWatchProvidersSlice";
 
 export const store = configureStore({
   reducer: {
@@ -30,6 +31,7 @@ export const store = configureStore({
     userComments: userCommentsSlice,
     movieComments: movieCommentsSlice,
     trailer: trailerSlice,
+    watchProviders: watchProvidersSlice,
   },
 });
 
