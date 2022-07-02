@@ -58,7 +58,7 @@ const Carousel = ({ category }: Props) => {
 
   return (
     <div className="relative w-3/4 h-60 md:h-72 bg-black mx-auto mt-12 overflow-hidden">
-      <p className="absolute text-4xl text-primary top-12 left-12 w-[80px] md:w-full">
+      <p className="absolute text-[22px] sm:text-3xl text-bold md:text-4xl text-primary top-20 md:top-24 left-10 md:left-16 w-[80px] md:w-full">
         <Link to="/movielist">
           {" "}
           {category} <br />
@@ -76,7 +76,7 @@ const Carousel = ({ category }: Props) => {
               <div className="carousel-item w-[7.5rem] md:w-[10.5rem] flex items-center md:items-start" key={index}>
                 <Link
                   to={`/movies/${movie.id}`}
-                  className="w-[100px] md:w-[140px] flex justify-center relative hover:scale-125"
+                  className="w-[100px] md:w-[140px] flex justify-center relative hover:scale-110"
                 >
                   <GridCards
                     image={movie.poster_path ? `${IMAGE_URL}w300${movie.poster_path}` : null}
@@ -87,16 +87,16 @@ const Carousel = ({ category }: Props) => {
               </div>
             ))}
           <Link to="/movielist">
-            <button className="btn p-5 btn-lg bg-primary rounded-full text-white mt-[4rem] -ml-2 sm:ml-8">
+            <button className="btn p-5 btn-lg bg-primary rounded-full text-white mt-[3rem] md:mt-[4rem] -ml-2 sm:ml-8">
               더 보기
             </button>
           </Link>
         </div>
       </div>
-      <button className="absolute top-36 left-28 md:top-30 md:left-52 text-primary" onClick={leftShift}>
+      <button className="absolute top-24 left-28 md:top-32 md:left-52 text-primary" onClick={leftShift}>
         <BsFillArrowLeftCircleFill size={36} />
       </button>
-      <button className="absolute top-36 md:top-30 right-2 text-primary" onClick={rightShift}>
+      <button className="absolute top-24 md:top-32 right-2 text-primary" onClick={rightShift}>
         <BsFillArrowRightCircleFill size={36} />
       </button>
     </div>

@@ -426,9 +426,6 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
           <h3 className="text-2xl font-bold mb-4">출연진</h3>
           <ul className="grid grid-cols-3 md:grid-cols-5 lg:flex flex-row justify-between overflow-auto">
             {moreCredits ? tenMovieActors : fiveMovieActors}
-<<<<<<< HEAD
-            <li className='my-auto'><button className='btn btn-primary btn-sm' onClick={()=>moreCredits ? setMoreCredits(false) :setMoreCredits(true)}>{moreCredits ? `접기` : `더보기`}</button></li>
-=======
             <li>
               <button
                 className="btn btn-primary btn-sm"
@@ -437,7 +434,6 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
                 {moreCredits ? `접기` : `더보기`}
               </button>
             </li>
->>>>>>> 0cfb05afc0c0ba2c48a87ea5f0dabbc9d82d5f27
           </ul>
         </div>
         <div className="divider"></div>
