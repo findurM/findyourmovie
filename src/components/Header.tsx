@@ -105,7 +105,7 @@ const Header = () => {
               {currentUserInfo?.profileImg !== "" ? (
                 <img
                   src={url}
-                  className="w-9 h-9 mr-2.5 object-cover cursor-pointer rounded-full"
+                  className="w-9 h-9 mr-2.5 object-cover cursor-pointer rounded-full border border-black"
                   onClick={profileClick}
                 />
               ) : (
