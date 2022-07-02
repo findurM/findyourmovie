@@ -37,12 +37,7 @@ const RecentRecords = () => {
     }
   }, [recentRecordsLoading]);
 
-  if (
-    currentUserInfoLoading !== "succeeded" ||
-    movieImagesLoading !== "succeeded" ||
-    recentRecordsLoading !== "succeeded"
-  )
-    return <div>Loading...</div>;
+  if (currentUserInfoLoading !== "succeeded" || recentRecordsLoading !== "succeeded") return <div>Loading...</div>;
 
   return (
     <>

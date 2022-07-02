@@ -57,8 +57,7 @@ const MyLikes = () => {
     });
   };
 
-  if (currentUserInfoLoading !== "succeeded" || movieImagesLoading !== "succeeded" || likeMoviesLoading !== "succeeded")
-    return <div>Loading...</div>;
+  if (currentUserInfoLoading !== "succeeded" || likeMoviesLoading !== "succeeded") return <div>Loading...</div>;
 
   return (
     <>
