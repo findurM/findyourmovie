@@ -19,6 +19,7 @@ import { fetchMovieComments, MovieCommentsState } from "../features/fetchMovieCo
 import { fetchTrailer, TrailerState } from "../features/fetchTrailerSlice";
 import Spinner from "../components/Spinner";
 import Footer from "../components/Footer";
+import { fetchWatchProviders, WatchProvidersState } from "../features/fetchWatchProvidersSlice";
 
 export interface MovieDetailedPages {}
 
@@ -79,6 +80,9 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
     (state) => state.movieComments,
   );
   const { trailer, loading: trailerLoading } = useSelector<RootState, TrailerState>((state) => state.trailer);
+  const { watchProviders, loading: watchProvidersLoading } = useSelector<RootState, WatchProvidersState>(
+    (state) => state.watchProviders,
+  );
 
   const movieId = useParams().id;
   const rateInputRef = useRef(null);
@@ -100,6 +104,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
     dispatch(fetchUserComments());
     dispatch(fetchMovieComments(movieId));
     dispatch(fetchTrailer(movieId));
+    dispatch(fetchWatchProviders(Number(movieId)));
   }, [location.pathname]);
 
   useEffect(() => {
