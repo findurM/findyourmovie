@@ -360,9 +360,9 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
           }}
         ></div>
 
-        <div className="absolute w-3/4 left-[12.5%] bottom-10 flex flex-row justify-between items-end">
+        <div className="absolute max-w-[calc(100vw-20px)]] mx-auto  bottom-10 flex flex-row justify-between items-end md:w-3/4 md:left-[12.5%]">
           <div className="md:flex flex-row ">
-            <h2 className="text-2xl font-bold xl2:text-3xl">
+            <h2 className="text-2xl font-bold md:text-3xl xl2:text-4xl">
               {movieDetails.movieTitle}({movieYear})
             </h2>
             <div className="flex flex-row items-end md:ml-4">
@@ -426,9 +426,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
           <h3 className="text-2xl font-bold mb-4">출연진</h3>
           <ul className="grid grid-cols-3 md:grid-cols-5 lg:flex flex-row justify-between overflow-auto">
             {moreCredits ? tenMovieActors : fiveMovieActors}
-<<<<<<< HEAD
-            <li className='my-auto'><button className='btn btn-primary btn-sm' onClick={()=>moreCredits ? setMoreCredits(false) :setMoreCredits(true)}>{moreCredits ? `접기` : `더보기`}</button></li>
-=======
+
             <li>
               <button
                 className="btn btn-primary btn-sm"
@@ -437,7 +435,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
                 {moreCredits ? `접기` : `더보기`}
               </button>
             </li>
->>>>>>> 0cfb05afc0c0ba2c48a87ea5f0dabbc9d82d5f27
+
           </ul>
         </div>
         <div className="divider"></div>
