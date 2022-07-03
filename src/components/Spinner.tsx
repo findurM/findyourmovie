@@ -4,8 +4,8 @@ interface Props {}
 
 const Spinner = () => {
   return (
-    <div className="mx-auto my-auto w-[400px] h-[400px]">
-      <img src="/assets/Spinner.gif" />
+    <div className="absolute min-h-screen min-w-full">
+      <img src="/assets/Spinner.gif" className="m-auto my-[30%] w-[300px] h-[300px]" />
     </div>
   );
 };
