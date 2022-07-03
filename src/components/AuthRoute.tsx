@@ -5,6 +5,7 @@ import { setUserInfo } from "../features/userSlice";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../app/store";
 import { fetchUserInfo } from "../features/fetchUserInfoSlice";
+import Spinner from "./Spinner";
 
 export interface IAuthRouteProps {}
 
@@ -32,7 +33,7 @@ const AuthRoute: React.FunctionComponent<IAuthRouteProps> = (props) => {
     return () => AuthCheck();
   }, [auth]);
 
-  if (loading) return <p>loading ...</p>;
+  if (loading) return <Spinner />;
 
   return <div style={{ height: "100vh" }}>{children}</div>;
 };

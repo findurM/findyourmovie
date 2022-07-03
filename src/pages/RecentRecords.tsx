@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { AppDispatch, RootState } from "../app/store";
 import GridCards from "../components/GridCards";
 import { MypageGridArea, MypageTitle } from "../components/SideMenu";
+import Spinner from "../components/Spinner";
 import { IMAGE_URL } from "../config/config";
 import { fetchMovieImages, MovieImagesState, resetMovieImages } from "../features/fetchMovieImagesSlice";
 import { fetchRecentRecords, RecentRecordsState } from "../features/fetchRecentRecordsSlice";
@@ -37,7 +38,7 @@ const RecentRecords = () => {
     }
   }, [recentRecordsLoading]);
 
-  if (currentUserInfoLoading !== "succeeded" || recentRecordsLoading !== "succeeded") return <div>Loading...</div>;
+  if (currentUserInfoLoading !== "succeeded" || recentRecordsLoading !== "succeeded") return <Spinner />;
 
   return (
     <>

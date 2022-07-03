@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../app/store";
 import ReviewCards from "../components/ReviewCards";
 import { MypageGridArea, MypageTitle } from "../components/SideMenu";
+import Spinner from "../components/Spinner";
 import { IMAGE_URL } from "../config/config";
 import {
   fetchMypageUserComments,
@@ -60,7 +61,7 @@ const MyReviews = () => {
     });
   };
 
-  if (currentUserInfoLoading !== "succeeded" || userCommentsLoading !== "succeeded") return <div>Loading...</div>;
+  if (currentUserInfoLoading !== "succeeded" || userCommentsLoading !== "succeeded") return <Spinner />;
 
   return (
     <>
