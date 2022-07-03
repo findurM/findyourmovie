@@ -4,9 +4,34 @@ import { API_KEY, API_URL } from "../config/config";
 export const fetchWatchProviders = createAsyncThunk("watchProviders/watchProvidersSlice", async (movieId: Number) => {
   const res = await fetch(`${API_URL}/movie/${movieId}/watch/providers?api_key=${API_KEY}`);
   const results = await res.json();
-  const providers = results.results["KR"]["rent"].concat(results.results["KR"]["flatrate"]);
+  const resultsKR = results.results["KR"];
+  const providers: WatchProviders[] = [];
 
-  return providers
+  const findProviderIndex = (providerId: number) => {
+    for (let i = 0; i < providers.length; i++) {
+      if (providerId === providers[i].provider_id) return i;
+    }
+    return -1;
+  };
+
+  if (resultsKR) {
+    Object.keys(resultsKR).forEach((method: string) => {
+      if (method !== "link") {
+        resultsKR[method].forEach((provider: WatchProviders) => {
+          const index = findProviderIndex(provider.provider_id);
+          if (index !== -1) {
+            providers[index].method.push(method);
+          } else {
+            provider["method"] = [method];
+            providers.push(provider);
+          }
+        });
+      }
+    });
+  }
+
+  providers.sort((a, b) => a.display_priority - b.display_priority);
+  return providers;
 });
 
 export interface WatchProviders {
@@ -14,6 +39,7 @@ export interface WatchProviders {
   logo_path: string;
   provider_id: number;
   provider_name: string;
+  method?: string[];
 }
 
 export interface WatchProvidersState {

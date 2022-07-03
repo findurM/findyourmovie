@@ -19,7 +19,7 @@ import { fetchMovieComments, MovieCommentsState } from "../features/fetchMovieCo
 import { fetchTrailer, TrailerState } from "../features/fetchTrailerSlice";
 import Spinner from "../components/Spinner";
 import Footer from "../components/Footer";
-import { fetchWatchProviders, WatchProvidersState, WatchProviders } from "../features/fetchWatchProvidersSlice";
+import { fetchWatchProviders, WatchProviders, WatchProvidersState } from "../features/fetchWatchProvidersSlice";
 
 export interface MovieDetailedPages {}
 
@@ -186,17 +186,17 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
       setWindowSize("sm");
     } else if (width >= 480) {
       setWindowSize("xs");
-    } else if ( width < 479) {
+    } else if (width < 479) {
       setWindowSize("xs2");
     }
 
     if (windowSize === "xs2") {
-      setTrailerSize({ ...trailerSize, width: width-20, height: ((width-20) * 9) / 16 });
+      setTrailerSize({ ...trailerSize, width: width - 20, height: ((width - 20) * 9) / 16 });
       setHeroHeight("60vh");
-    } else if (windowSize === "xs" || windowSize === "sm"){
+    } else if (windowSize === "xs" || windowSize === "sm") {
       setTrailerSize({ ...trailerSize, width: width * 0.75, height: (width * 0.75 * 9) / 16 });
       setHeroHeight("60vh");
-    }else {
+    } else {
       setTrailerSize({ ...trailerSize, width: width * 0.75 * 0.25, height: (width * 0.75 * 0.25 * 9) / 16 });
       setHeroHeight("40vw");
     }
@@ -252,17 +252,14 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
     return result;
   }
 
-  const watchOTT: WatchProviders[] = []
+  const getProviderMethod = (provider: WatchProviders) => {
+    let methods = provider.method[0];
+    if (provider.method.length > 1) {
+      return provider.method.slice(1).reduce((pre, cur) => pre + ", " + cur, methods);
+    }
+    return methods;
+  };
 
-  if(watchProviders.length > 0) {
-    watchOTT.push(watchProviders[0])
-    for(let i = 0; i < watchProviders.length; i++){
-      if(!JSON.stringify(watchOTT).includes(JSON.stringify(watchProviders[i]))) {
-          watchOTT.push(watchProviders[i])
-        } 
-      }
-  }
-  
   const movieDirector: string = director?.name;
 
   const fiveMovieActors: JSX.Element[] = maxFiveActors(actors).map((actor) => (
@@ -364,7 +361,6 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
     currentUserInfoLoading !== "succeeded" ||
     userCommentsLoading !== "succeeded" ||
     trailerLoading !== "succeeded"
-    
   )
     return <Spinner />;
 
@@ -405,7 +401,8 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
 
       <section className="max-w-[calc(100vw-20px)] mx-2.5 mt-14 grid grid-cols-2 md:grid-cols-4 xs:w-3/4 xs:mx-auto">
         <div
-          className="basis-1/4 mr-4 shrink-0" title="OTT 로고"
+          className="basis-1/4 mr-4 shrink-0"
+          title="OTT 로고"
           style={{
             backgroundImage: `url(${IMAGE_URL}w300${movieDetails.moviePoster})`,
             backgroundRepeat: "no-repeat",
@@ -438,17 +435,26 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
               allowFullScreen
             ></iframe>
           )}
-          <h3 className="text-2xl font-bold mb-4 mt-4 ">볼 수 있는 곳</h3>
-          <div className="flex flex-row">
-            {watchOTT && watchOTT.map((provider) => {
-               <div className='w-12 rounded mr-4 md:w-6 lg:w-10' key={provider.provider_id} style={{ 
-                backgroundImage: `url(${IMAGE_URL}w300${provider.logo_path})`,
-                backgroundRepeat: "no-repeat",
-                backgroundSize: "contain",
-                aspectRatio: "1/1",}}></div>
-               }
-             )}
-          </div>
+          {watchProviders.length > 0 && (
+            <>
+              <h3 className="text-2xl font-bold mb-4 mt-4 ">볼 수 있는 곳</h3>
+              <div className="flex flex-row">
+                {watchProviders.map((provider) => (
+                  <div
+                    className="w-12 rounded mr-4 md:w-6 lg:w-10"
+                    key={provider.provider_id}
+                    style={{
+                      backgroundImage: `url(${IMAGE_URL}w300${provider.logo_path})`,
+                      backgroundRepeat: "no-repeat",
+                      backgroundSize: "contain",
+                      aspectRatio: "1/1",
+                    }}
+                    title={getProviderMethod(provider)}
+                  ></div>
+                ))}
+              </div>
+            </>
+          )}
         </div>
       </section>
 
