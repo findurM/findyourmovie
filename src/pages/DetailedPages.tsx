@@ -19,7 +19,7 @@ import { fetchMovieComments, MovieCommentsState } from "../features/fetchMovieCo
 import { fetchTrailer, TrailerState } from "../features/fetchTrailerSlice";
 import Spinner from "../components/Spinner";
 import Footer from "../components/Footer";
-import { fetchWatchProviders, WatchProviders, WatchProvidersState } from "../features/fetchWatchProvidersSlice";
+import { fetchWatchProviders, WatchProvidersState, WatchProviders } from "../features/fetchWatchProvidersSlice";
 
 export interface MovieDetailedPages {}
 
@@ -252,13 +252,16 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
     return result;
   }
 
-  const getProviderMethod = (provider: WatchProviders) => {
-    let methods = provider.method[0];
-    if (provider.method.length > 1) {
-      return provider.method.slice(1).reduce((pre, cur) => pre + ", " + cur, methods);
+  const watchOTT: WatchProviders[] = [];
+
+  if (watchProviders.length > 0) {
+    watchOTT.push(watchProviders[0]);
+    for (let i = 0; i < watchProviders.length; i++) {
+      if (!JSON.stringify(watchOTT).includes(JSON.stringify(watchProviders[i]))) {
+        watchOTT.push(watchProviders[i]);
+      }
     }
-    return methods;
-  };
+  }
 
   const movieDirector: string = director?.name;
 
@@ -435,26 +438,22 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
               allowFullScreen
             ></iframe>
           )}
-          {watchProviders.length > 0 && (
-            <>
-              <h3 className="text-2xl font-bold mb-4 mt-4 ">볼 수 있는 곳</h3>
-              <div className="flex flex-row">
-                {watchProviders.map((provider) => (
-                  <div
-                    className="w-12 rounded mr-4 md:w-6 lg:w-10"
-                    key={provider.provider_id}
-                    style={{
-                      backgroundImage: `url(${IMAGE_URL}w300${provider.logo_path})`,
-                      backgroundRepeat: "no-repeat",
-                      backgroundSize: "contain",
-                      aspectRatio: "1/1",
-                    }}
-                    title={getProviderMethod(provider)}
-                  ></div>
-                ))}
-              </div>
-            </>
-          )}
+          <h3 className="text-2xl font-bold mb-4 mt-4 ">볼 수 있는 곳</h3>
+          <div className="flex flex-row">
+            {watchOTT &&
+              watchOTT.map((provider) => (
+                <div
+                  className="w-12 rounded mr-4 md:w-6 lg:w-10"
+                  key={provider.provider_id}
+                  style={{
+                    backgroundImage: `url(${IMAGE_URL}w300${provider.logo_path})`,
+                    backgroundRepeat: "no-repeat",
+                    backgroundSize: "contain",
+                    aspectRatio: "1/1",
+                  }}
+                ></div>
+              ))}
+          </div>
         </div>
       </section>
 
