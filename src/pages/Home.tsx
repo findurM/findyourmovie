@@ -168,7 +168,7 @@ const HomePage: React.FunctionComponent<IHomePageProps> = (props) => {
 
       <section className="mt-20">
         <div className="w-3/4 mx-auto mt-[3.75rem] mb-[1.875rem]">
-          <h2 className="text-5xl font-bold pb-10 mt-">영화평점 TOP 250</h2>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold pb-10 mt-">영화평점 TOP 250</h2>
           <InfiniteScroll
             className="w-full h-full"
             dataLength={Movies.length}

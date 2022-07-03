@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../app/store";
 import { fetchUserInfo, UserInfoState } from "../features/fetchUserInfoSlice";
 import { MypageTitle } from "../components/SideMenu";
+import Spinner from "../components/Spinner";
 
 const InfoTitle = tw.p`
 font-bold
@@ -148,7 +149,7 @@ const MyInfo = () => {
       });
   };
 
-  if (currentUserInfoLoading !== "succeeded") return <div>Loading...</div>;
+  if (currentUserInfoLoading !== "succeeded") return <Spinner />;
 
   return (
     <>

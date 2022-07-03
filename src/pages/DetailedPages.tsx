@@ -19,6 +19,7 @@ import { fetchMovieComments, MovieCommentsState } from "../features/fetchMovieCo
 import { fetchTrailer, TrailerState } from "../features/fetchTrailerSlice";
 import Spinner from "../components/Spinner";
 import Footer from "../components/Footer";
+import { fetchWatchProviders, WatchProviders, WatchProvidersState } from "../features/fetchWatchProvidersSlice";
 
 export interface MovieDetailedPages {}
 
@@ -79,6 +80,9 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
     (state) => state.movieComments,
   );
   const { trailer, loading: trailerLoading } = useSelector<RootState, TrailerState>((state) => state.trailer);
+  const { watchProviders, loading: watchProvidersLoading } = useSelector<RootState, WatchProvidersState>(
+    (state) => state.watchProviders,
+  );
 
   const movieId = useParams().id;
   const rateInputRef = useRef(null);
@@ -100,6 +104,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
     dispatch(fetchUserComments());
     dispatch(fetchMovieComments(movieId));
     dispatch(fetchTrailer(movieId));
+    dispatch(fetchWatchProviders(Number(movieId)));
   }, [location.pathname]);
 
   useEffect(() => {
@@ -179,11 +184,16 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
       setWindowSize("md");
     } else if (width >= 640) {
       setWindowSize("sm");
-    } else if (width < 640) {
+    } else if (width >= 480) {
       setWindowSize("xs");
+    } else if (width < 479) {
+      setWindowSize("xs2");
     }
 
-    if (windowSize === "xs2" || windowSize === "xs" || windowSize === "sm") {
+    if (windowSize === "xs2") {
+      setTrailerSize({ ...trailerSize, width: width - 20, height: ((width - 20) * 9) / 16 });
+      setHeroHeight("60vh");
+    } else if (windowSize === "xs" || windowSize === "sm") {
       setTrailerSize({ ...trailerSize, width: width * 0.75, height: (width * 0.75 * 9) / 16 });
       setHeroHeight("60vh");
     } else {
@@ -241,6 +251,14 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
     }
     return result;
   }
+
+  const getProviderMethod = (provider: WatchProviders) => {
+    let methods = provider.method[0];
+    if (provider.method.length > 1) {
+      return provider.method.slice(1).reduce((pre, cur) => pre + ", " + cur, methods);
+    }
+    return methods;
+  };
 
   const movieDirector: string = director?.name;
 
@@ -360,9 +378,9 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
           }}
         ></div>
 
-        <div className="absolute w-3/4 left-[12.5%] bottom-10 flex flex-row justify-between items-end">
+        <div className="absolute w-[calc(100vw-30px)] mx-2.5  bottom-10 flex flex-row justify-between items-end xs:w-3/4 xs:left-[12.5%]">
           <div className="md:flex flex-row ">
-            <h2 className="text-2xl font-bold xl2:text-3xl">
+            <h2 className="text-2xl font-bold md:text-3xl xl2:text-4xl">
               {movieDetails.movieTitle}({movieYear})
             </h2>
             <div className="flex flex-row items-end md:ml-4">
@@ -381,9 +399,10 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
         </div>
       </section>
 
-      <section className="w-3/4 mt-14 mx-auto grid grid-cols-2 md:grid-cols-4 ">
+      <section className="max-w-[calc(100vw-20px)] mx-2.5 mt-14 grid grid-cols-2 md:grid-cols-4 xs:w-3/4 xs:mx-auto">
         <div
           className="basis-1/4 mr-4 shrink-0"
+          title="OTT 로고"
           style={{
             backgroundImage: `url(${IMAGE_URL}w300${movieDetails.moviePoster})`,
             backgroundRepeat: "no-repeat",
@@ -394,7 +413,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
 
         <div className="basis-2/4 col-span-1 md:col-span-2 ">
           <h3 className="text-2xl font-bold mb-4">기본정보</h3>
-          <ul className="mr-4 text-xs lg:text-lg xs:text-base">
+          <ul className="mr-4 text-base lg:text-lg ">
             <li className="flex flex-row">장르 : {addGenre()}</li>
             <li>개봉날짜 : {movieDetails.movieRelease && movieDetails.movieRelease}</li>
             <li>언어 : {movieDetails.movieLanguage && movieDetails.movieLanguage}</li>
@@ -416,10 +435,30 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
               allowFullScreen
             ></iframe>
           )}
+          {watchProviders.length > 0 && (
+            <>
+              <h3 className="text-2xl font-bold mb-4 mt-4 ">볼 수 있는 곳</h3>
+              <div className="flex flex-row">
+                {watchProviders.map((provider) => (
+                  <div
+                    className="w-12 rounded mr-4 md:w-6 lg:w-10"
+                    key={provider.provider_id}
+                    style={{
+                      backgroundImage: `url(${IMAGE_URL}w300${provider.logo_path})`,
+                      backgroundRepeat: "no-repeat",
+                      backgroundSize: "contain",
+                      aspectRatio: "1/1",
+                    }}
+                    title={getProviderMethod(provider)}
+                  ></div>
+                ))}
+              </div>
+            </>
+          )}
         </div>
       </section>
 
-      <section className="w-3/4  mx-auto ">
+      <section className="max-w-[calc(100vw-20px)] mx-2.5 xs:w-3/4 xs:mx-auto">
         <div className="divider"></div>
 
         <div>
@@ -453,7 +492,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
         <div className="divider"></div>
       </section>
 
-      <section className="w-3/4  mx-auto flex flex-col mb-8">
+      <section className="max-w-[calc(100vw-20px)] mx-2.5 xs:w-3/4 xs:mx-auto flex flex-col mb-8">
         <h3 className="text-2xl font-bold mb-4">감상평</h3>
         <div className="bg-gray-300 flex flex-col items-center py-8">
           <p className="mb-4">별점을 선택해주세요</p>
@@ -499,7 +538,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
                     <p className="text-gray-400">{comment.nickname}</p>
                   </div>
                   <div>
-                    {comment.id == currentUserInfo?.id ? (
+                    {comment.id === currentUserInfo?.id ? (
                       <label
                         htmlFor="my-modal-6"
                         className="modal-button cursor-pointer"

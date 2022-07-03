@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { AppDispatch, RootState } from "../app/store";
 import { LikeGridCards } from "../components/GridCards";
 import { MypageGridArea, MypageTitle } from "../components/SideMenu";
+import Spinner from "../components/Spinner";
 import { IMAGE_URL } from "../config/config";
 import { fetchLikeMovies, LikeMoviesState, resetLikeMovies } from "../features/fetchLikeMoviesSlice";
 import { fetchMovieImages, MovieImagesState, resetMovieImages } from "../features/fetchMovieImagesSlice";
@@ -57,8 +58,7 @@ const MyLikes = () => {
     });
   };
 
-  if (currentUserInfoLoading !== "succeeded" || movieImagesLoading !== "succeeded" || likeMoviesLoading !== "succeeded")
-    return <div>Loading...</div>;
+  if (currentUserInfoLoading !== "succeeded" || likeMoviesLoading !== "succeeded") return <Spinner />;
 
   return (
     <>
