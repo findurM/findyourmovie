@@ -262,7 +262,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
         } 
       }
   }
-  
+
   const movieDirector: string = director?.name;
 
   const fiveMovieActors: JSX.Element[] = maxFiveActors(actors).map((actor) => (
@@ -440,13 +440,13 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
           )}
           <h3 className="text-2xl font-bold mb-4 mt-4 ">볼 수 있는 곳</h3>
           <div className="flex flex-row">
-            {watchOTT && watchOTT.map((provider) => {
+            {watchOTT && watchOTT.map((provider) => (
                <div className='w-12 rounded mr-4 md:w-6 lg:w-10' key={provider.provider_id} style={{ 
                 backgroundImage: `url(${IMAGE_URL}w300${provider.logo_path})`,
                 backgroundRepeat: "no-repeat",
                 backgroundSize: "contain",
-                aspectRatio: "1/1",}}></div>
-               }
+                aspectRatio: "1/1"}}></div>
+              )
              )}
           </div>
         </div>
