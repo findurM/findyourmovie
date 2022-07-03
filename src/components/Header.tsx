@@ -84,6 +84,7 @@ const Header = () => {
         <Link to="/" className="btn btn-ghost normal-case text-xl">
           <img src="/assets/FindurM_regular_logo.png" alt="FindurM Logo" />
         </Link>
+        {userInfo.email &&
         <form className="flex focus:outline-primary" onSubmit={onSubmit}>
           <div className="btn bg-transparent border-0 text-black hover:bg-primary" onClick={openSearch}>
             <BsSearch size={20} />
@@ -96,7 +97,7 @@ const Header = () => {
               ref={searchRef}
             />
           )}
-        </form>
+        </form>}
       </div>
       <div className="flex-none">
         <ul className="menu menu-horizontal p-0 items-center">

@@ -67,7 +67,7 @@ const Carousel = ({ category }: Props) => {
       </p>
       <div className="overflow-hidden relative top-6 left-28 md:left-60 w-3/4">
         <div
-          className="carousel carousel-center p-4 bg-transparent w-[105rem] h-full
+          className="carousel carousel-center p-4 bg-transparent w-[105rem]  h-full
             transition duration-150 ease-out touch-auto"
           ref={movieCarouselRef}
         >

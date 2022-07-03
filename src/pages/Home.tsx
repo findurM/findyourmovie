@@ -184,7 +184,7 @@ const HomePage: React.FunctionComponent<IHomePageProps> = (props) => {
               </>
             }
           >
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 justify-items-center gap-5 m-auto">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 justify-items-center gap-5 m-auto">
               {Movies &&
                 Movies.map((movie, index) => (
                   <Link to={`/movies/${movie.id}`} key={index} className="w-full flex justify-center h-full">

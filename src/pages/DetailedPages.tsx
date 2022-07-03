@@ -344,7 +344,7 @@ const DetailedPages: React.FC<MovieDetailedPages> = () => {
     userCommentsLoading !== "succeeded" ||
     trailerLoading !== "succeeded"
   )
-    return <Spinner />;
+    return <Spinner />
 
   return (
     <>
