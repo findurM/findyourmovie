@@ -11,3 +11,7 @@
   -webkit-line-clamp: 3; /* 3줄 이상 말줄임 처리 */
   height: 3.75rem; /* line-height * 3 */
 }
+
+div::-webkit-scrollbar {
+  display: none;
+}

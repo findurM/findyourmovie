@@ -56,7 +56,7 @@ const MovieListPage = () => {
 
   return (
     <>
-      <section className="w-2/3 mx-auto mt-12">
+      <section className="w-11/12 sm:w-2/3 mx-auto mt-12">
         <div className="flex flex-col items-center sm:flex-row sm:items-start sm:justify-between">
           <h1 className="text-4xl mb-5 sm:mb-10 text-center">{categoryKR[category]} 영화</h1>
           <select className="select select-primary w-full max-w-xs mb-5" onChange={changeCategory} ref={selectRef}>
@@ -83,7 +83,7 @@ const MovieListPage = () => {
             </>
           }
         >
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 justify-items-center gap-5 m-auto">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 justify-items-center gap-5 m-auto">
             {Movies &&
               Movies.map((movie, index) => (
                 <Link to={`/movies/${movie.id}`} key={index} className="w-full h-full flex justify-center">

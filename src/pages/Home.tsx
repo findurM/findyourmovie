@@ -1,19 +1,19 @@
-import { useEffect, useRef, useState } from "react";
-import { API_URL, API_KEY, IMAGE_URL } from "../config/config";
-import MainImage from "../components/MainImage";
-import GridCards from "../components/GridCards";
-import { Link } from "react-router-dom";
-import InfiniteScroll from "react-infinite-scroll-component";
-import Carousel from "../components/Carousel";
-import tw from "tailwind-styled-components/dist/tailwind";
-import { doc, updateDoc } from "firebase/firestore";
-import { db } from "../Application";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { InputBox } from "./Register";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "../app/store";
-import { isExistUserInfo } from "../features/fetchUserInfoSlice";
-import Footer from "../components/Footer";
+import { useEffect, useRef, useState } from "react"
+import { API_URL, API_KEY, IMAGE_URL } from "../config/config"
+import MainImage from "../components/MainImage"
+import GridCards from "../components/GridCards"
+import { Link } from "react-router-dom"
+import InfiniteScroll from "react-infinite-scroll-component"
+import Carousel from "../components/Carousel"
+import tw from "tailwind-styled-components/dist/tailwind"
+import { doc, updateDoc } from "firebase/firestore"
+import { db } from "../Application"
+import { getAuth, onAuthStateChanged } from "firebase/auth"
+import { InputBox } from "./Register"
+import { useDispatch } from "react-redux"
+import { AppDispatch } from "../app/store"
+import { isExistUserInfo } from "../features/fetchUserInfoSlice"
+import Footer from "../components/Footer"
 
 const Ranking = tw.div`
 text-[1.3em]
@@ -34,34 +34,34 @@ export interface IHomePageProps {}
 
 const HomePage: React.FunctionComponent<IHomePageProps> = (props) => {
   const auth = getAuth();
-  const [Movies, setMovies] = useState([]);
-  const [hasMore, setHasMore] = useState(true);
-  const [page, setPage] = useState(2);
-  const [bestMovies, setBestMovies] = useState([]);
-  const [age, setAge] = useState(20);
-  const [selectedRadio, setSelectedRadio] = useState("여");
-  const dispatch = useDispatch<AppDispatch>();
+  const [Movies, setMovies] = useState([])
+  const [hasMore, setHasMore] = useState(true)
+  const [page, setPage] = useState(2)
+  const [bestMovies, setBestMovies] = useState([])
+  const [age, setAge] = useState(20)
+  const [selectedRadio, setSelectedRadio] = useState("여")
+  const dispatch = useDispatch<AppDispatch>()
 
-  const ageRef = useRef<HTMLInputElement>();
+  const ageRef = useRef<HTMLInputElement>()
 
   const handleRange = () => {
-    setAge(Number(ageRef.current.value));
+    setAge(Number(ageRef.current.value))
   };
 
   const isRadioSelected = (value: string): boolean => selectedRadio === value;
 
   const handleRadio = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    setSelectedRadio(e.currentTarget.value);
+    setSelectedRadio(e.currentTarget.value)
   };
 
   useEffect(() => {
-    const endpoint = `${API_URL}movie/top_rated?api_key=${API_KEY}&language=ko&page=1`;
+    const endpoint = `${API_URL}movie/top_rated?api_key=${API_KEY}&language=ko&page=1`
     fetch(endpoint)
       .then((response) => response.json())
       .then((response) => {
-        setMovies([...response.results]);
-        let bestIds = [...response.results.slice(0, 8)].map((movie) => movie.id);
-        setBestMovies(bestIds);
+        setMovies([...response.results])
+        let bestIds = [...response.results.slice(0, 8)].map((movie) => movie.id)
+        setBestMovies(bestIds)
       });
   }, []);
 
@@ -76,27 +76,27 @@ const HomePage: React.FunctionComponent<IHomePageProps> = (props) => {
       }
     });
 
-    return () => AuthCheck();
-  }, [auth]);
+    return () => AuthCheck()
+  }, [auth])
 
   const fetchMovies = async () => {
     const res = await fetch(`${API_URL}movie/top_rated?api_key=${API_KEY}&language=ko&page=${page}`);
     const data = await res.json();
-    return data.results;
+    return data.results
   };
 
   const fetchData = async () => {
-    const newMovies = await fetchMovies();
-    setMovies([...Movies, ...newMovies]);
+    const newMovies = await fetchMovies()
+    setMovies([...Movies, ...newMovies])
 
-    setPage(page + 1);
+    setPage(page + 1)
     if (page >= 12) {
-      setHasMore(false);
+      setHasMore(false)
     }
   };
 
   const updateUserInfo = async () => {
-    await updateDoc(doc(db, "users", auth.currentUser?.uid), { age: age, sex: selectedRadio });
+    await updateDoc(doc(db, "users", auth.currentUser?.uid), { age: age, sex: selectedRadio })
   };
 
   return (
@@ -167,8 +167,8 @@ const HomePage: React.FunctionComponent<IHomePageProps> = (props) => {
       </section>
 
       <section className="mt-20">
-        <div className="w-3/4 mx-auto mt-[3.75rem] mb-[1.875rem]">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold pb-10 mt-">영화평점 TOP 250</h2>
+        <div className="w-11/12 sm:w-3/4 mx-auto mt-[3.75rem] mb-[1.875rem]">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold pb-10 mt-">평점 TOP 250</h2>
           <InfiniteScroll
             className="w-full h-full"
             dataLength={Movies.length}
@@ -206,4 +206,4 @@ const HomePage: React.FunctionComponent<IHomePageProps> = (props) => {
   );
 };
 
-export default HomePage;
+export default HomePage

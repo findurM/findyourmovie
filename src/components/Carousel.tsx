@@ -57,18 +57,18 @@ const Carousel = ({ category }: Props) => {
   };
 
   return (
-    <div className="relative w-3/4 h-60 md:h-72 bg-black mx-auto mt-12 overflow-hidden">
-      <p className="absolute text-[22px] sm:text-3xl text-bold md:text-4xl text-primary top-20 md:top-24 left-10 md:left-16 w-[80px] md:w-full">
+    <div className="relative w-11/12 xs:w-3/4 h-60 md:h-72 bg-black mx-auto mt-12 overflow-hidden">
+      <p className="absolute text-[22px] sm:text-3xl text-bold md:text-4xl text-primary top-20 md:top-24 left-8 md:left-16 w-[80px] md:w-full">
         <Link to="/movielist">
           {" "}
           {category} <br />
           영화
         </Link>
       </p>
-      <div className="overflow-hidden relative top-6 left-28 md:left-60 w-3/4">
+      <div className=" overflow-auto touch-pan-x relative top-6 left-28 md:left-60 w-3/4">
         <div
           className="carousel carousel-center p-4 bg-transparent w-[105rem]  h-full
-            transition duration-150 ease-out touch-auto"
+            transition duration-150 ease-out overflow-auto touch-pan-x"
           ref={movieCarouselRef}
         >
           {movies &&
