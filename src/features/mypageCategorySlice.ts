@@ -1,28 +1,27 @@
-import { createSlice,PayloadAction } from "@reduxjs/toolkit";
-import { useLocation } from "react-router-dom";
+import { createSlice } from "@reduxjs/toolkit";
 
 interface InitialState {
-  category: string | null,
+  category: string | null;
 }
 
 export interface MypageCategory {
-  category: string
+  category: string;
 }
 
 const initialState: InitialState = {
-  category: localStorage.getItem('mypageCategory') || 'recent-records'
-}
+  category: localStorage.getItem("mypageCategory") || "recent-records",
+};
 
 export const mypageCategorySlice = createSlice({
-  name: 'user',
+  name: "user",
   initialState,
   reducers: {
-    setCategory: (state,action) => {
-      state.category = action.payload
+    setCategory: (state, action) => {
+      state.category = action.payload;
     },
-  }
-})
+  },
+});
 
-export const { setCategory } = mypageCategorySlice.actions
+export const { setCategory } = mypageCategorySlice.actions;
 
-export default mypageCategorySlice.reducer
+export default mypageCategorySlice.reducer;

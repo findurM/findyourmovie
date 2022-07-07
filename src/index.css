@@ -2,12 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
-.ellipsis-box-3 {
+.ellipsis-box-3-sm {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   word-wrap: break-word;
   text-overflow: ellipsis;
   overflow: hidden;
   -webkit-line-clamp: 3; /* 3줄 이상 말줄임 처리 */
-  height: 4.5rem; /* line-height * 3 */
+  height: 3.75rem; /* line-height * 3 */
+}
+
+div::-webkit-scrollbar {
+  display: none;
 }

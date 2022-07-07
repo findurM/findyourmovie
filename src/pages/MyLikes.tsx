@@ -1,76 +1,95 @@
-import { doc, getDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { CurrentUserInfo, db } from "../Application";
+import { AppDispatch, RootState } from "../app/store";
 import { LikeGridCards } from "../components/GridCards";
-import { API_KEY, API_URL, IMAGE_URL } from "../config/config";
+import { MypageGridArea, MypageTitle } from "../components/SideMenu";
+import Spinner from "../components/Spinner";
+import { IMAGE_URL } from "../config/config";
+import { fetchLikeMovies, LikeMoviesState, resetLikeMovies } from "../features/fetchLikeMoviesSlice";
+import { fetchMovieImages, MovieImagesState, resetMovieImages } from "../features/fetchMovieImagesSlice";
+import { fetchUserInfo, UserInfoState } from "../features/fetchUserInfoSlice";
 
 const MyLikes = () => {
-
-  const localStorageUserInfo = JSON.parse(localStorage.getItem('user'))
-  const [currentUserInfo, setCurrentUserInfo] = useState<CurrentUserInfo>();
-  const [likeMovies, setLikeMovies] = useState<Number[]>();
-  const [movieImages, setMovieImages] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const getUserInfo = async () => {
-    const userRef = doc(db, "users", localStorageUserInfo.uid);
-    const userSnap = await getDoc(userRef);
-    setCurrentUserInfo((userSnap.data() as CurrentUserInfo));
-  }
-
-  const getLikeMovies = async () => {
-    const likeRef = doc(db, "users", localStorageUserInfo.uid, "likeMovies", "movies");
-    const likeSnap = await getDoc(likeRef);
-    setLikeMovies((likeSnap.data().moviesArray as Number[]));
-  }
-
-  const getMovieImages = async (movieId: Number) => {
-    const res = await fetch(`${API_URL}/movie/${movieId}/images?api_key=${API_KEY}`);
-    const data = await res.json();
-    const newImage = [{movieId: movieId, poster: data.posters[0]}];
-    setMovieImages((movieImages) => {return [...movieImages, ...newImage]});
-  }
+  const dispatch = useDispatch<AppDispatch>();
+  const [total, setTotal] = useState(6);
+  const [isFinish, setIsFinish] = useState(false);
+  const { userInfo: currentUserInfo, loading: currentUserInfoLoading } = useSelector<RootState, UserInfoState>(
+    (state) => state.userInfo,
+  );
+  const { movieImages, loading: movieImagesLoading } = useSelector<RootState, MovieImagesState>(
+    (state) => state.movieImages,
+  );
+  const { likeMovies, loading: likeMoviesLoading } = useSelector<RootState, LikeMoviesState>(
+    (state) => state.likeMovies,
+  );
 
   useEffect(() => {
-    getUserInfo();
-    getLikeMovies()
-    .then(() => {
-      setIsLoading(false);
-    });
+    dispatch(fetchUserInfo());
+    dispatch(resetLikeMovies());
   }, []);
 
   useEffect(() => {
-    if(likeMovies !== null && likeMovies !== undefined) {
-      likeMovies.reverse().forEach((movieId: Number) => {
-        getMovieImages(movieId);
-      })
+    if (likeMoviesLoading === "idle") {
+      dispatch(fetchLikeMovies());
+    } else if (likeMoviesLoading === "succeeded") {
+      dispatch(resetMovieImages());
+      if (likeMovies.length > 0) {
+        if (total >= likeMovies.length) {
+          setTotal(() => likeMovies.length);
+          setIsFinish(true);
+        }
+        likeMovies.slice(0, total).forEach((movieId: Number) => {
+          dispatch(fetchMovieImages(movieId));
+        });
+      }
     }
-  }, [likeMovies])
+  }, [likeMoviesLoading]);
 
-  if(isLoading) return <div>Loading...</div>
+  const morePosters = () => {
+    if (total + 6 >= likeMovies.length) setIsFinish(() => true);
+
+    likeMovies.slice(total, isFinish ? likeMovies.length : total + 6).forEach((movieId: Number) => {
+      dispatch(fetchMovieImages(movieId));
+    });
+
+    setTotal(() => {
+      return isFinish ? likeMovies.length : total + 6;
+    });
+  };
+
+  if (currentUserInfoLoading !== "succeeded" || likeMoviesLoading !== "succeeded") return <Spinner />;
 
   return (
     <>
       <section className="w-full mx-auto">
         <div className="mb-[3.75rem]">
-          <h2 className="text-5xl font-bold">{currentUserInfo?.nickname} 님의 좋아요</h2>
+          <MypageTitle>{currentUserInfo?.nickname} 님의 좋아요</MypageTitle>
         </div>
-        {likeMovies === null || likeMovies === undefined
-        ? (<div>좋아요한 영화가 없습니다.</div>)
-        : (<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 justify-items-center gap-5 m-auto">
-        {movieImages && movieImages.map(({movieId, poster}, index) => (
-          <Link to={`/movies/${movieId}`} key={index} className="w-full h-full">
-            <LikeGridCards 
-              image={poster.file_path ? `${IMAGE_URL}w500${poster.file_path}`: null}
-              alt={movieId}
-            />
-          </Link>
+        {likeMovies.length === 0 ? (
+          <div>좋아요한 영화가 없습니다.</div>
+        ) : (
+          <>
+            <MypageGridArea>
+              {movieImages &&
+                movieImages.map(({ movieId, poster }, index) => (
+                  <Link to={`/movies/${movieId}`} key={index} className="w-full h-full">
+                    <LikeGridCards image={poster ? `${IMAGE_URL}w500${poster}` : null} alt={String(movieId)} />
+                  </Link>
                 ))}
-        </div>)}
+            </MypageGridArea>
+            {isFinish ? (
+              ""
+            ) : (
+              <button className="btn btn-active btn-secondary rounded-full block mt-10 mx-auto" onClick={morePosters}>
+                더 불러오기
+              </button>
+            )}
+          </>
+        )}
       </section>
     </>
-  )
+  );
 };
 
 export default MyLikes;
